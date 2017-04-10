@@ -7,7 +7,7 @@ import bf2
 import mesher
 
 
-class TestModRoot(unittest.TestCase):
+class TestMod(unittest.TestCase):
     
     @mock.patch('os.getcwd')
     def test_can_find_mod_root(self, mock_function):
@@ -21,9 +21,6 @@ class TestModRoot(unittest.TestCase):
     def test_mod_init_with_mod_root(self):
         mod = bf2.Mod()
         self.assertTrue('mods' in mod.root.split(os.sep))
-
-
-class TestModSearch(unittest.TestCase):
 
     def test_can_get_object_path(self):
         test_object_name = 'faction_type_name_variant'

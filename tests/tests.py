@@ -52,4 +52,13 @@ class TestStdMesh(unittest.TestCase):
         stdmesh.read_header()
         self.assertTrue(stdmesh.struct.header.version in [0, 9, 10])
         self.assertTrue(stdmesh.struct.header.u2 in [11])
+        self.assertTrue(stdmesh.struct.header.tail is 8)
+    
+    # NOTE: THIS IS VERY SPECIFIC TEST FOR TEST MODEL READ
+    def test_can_read_bounds(self):
+        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh.read_bounds()
+        self.assertTrue(stdmesh.struct.bounds.min == (0, 0, 0))
+        self.assertTrue(stdmesh.struct.bounds.max == (256, 256, 2304))
+        self.assertTrue(stdmesh.struct.bounds.tail is 32)
         

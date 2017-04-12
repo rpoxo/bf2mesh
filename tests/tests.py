@@ -60,7 +60,10 @@ class TestStdMesh(unittest.TestCase):
         self.assertTrue(stdmesh.struct.unknown2.u1 is 0)
 
     
-
+    def test_can_read_geom_num(self):
+        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh.read_geom_num()
+        self.assertTrue(stdmesh.struct.geom.num is 256)
 
 
 

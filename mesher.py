@@ -23,10 +23,16 @@ class StdMeshFile:
 
             def __init__(self):
                 self.u2 = None
+        
+        class __Geom:
+
+            def __init__(self):
+                self.num = None
 
         def __init__(self):
             self.header = self.__Header()
             self.unknown2 = self.__Unknown()
+            self.geom = self.__Geom()
 
     def __init__(self, filepath):
         self.filepath = filepath
@@ -68,7 +74,17 @@ class StdMeshFile:
         self.struct.unknown2.u1 = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
+    def read_geom_num(self):
+        # geomnum As l
+        format = 'l'
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
 
+        start = self.read_header()
+        tail = start + data_size
+
+        self.struct.geom.num = data_struct.unpack(self.get_filedata()[start:tail])[0]
+        return tail
 
 
 

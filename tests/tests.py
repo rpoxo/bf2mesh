@@ -58,4 +58,10 @@ class TestStdMesh(unittest.TestCase):
         self.assertTrue(stdmesh.struct.bounds.min == (0, 0, 0))
         self.assertTrue(stdmesh.struct.bounds.max == (256, 256, 2304))
         self.assertTrue(stdmesh.struct.bounds.tail is 32)
+    
+    def test_can_read_unknown_qflag(self):
+        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh.read_qflag()
+        self.assertTrue(stdmesh.struct.unknown1.qflag[0] == b'\x00')
+        self.assertTrue(stdmesh.struct.unknown1.tail is 33)
         

@@ -64,4 +64,10 @@ class TestStdMesh(unittest.TestCase):
         stdmesh.read_qflag()
         self.assertTrue(stdmesh.struct.unknown1.qflag[0] == b'\x00')
         self.assertTrue(stdmesh.struct.unknown1.tail is 33)
+    
+    def test_can_read_yblock_colnum(self):
+        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh.read_yblock()
+        self.assertTrue(stdmesh.struct.yblock.colnum == 5)
+        #self.assertTrue(stdmesh.struct.yblock.tail is 33)
         

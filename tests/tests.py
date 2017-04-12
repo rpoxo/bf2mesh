@@ -54,4 +54,29 @@ class TestStdMesh(unittest.TestCase):
         self.assertTrue(stdmesh.struct.header.u4 is 0)
         self.assertTrue(stdmesh.struct.header.u5 is 0)
     
+    def test_can_read_unknown_byte(self):
+        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh.read_unknown2()
+        self.assertTrue(stdmesh.struct.unknown2.u1 is 0)
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         

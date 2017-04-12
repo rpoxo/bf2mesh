@@ -18,9 +18,15 @@ class StdMeshFile:
                 self.u3 = None
                 self.u4 = None
                 self.u5 = None
+        
+        class __Unknown:
+
+            def __init__(self):
+                self.u2 = None
 
         def __init__(self):
             self.header = self.__Header()
+            self.unknown2 = self.__Unknown()
 
     def __init__(self, filepath):
         self.filepath = filepath
@@ -41,11 +47,42 @@ class StdMeshFile:
         # u4 As long          '0
         # u5 As long          '0
         format = 'l l l l l'
-        header_struct = struct.Struct(format)
-        header_size = struct.calcsize(format)
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
 
         start = 0
-        tail = header_size
+        tail = data_size
 
-        self.struct.header.u1, self.struct.header.version, self.struct.header.u3, self.struct.header.u4, self.struct.header.u5 = header_struct.unpack(self.get_filedata()[start:tail])
+        self.struct.header.u1, self.struct.header.version, self.struct.header.u3, self.struct.header.u4, self.struct.header.u5 = data_struct.unpack(self.get_filedata()[start:tail])
         return tail
+
+    def read_unknown2(self):
+        # u1 As char          'always 0?
+        format = 'b'
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
+
+        start = self.read_header()
+        tail = start + data_size
+
+        self.struct.unknown2.u1 = data_struct.unpack(self.get_filedata()[start:tail])[0]
+        return tail
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

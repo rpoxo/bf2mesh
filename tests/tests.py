@@ -38,6 +38,7 @@ class TestMod(unittest.TestCase):
 class TestStdMesh(unittest.TestCase):
 
     def setUp(self):
+        # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
         test_object_path_relative = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
         self.test_object_path = os.path.join(bf2.Mod().root, test_object_path_relative)
 
@@ -47,27 +48,10 @@ class TestStdMesh(unittest.TestCase):
     def test_can_read_header(self):
         stdmesh = mesher.StdMeshFile(self.test_object_path)
         stdmesh.read_header()
-        self.assertTrue(stdmesh.struct.header.version in [0, 9, 10])
-        self.assertTrue(stdmesh.struct.header.u2 in [11])
-        self.assertTrue(stdmesh.struct.header.tail is 8)
+        self.assertTrue(stdmesh.struct.header.u1 is 0)
+        self.assertTrue(stdmesh.struct.header.version in [10, 6, 11])
+        self.assertTrue(stdmesh.struct.header.u3 is 0)
+        self.assertTrue(stdmesh.struct.header.u4 is 0)
+        self.assertTrue(stdmesh.struct.header.u5 is 0)
     
-    # NOTE: THIS IS VERY SPECIFIC TEST FOR TEST MODEL READ
-    def test_can_read_bounds(self):
-        stdmesh = mesher.StdMeshFile(self.test_object_path)
-        stdmesh.read_bounds()
-        self.assertTrue(stdmesh.struct.bounds.min == (0, 0, 0))
-        self.assertTrue(stdmesh.struct.bounds.max == (256, 256, 2304))
-        self.assertTrue(stdmesh.struct.bounds.tail is 32)
-    
-    def test_can_read_unknown_qflag(self):
-        stdmesh = mesher.StdMeshFile(self.test_object_path)
-        stdmesh.read_qflag()
-        self.assertTrue(stdmesh.struct.unknown1.qflag[0] == b'\x00')
-        self.assertTrue(stdmesh.struct.unknown1.tail is 33)
-    
-    def test_can_read_yblock_colnum(self):
-        stdmesh = mesher.StdMeshFile(self.test_object_path)
-        stdmesh.read_yblock()
-        self.assertTrue(stdmesh.struct.yblock.colnum == 5)
-        #self.assertTrue(stdmesh.struct.yblock.tail is 33)
         

@@ -28,11 +28,17 @@ class StdMeshFile:
 
             def __init__(self):
                 self.num = None
+        
+        class __Bf2Geom:
+            
+            def __init__(self):
+                self.lodnum = None
 
         def __init__(self):
             self.header = self.__Header()
             self.unknown2 = self.__Unknown()
             self.geom = self.__Geom()
+            self.bf2geom = self.__Bf2Geom()
 
     def __init__(self, filepath):
         self.filepath = filepath
@@ -80,12 +86,23 @@ class StdMeshFile:
         data_struct = struct.Struct(format)
         data_size = struct.calcsize(format)
 
-        start = self.read_header()
+        start = self.read_unknown2()
         tail = start + data_size
 
         self.struct.geom.num = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
+    def read_bf2geom(self):
+        # geomnum As l
+        format = 'l'
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
+
+        start = self.read_geom_num()
+        tail = start + data_size
+
+        self.struct.bf2geom.lodnum = data_struct.unpack(self.get_filedata()[start:tail])[0]
+        return tail
 
 
 

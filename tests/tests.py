@@ -58,12 +58,16 @@ class TestStdMesh(unittest.TestCase):
         stdmesh = mesher.StdMeshFile(self.test_object_path)
         stdmesh.read_unknown2()
         self.assertTrue(stdmesh.struct.unknown2.u1 is 0)
-
     
     def test_can_read_geom_num(self):
         stdmesh = mesher.StdMeshFile(self.test_object_path)
         stdmesh.read_geom_num()
-        self.assertTrue(stdmesh.struct.geom.num is 256)
+        self.assertTrue(stdmesh.struct.geom.num is 1)
+
+    def test_can_read_bf2geom_lodnum(self):
+        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh.read_bf2geom()
+        self.assertTrue(stdmesh.struct.bf2geom.lodnum is 1)
 
 
 

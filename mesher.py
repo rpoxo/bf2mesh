@@ -30,9 +30,22 @@ class StdMeshFile:
                 self.num = None
         
         class __Bf2Geom:
+        
+            class __Lod():
+            
+                class __Bounds():
+                
+                    def __init__(self):
+                        self.min = None
+                        self.max = None
+                        self.pivot = None
+                
+                def __init__(self):
+                    self.bounds = self.__Bounds()
             
             def __init__(self):
                 self.lodnum = None
+                self.lod = self.__Lod()
 
         def __init__(self):
             self.header = self.__Header()
@@ -92,7 +105,7 @@ class StdMeshFile:
         self.struct.geom.num = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
-    def read_bf2geom(self):
+    def read_bf2geom_lodnum(self):
         # geomnum As l
         format = 'l'
         data_struct = struct.Struct(format)
@@ -102,6 +115,20 @@ class StdMeshFile:
         tail = start + data_size
 
         self.struct.bf2geom.lodnum = data_struct.unpack(self.get_filedata()[start:tail])[0]
+        return tail
+    
+    def read_bf2geom_lod_bounds(self):
+        # geomnum As l
+        format = 'l l l l l l l l l'
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
+
+        start = self.read_bf2geom_lodnum()
+        tail = start + data_size
+
+        self.struct.bf2geom.lod.bounds.min = data_struct.unpack(self.get_filedata()[start:tail])[0:3]
+        self.struct.bf2geom.lod.bounds.max = data_struct.unpack(self.get_filedata()[start:tail])[3:6]
+        self.struct.bf2geom.lod.bounds.pivot = data_struct.unpack(self.get_filedata()[start:tail])[6:9]
         return tail
 
 

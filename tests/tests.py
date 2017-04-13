@@ -68,6 +68,11 @@ class TestStdMesh(unittest.TestCase):
         stdmesh = mesher.StdMeshFile(self.test_object_path)
         stdmesh.read_bf2geom()
         self.assertTrue(stdmesh.struct.bf2geom.lodnum is 1)
+    
+    def test_can_read_bf2geom_lod_bounds(self):
+        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh.read_bf2geom()
+        self.assertTrue(stdmesh.struct.bf2geom.lod.bound.min is (0.0, 0.0, 0.0))
 
 
 

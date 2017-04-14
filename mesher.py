@@ -42,6 +42,7 @@ class StdMeshFile:
                 
                 def __init__(self):
                     self.bounds = self.__Bounds()
+                    self.rignum = None
             
             def __init__(self):
                 self.lodnum = None
@@ -130,9 +131,6 @@ class StdMeshFile:
         self.struct.bf2geom.lod.bounds.max = data_struct.unpack(self.get_filedata()[start:tail])[3:6]
         self.struct.bf2geom.lod.bounds.pivot = data_struct.unpack(self.get_filedata()[start:tail])[6:9]
         return tail
-
-
-
 
 
 

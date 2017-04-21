@@ -108,7 +108,7 @@ class StdMeshFile:
         data_size = struct.calcsize(format)
 
         start = self.read_geom_num()
-        tail = start + data_size
+        tail = start * (start + data_size)
 
         self.struct.bf2geom.lodnum = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail

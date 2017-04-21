@@ -61,10 +61,10 @@ class TestStdMesh(unittest.TestCase):
     
     def test_can_read_geom_num(self):
         stdmesh = mesher.StdMeshFile(self.test_object_path)
-        stdmesh.read_geom_num()
+        stdmesh.read_bf2geom_num()
         self.assertTrue(stdmesh.struct.bf2geom.num is 1)
 
-    @unittest.skip('to be reworked')
+    #@unittest.skip('to be reworked')
     def test_can_read_geom_table(self):
         stdmesh = mesher.StdMeshFile(self.test_object_path)
         stdmesh.read_bf2geom_lodnum()

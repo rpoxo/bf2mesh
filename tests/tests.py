@@ -91,8 +91,7 @@ class TestStdMesh(unittest.TestCase):
     def test_can_read_vertattrib_num(self):
         mesh = mesher.StdMeshFile(self.path_object_std)
         mesh.read_vertattrib_num()
-        print(mesh.struct.vertattrib.num)
-        self.assertTrue(mesh.struct.vertattrib.num is 8)
+        self.assertTrue(mesh.struct.vertattrib.num is 9)
 
     def test_can_read_vertattrib_num_CUSTOM_PR_DEST(self):
         try:
@@ -101,10 +100,22 @@ class TestStdMesh(unittest.TestCase):
             mesh = mesher.StdMeshFile(self.path_object_custom)
             mesh.read_vertattrib_num()
             print(mesh.struct.vertattrib.num)
-            self.assertTrue(mesh.struct.vertattrib.num is 9)
+            self.assertTrue(mesh.struct.vertattrib.num is 10)
         except FileNotFoundError:
             self.skipTest('cannot find PR "wooddoor1m_03" mesh')
             
+    def test_can_read_vertex_attributes(self):
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_vertattributes()
+        self.assertTrue(mesh.struct.vertattrib.table[0] == (0, 0, 2, 0))
+        self.assertTrue(mesh.struct.vertattrib.table[1] == (0, 12, 2, 3))
+        self.assertTrue(mesh.struct.vertattrib.table[2] == (0, 24, 4, 2))
+        self.assertTrue(mesh.struct.vertattrib.table[3] == (0, 28, 1, 5))
+        self.assertTrue(mesh.struct.vertattrib.table[4] == (0, 36, 1, 261))
+        self.assertTrue(mesh.struct.vertattrib.table[5] == (0, 44, 1, 517))
+        self.assertTrue(mesh.struct.vertattrib.table[6] == (0, 52, 1, 773))
+        self.assertTrue(mesh.struct.vertattrib.table[7] == (0, 60, 2, 6))
+        self.assertTrue(mesh.struct.vertattrib.table[8] == (255, 0, 17, 0))
 
 
 
@@ -120,4 +131,3 @@ class TestStdMesh(unittest.TestCase):
 
 
 
-        

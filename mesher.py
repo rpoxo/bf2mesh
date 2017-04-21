@@ -48,6 +48,8 @@ class StdMeshFile:
             
             def __init__(self):
                 self.num = None
+                self.table = []
+                self.vertstride = None
 
         def __init__(self):
             self.header = self.__Header()
@@ -128,10 +130,29 @@ class StdMeshFile:
 
         tail = start + data_size
 
-        self.struct.vertattrib.num = data_struct.unpack(self.get_filedata()[start:tail])[0] - 1
+        self.struct.vertattrib.num = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
+    def read_vertattributes(self):
+        def _batch_gen(data, batch_size): # stackoverflow copypasta
+            for i in range(0, len(data), batch_size):
+                    yield data[i:i+batch_size]
 
+        start = self.read_vertattrib_num()
+        # flag As i        '1
+        # offset As i      '0
+        # vartype As i     '0
+        # usage As i       '0
+        format = ' '.join(['h h h h' for _ in range(self.struct.vertattrib.num)])
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
+
+        tail = start + data_size
+
+        unpacked_data = data_struct.unpack(self.get_filedata()[start:tail])
+        for index, vertex_attribute_table in enumerate(_batch_gen(unpacked_data, 4)):
+            self.struct.vertattrib.table.append(vertex_attribute_table)
+        return tail
 
 
 

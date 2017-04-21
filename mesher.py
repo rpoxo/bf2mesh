@@ -89,7 +89,7 @@ class StdMeshFile:
         self.struct.unknown2.u1 = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
-    def read_geom_num(self):
+    def read_bf2geom_num(self):
         # geomnum As l
         format = 'l'
         data_struct = struct.Struct(format)
@@ -107,8 +107,8 @@ class StdMeshFile:
         data_struct = struct.Struct(format)
         data_size = struct.calcsize(format)
 
-        start = self.read_geom_num()
-        tail = start * (start + data_size)
+        start = self.read_bf2geom_num()
+        tail = self.struct.bf2geom.num * (start + data_size)
 
         self.struct.bf2geom.lodnum = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail

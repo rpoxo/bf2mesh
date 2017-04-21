@@ -39,14 +39,21 @@ class TestStdMesh(unittest.TestCase):
 
     def setUp(self):
         # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
-        test_object_path_relative = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
-        self.test_object_path = os.path.join(bf2.Mod().root, test_object_path_relative)
+        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
+        test_object_alt_uvw = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box2', 'meshes', 'evil_box2.staticmesh'])
+        test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box3', 'meshes', 'evil_box3.staticmesh'])
+        test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box4', 'meshes', 'evil_box4.staticmesh'])
+
+        self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
+        self.path_object_alt_uvw = os.path.join(bf2.Mod().root, test_object_alt_uvw)
+        self.path_object_two_lods = os.path.join(bf2.Mod().root, test_object_two_lods)
+        self.path_object_dest = os.path.join(bf2.Mod().root, test_object_dest)
 
     def test_can_store_path(self):
-        self.assertTrue(mesher.StdMeshFile(self.test_object_path))
+        self.assertTrue(mesher.StdMeshFile(self.path_object_std))
     
     def test_can_read_header(self):
-        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh = mesher.StdMeshFile(self.path_object_std)
         stdmesh.read_header()
         self.assertTrue(stdmesh.struct.header.u1 is 0)
         self.assertTrue(stdmesh.struct.header.version in [10, 6, 11])
@@ -55,18 +62,21 @@ class TestStdMesh(unittest.TestCase):
         self.assertTrue(stdmesh.struct.header.u5 is 0)
     
     def test_can_read_unknown_byte(self):
-        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh = mesher.StdMeshFile(self.path_object_std)
         stdmesh.read_unknown2()
         self.assertTrue(stdmesh.struct.unknown2.u1 is 0)
     
-    def test_can_read_geom_num(self):
-        stdmesh = mesher.StdMeshFile(self.test_object_path)
+    def test_can_read_bf2geom_num(self):
+        stdmesh = mesher.StdMeshFile(self.path_object_std)
         stdmesh.read_bf2geom_num()
         self.assertTrue(stdmesh.struct.bf2geom.num is 1)
+        
+        stdmesh = mesher.StdMeshFile(self.path_object_dest)
+        stdmesh.read_bf2geom_num()
+        self.assertTrue(stdmesh.struct.bf2geom.num is 2)
 
-    #@unittest.skip('to be reworked')
     def test_can_read_geom_table(self):
-        stdmesh = mesher.StdMeshFile(self.test_object_path)
+        stdmesh = mesher.StdMeshFile(self.path_object_std)
         stdmesh.read_bf2geom_lodnum()
         self.assertTrue(stdmesh.struct.bf2geom.lodnum is 1)
 

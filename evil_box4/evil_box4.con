@@ -1,0 +1,8 @@
+GeometryTemplate.create StaticMesh evil_box4
+
+ObjectTemplate.create DestroyableObject evil_box4
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.creator DECENT-PC:Administrator
+ObjectTemplate.geometry evil_box4
+
+include evil_box4.tweak

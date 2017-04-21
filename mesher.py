@@ -148,6 +148,8 @@ class StdMeshFile:
         data_size = struct.calcsize(format)
 
         tail = start + data_size
+        print('{}:{}'.format(start, tail))
+        raise
 
         unpacked_data = data_struct.unpack(self.get_filedata()[start:tail])
         for index, vertex_attribute_table in enumerate(_batch_gen(unpacked_data, 4)):

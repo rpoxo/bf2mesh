@@ -75,7 +75,7 @@ class TestStdMesh(unittest.TestCase):
         mesh.read_bf2geom_num()
         self.assertTrue(mesh.struct.bf2geom.num is 2)
 
-    def test_can_read_geom_table(self):
+    def test_can_read_иа2geom_table(self):
         mesh = mesher.StdMeshFile(self.path_object_std)
         mesh.read_bf2geom_lodnum()
         self.assertTrue(mesh.struct.bf2geom.lodnum is 1)

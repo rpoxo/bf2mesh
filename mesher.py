@@ -62,6 +62,7 @@ class StdMeshFile:
         return self.filedata
 
     def read_header(self):
+        start = 0
         # u1 As long          '0
         # version As long     '10 for most bundledmesh, 6 for some bundledmesh, 11 for staticmesh
         # u3 As long          '0
@@ -71,44 +72,43 @@ class StdMeshFile:
         data_struct = struct.Struct(format)
         data_size = struct.calcsize(format)
 
-        start = 0
         tail = data_size
 
         self.struct.header.u1, self.struct.header.version, self.struct.header.u3, self.struct.header.u4, self.struct.header.u5 = data_struct.unpack(self.get_filedata()[start:tail])
         return tail
 
     def read_unknown2(self):
+        start = self.read_header()
         # u1 As char          'always 0?
         format = 'b'
         data_struct = struct.Struct(format)
         data_size = struct.calcsize(format)
 
-        start = self.read_header()
         tail = start + data_size
 
         self.struct.unknown2.u1 = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
     def read_bf2geom_num(self):
+        start = self.read_unknown2()
         # geomnum As l
         format = 'l'
         data_struct = struct.Struct(format)
         data_size = struct.calcsize(format)
 
-        start = self.read_unknown2()
         tail = start + data_size
 
         self.struct.bf2geom.num = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
     def read_bf2geom_lodnum(self):
-        # geomnum As l
-        format = 'l'
+        start = self.read_bf2geom_num()
+        # geomnum As l * geomnum
+        format = ' '.join(['l' for _ in range(self.struct.bf2geom.num)])
         data_struct = struct.Struct(format)
         data_size = struct.calcsize(format)
 
-        start = self.read_bf2geom_num()
-        tail = self.struct.bf2geom.num * (start + data_size)
+        tail = start + data_size
 
         self.struct.bf2geom.lodnum = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail

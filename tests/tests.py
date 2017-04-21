@@ -79,8 +79,20 @@ class TestStdMesh(unittest.TestCase):
         mesh = mesher.StdMeshFile(self.path_object_std)
         mesh.read_bf2geom_lodnum()
         self.assertTrue(mesh.struct.bf2geom.lodnum is 1)
+        
+        mesh = mesher.StdMeshFile(self.path_object_two_lods)
+        mesh.read_bf2geom_lodnum()
+        self.assertTrue(mesh.struct.bf2geom.lodnum is 2)
+        
+        mesh = mesher.StdMeshFile(self.path_object_dest)
+        mesh.read_bf2geom_lodnum()
+        self.assertTrue(mesh.struct.bf2geom.lodnum is 2)
 
-    def 
+    @unittest.skip('testing previous')
+    def test_can_read_vertex_attributes(self):
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_bf2geom_lodnum()
+        self.assertTrue(mesh.struct.bf2geom.lodnum is 1)
 
 
 

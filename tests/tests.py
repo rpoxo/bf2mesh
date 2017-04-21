@@ -53,32 +53,32 @@ class TestStdMesh(unittest.TestCase):
         self.assertTrue(mesher.StdMeshFile(self.path_object_std))
     
     def test_can_read_header(self):
-        stdmesh = mesher.StdMeshFile(self.path_object_std)
-        stdmesh.read_header()
-        self.assertTrue(stdmesh.struct.header.u1 is 0)
-        self.assertTrue(stdmesh.struct.header.version in [10, 6, 11])
-        self.assertTrue(stdmesh.struct.header.u3 is 0)
-        self.assertTrue(stdmesh.struct.header.u4 is 0)
-        self.assertTrue(stdmesh.struct.header.u5 is 0)
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_header()
+        self.assertTrue(mesh.struct.header.u1 is 0)
+        self.assertTrue(mesh.struct.header.version in [10, 6, 11])
+        self.assertTrue(mesh.struct.header.u3 is 0)
+        self.assertTrue(mesh.struct.header.u4 is 0)
+        self.assertTrue(mesh.struct.header.u5 is 0)
     
     def test_can_read_unknown_byte(self):
-        stdmesh = mesher.StdMeshFile(self.path_object_std)
-        stdmesh.read_unknown2()
-        self.assertTrue(stdmesh.struct.unknown2.u1 is 0)
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_unknown2()
+        self.assertTrue(mesh.struct.unknown2.u1 is 0)
     
     def test_can_read_bf2geom_num(self):
-        stdmesh = mesher.StdMeshFile(self.path_object_std)
-        stdmesh.read_bf2geom_num()
-        self.assertTrue(stdmesh.struct.bf2geom.num is 1)
-        
-        stdmesh = mesher.StdMeshFile(self.path_object_dest)
-        stdmesh.read_bf2geom_num()
-        self.assertTrue(stdmesh.struct.bf2geom.num is 2)
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_bf2geom_num()
+        self.assertTrue(mesh.struct.bf2geom.num is 1)
+
+        mesh = mesher.StdMeshFile(self.path_object_dest)
+        mesh.read_bf2geom_num()
+        self.assertTrue(mesh.struct.bf2geom.num is 2)
 
     def test_can_read_geom_table(self):
-        stdmesh = mesher.StdMeshFile(self.path_object_std)
-        stdmesh.read_bf2geom_lodnum()
-        self.assertTrue(stdmesh.struct.bf2geom.lodnum is 1)
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_bf2geom_lodnum()
+        self.assertTrue(mesh.struct.bf2geom.lodnum is 1)
 
 
 

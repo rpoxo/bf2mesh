@@ -62,32 +62,15 @@ class TestStdMesh(unittest.TestCase):
     def test_can_read_geom_num(self):
         stdmesh = mesher.StdMeshFile(self.test_object_path)
         stdmesh.read_geom_num()
-        self.assertTrue(stdmesh.struct.geom.num is 1)
+        self.assertTrue(stdmesh.struct.bf2geom.num is 1)
 
-    def test_can_read_bf2geom_lodnum_with_one_lod(self):
+    @unittest.skip('to be reworked')
+    def test_can_read_geom_table(self):
         stdmesh = mesher.StdMeshFile(self.test_object_path)
         stdmesh.read_bf2geom_lodnum()
         self.assertTrue(stdmesh.struct.bf2geom.lodnum is 1)
-        
-    def test_can_read_bf2geom_lodnum_with_two_lods(self):
-        stdmesh_two_lods_path_relative = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box3', 'meshes', 'evil_box3.staticmesh'])
-        stdmesh_two_lods_object_path = os.path.join(bf2.Mod().root, stdmesh_two_lods_path_relative)
-        stdmesh_two_lods = mesher.StdMeshFile(stdmesh_two_lods_object_path)
-        stdmesh_two_lods.read_bf2geom_lodnum()
-        self.assertTrue(stdmesh_two_lods.struct.bf2geom.lodnum is 2)
-    
-    # for test model this should be vertex attrib, evilbox has no geom table
-    @unittest.skip('investigating model')
-    def test_can_read_bf2geom_lod_bounds(self):
-        stdmesh = mesher.StdMeshFile(self.test_object_path)
-        stdmesh.read_bf2geom_lod_bounds()
-        self.assertTrue(isinstance(axis, int) for axis in stdmesh.struct.bf2geom.lod.bounds.min)
-        self.assertTrue(isinstance(axis, int) for axis in stdmesh.struct.bf2geom.lod.bounds.max)
-        self.assertTrue(isinstance(axis, int) for axis in stdmesh.struct.bf2geom.lod.bounds.pivot)
-        print(stdmesh.struct.bf2geom.lod.bounds.min)
-        print(stdmesh.struct.bf2geom.lod.bounds.max)
-        raise
-    
+
+
 
 
 

@@ -43,11 +43,17 @@ class StdMeshFile:
                 self.num = None
                 self.lodnum = None
                 self.lod = self.__Lod()
+        
+        class __Vertattrib:
+            
+            def __init__(self):
+                self.num = None
 
         def __init__(self):
             self.header = self.__Header()
             self.unknown2 = self.__Unknown()
             self.bf2geom = self.__Bf2Geom()
+            self.vertattrib = self.__Vertattrib()
 
     def __init__(self, filepath):
         self.filepath = filepath
@@ -113,7 +119,17 @@ class StdMeshFile:
         self.struct.bf2geom.lodnum = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
+    def read_vertattrib_num(self):
+        start = self.read_bf2geom_lodnum()
+        # vertattribnum As l
+        format = 'l'
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
 
+        tail = start + data_size
+
+        self.struct.vertattrib.num = data_struct.unpack(self.get_filedata()[start:tail])[0] - 1
+        return tail
 
 
 

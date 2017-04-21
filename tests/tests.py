@@ -88,13 +88,23 @@ class TestStdMesh(unittest.TestCase):
         mesh.read_bf2geom_lodnum()
         self.assertTrue(mesh.struct.bf2geom.lodnum is 2)
 
-    @unittest.skip('testing previous')
-    def test_can_read_vertex_attributes(self):
+    def test_can_read_vertattrib_num(self):
         mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_bf2geom_lodnum()
-        self.assertTrue(mesh.struct.bf2geom.lodnum is 1)
+        mesh.read_vertattrib_num()
+        print(mesh.struct.vertattrib.num)
+        self.assertTrue(mesh.struct.vertattrib.num is 8)
 
-
+    def test_can_read_vertattrib_num_CUSTOM_PR_DEST(self):
+        try:
+            test_object_custom = os.path.join(*['objects', 'staticobjects', 'pr', 'destroyable_objects', 'doors', 'wooddoor1m_03', 'meshes', 'wooddoor1m_03.staticmesh'])
+            self.path_object_custom = os.path.join(bf2.Mod().root, test_object_custom)
+            mesh = mesher.StdMeshFile(self.path_object_custom)
+            mesh.read_vertattrib_num()
+            print(mesh.struct.vertattrib.num)
+            self.assertTrue(mesh.struct.vertattrib.num is 9)
+        except FileNotFoundError:
+            self.skipTest('cannot find PR "wooddoor1m_03" mesh')
+            
 
 
 

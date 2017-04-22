@@ -54,6 +54,7 @@ class StdMeshFile:
             
             def __init__(self):
                 self.vertformat = None
+                self.vertstride = None
 
         def __init__(self):
             self.header = self.__Header()
@@ -173,6 +174,17 @@ class StdMeshFile:
         self.struct.vertices.vertformat = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
+    def read_vertstride(self):
+        start = self.read_vertformat()
+        # vertstride As l
+        format = 'l'
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
+
+        tail = start + data_size
+
+        self.struct.vertices.vertstride = data_struct.unpack(self.get_filedata()[start:tail])[0]
+        return tail
 
 
 

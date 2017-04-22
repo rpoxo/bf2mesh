@@ -122,7 +122,10 @@ class TestStdMesh(unittest.TestCase):
         mesh.read_vertformat()
         self.assertTrue(mesh.struct.vertices.vertformat == 4)
 
-
+    def test_can_read_vertstride(self):
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_vertstride()
+        self.assertTrue(mesh.struct.vertices.vertstride == 72)
 
 
 

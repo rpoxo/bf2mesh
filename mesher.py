@@ -56,6 +56,7 @@ class StdMeshFile:
                 self.vertformat = None
                 self.vertstride = None
                 self.vertnum = None
+                self.table = []
 
         def __init__(self):
             self.header = self.__Header()
@@ -68,6 +69,11 @@ class StdMeshFile:
         self.filepath = filepath
         self.filedata = None
         self.struct = self.__Filestruct()
+    
+    def _batch_gen(self, data, batch_size): # stackoverflow copypasta
+        for i in range(0, len(data), batch_size):
+                yield data[i:i+batch_size]
+
 
     def get_filedata(self):
         if self.filedata is None:
@@ -141,10 +147,6 @@ class StdMeshFile:
         return tail
 
     def read_vertattributes(self):
-        def _batch_gen(data, batch_size): # stackoverflow copypasta
-            for i in range(0, len(data), batch_size):
-                    yield data[i:i+batch_size]
-
         start = self.read_vertattrib_num()
         # .vertattrib.num * table
         #
@@ -159,7 +161,7 @@ class StdMeshFile:
         tail = start + data_size
 
         unpacked_data = data_struct.unpack(self.get_filedata()[start:tail])
-        for index, vertex_attribute_table in enumerate(_batch_gen(unpacked_data, 4)):
+        for vertex_attribute_table in self._batch_gen(unpacked_data, 4):
             self.struct.vertattrib.table.append(vertex_attribute_table)
         return tail
 
@@ -199,6 +201,21 @@ class StdMeshFile:
         self.struct.vertices.vertnum = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
+    def read_vertex_block(self):
+        start = self.read_vertnum()
+        
+        block_num = int((self.struct.vertices.vertstride / self.struct.vertices.vertformat) * self.struct.vertices.vertnum)
+        print(block_num)
+        format = ' '.join(['f' for _ in range(block_num)])
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
+
+        tail = start + data_size
+
+        for vertex in data_struct.unpack(self.get_filedata()[start:tail]):
+            self.struct.vertices.table.append(vertex)
+            print(vertex)
+        return tail
 
 
 

@@ -132,8 +132,10 @@ class TestStdMesh(unittest.TestCase):
         mesh.read_vertnum()
         self.assertTrue(mesh.struct.vertices.vertnum == 25)
 
-
-
+    def test_can_read_vertex_block(self):
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_vertex_block()
+        self.assertTrue(len(mesh.struct.vertices.table) == 450)
 
 
 

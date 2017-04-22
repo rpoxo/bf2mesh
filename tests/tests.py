@@ -117,7 +117,10 @@ class TestStdMesh(unittest.TestCase):
         self.assertTrue(mesh.struct.vertattrib.table[7] == (0, 60, 2, 6))
         self.assertTrue(mesh.struct.vertattrib.table[8] == (255, 0, 17, 0))
 
-
+    def test_can_read_vertformat(self):
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_vertformat()
+        self.assertTrue(mesh.struct.vertices.vertformat == 4)
 
 
 

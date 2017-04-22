@@ -49,13 +49,18 @@ class StdMeshFile:
             def __init__(self):
                 self.num = None
                 self.table = []
-                self.vertstride = None
+            
+        class  __Vertices:
+            
+            def __init__(self):
+                self.vertformat = None
 
         def __init__(self):
             self.header = self.__Header()
             self.unknown2 = self.__Unknown()
             self.bf2geom = self.__Bf2Geom()
             self.vertattrib = self.__Vertattrib()
+            self.vertices = self.__Vertices()
 
     def __init__(self, filepath):
         self.filepath = filepath
@@ -139,10 +144,12 @@ class StdMeshFile:
                     yield data[i:i+batch_size]
 
         start = self.read_vertattrib_num()
-        # flag As i        '1
-        # offset As i      '0
-        # vartype As i     '0
-        # usage As i       '0
+        # .vertattrib.num * table
+        #
+        # flag As h
+        # offset As h
+        # vartype As h
+        # usage As h
         format = ' '.join(['h h h h' for _ in range(self.struct.vertattrib.num)])
         data_struct = struct.Struct(format)
         data_size = struct.calcsize(format)
@@ -154,8 +161,17 @@ class StdMeshFile:
             self.struct.vertattrib.table.append(vertex_attribute_table)
         return tail
 
+    def read_vertformat(self):
+        start = self.read_vertattributes()
+        # vertformat As l
+        format = 'l'
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
 
+        tail = start + data_size
 
+        self.struct.vertices.vertformat = data_struct.unpack(self.get_filedata()[start:tail])[0]
+        return tail
 
 
 

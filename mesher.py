@@ -57,6 +57,17 @@ class StdMeshFile:
                 self.vertstride = None
                 self.vertnum = None
                 self.table = []
+            
+        class  __Index:
+            
+            def __init__(self):
+                self.num = None
+                self.table = []
+        
+        class __Rigs:
+            
+            def __init__(self):
+                self.u2 = None
 
         def __init__(self):
             self.header = self.__Header()
@@ -64,6 +75,8 @@ class StdMeshFile:
             self.bf2geom = self.__Bf2Geom()
             self.vertattrib = self.__Vertattrib()
             self.vertices = self.__Vertices()
+            self.index = self.__Index()
+            self.rigs = self.__Rigs()
 
     def __init__(self, filepath):
         self.filepath = filepath
@@ -203,19 +216,80 @@ class StdMeshFile:
 
     def read_vertex_block(self):
         start = self.read_vertnum()
-        
+        # lots of vertices As f
         block_num = int((self.struct.vertices.vertstride / self.struct.vertices.vertformat) * self.struct.vertices.vertnum)
-        print(block_num)
         format = ' '.join(['f' for _ in range(block_num)])
         data_struct = struct.Struct(format)
         data_size = struct.calcsize(format)
 
         tail = start + data_size
+        print('{}:{}'.format(start, tail))
 
         for vertex in data_struct.unpack(self.get_filedata()[start:tail]):
             self.struct.vertices.table.append(vertex)
-            print(vertex)
         return tail
+
+    def read_indexnum(self):
+        start = self.read_vertex_block()
+        # indexnum As l
+        format = 'l'
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
+
+        tail = start + data_size
+
+        self.struct.index.num = data_struct.unpack(self.get_filedata()[start:tail])[0]
+        return tail
+
+    def read_index_block(self):
+        start = self.read_indexnum()
+        # index table of h
+        format = ' '.join(['h' for _ in range(self.struct.index.num)])
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
+
+        tail = start + data_size
+
+        for index in data_struct.unpack(self.get_filedata()[start:tail]):
+            self.struct.index.table.append(index)
+        return tail
+
+    def read_rigs_u2(self):
+        start = self.read_index_block()
+        # unknonw As l
+        format = 'l'
+        data_struct = struct.Struct(format)
+        data_size = struct.calcsize(format)
+
+        tail = start + data_size
+
+        self.struct.rigs.u2 = data_struct.unpack(self.get_filedata()[start:tail])[0]
+        return tail
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

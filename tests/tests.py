@@ -126,6 +126,11 @@ class TestStdMesh(unittest.TestCase):
         mesh = mesher.StdMeshFile(self.path_object_std)
         mesh.read_vertstride()
         self.assertTrue(mesh.struct.vertices.vertstride == 72)
+    
+    def test_can_read_vertnum(self):
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_vertnum()
+        self.assertTrue(mesh.struct.vertices.vertnum == 25)
 
 
 

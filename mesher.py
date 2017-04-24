@@ -64,7 +64,7 @@ class StdMeshFile:
                 self.num = None
                 self.table = []
         
-        class __Rigs:
+        class __Nodes:
             
             def __init__(self):
                 self.u2 = None
@@ -76,7 +76,7 @@ class StdMeshFile:
             self.vertattrib = self.__Vertattrib()
             self.vertices = self.__Vertices()
             self.index = self.__Index()
-            self.rigs = self.__Rigs()
+            self.nodes = self.__Nodes()
 
     def __init__(self, filepath):
         self.filepath = filepath
@@ -254,7 +254,7 @@ class StdMeshFile:
             self.struct.index.table.append(index)
         return tail
 
-    def read_rigs_u2(self):
+    def read_nodes_u2(self):
         start = self.read_index_block()
         # unknonw As l
         format = 'l'
@@ -263,7 +263,7 @@ class StdMeshFile:
 
         tail = start + data_size
 
-        self.struct.rigs.u2 = data_struct.unpack(self.get_filedata()[start:tail])[0]
+        self.struct.nodes.u2 = data_struct.unpack(self.get_filedata()[start:tail])[0]
         return tail
 
 

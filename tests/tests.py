@@ -132,7 +132,7 @@ class TestStdMesh(unittest.TestCase):
         mesh.read_vertnum()
         self.assertTrue(mesh.struct.vertices.vertnum == 25)
 
-    @unittest.skip('investigating float precision issues')
+    #@unittest.skip('investigating float precision issues')
     def test_can_read_vertex_block(self):
         mesh = mesher.StdMeshFile(self.path_object_std)
         mesh.read_vertex_block()
@@ -148,14 +148,22 @@ class TestStdMesh(unittest.TestCase):
         mesh.read_index_block()
         self.assertTrue(len(mesh.struct.index.table) == 36)
     
-    def test_can_read_rigs_u2(self):
+    def test_can_read_nodes_u2(self):
         mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_rigs_u2()
-        self.assertTrue(mesh.struct.rigs.u2 is 8)
+        mesh.read_nodes_u2()
+        self.assertTrue(mesh.struct.nodes.u2 is 8)
 
+    @unittest.skip('not ready')
+    def test_can_read_nodes_num(self):
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_nodes_block()
+        self.assertTrue(mesh.struct.nodes.num is 2)
 
-
-
+    @unittest.skip('not ready')
+    def test_can_read_nodes_data(self):
+        mesh = mesher.StdMeshFile(self.path_object_std)
+        mesh.read_nodes_block()
+        self.assertTrue(mesh.struct.nodes.num is 2)
 
 
 

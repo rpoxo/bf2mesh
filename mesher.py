@@ -7,7 +7,7 @@ import bf2
 
 def LoadBF2Mesh(filepath):
     with open(filepath, 'rb') as meshfile:
-        vmesh = Test_StdMeshFile(meshfile)
+        vmesh = StdMeshFile(meshfile)
     return vmesh
 
 class bf2head:

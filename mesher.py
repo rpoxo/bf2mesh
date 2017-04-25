@@ -11,9 +11,16 @@ def LoadBF2Mesh(filepath):
     return vmesh
 
 class bf2lod:
-    def __init__(self, fo):
+    def __init__(self, fo, version):
         self.min = tuple(struct.Struct('f f f').unpack(fo.read(struct.calcsize('f f f'))))
         self.max = tuple(struct.Struct('f f f').unpack(fo.read(struct.calcsize('f f f'))))
+        if version <= 6:
+            self.pivot = tuple(struct.Struct('f f f').unpack(fo.read(struct.calcsize('f f f'))))
+        self.nodenum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.node = []
+        for i in range(self.nodenum):
+            for j in range(16):
+                self.node.append(struct.Struct('f').unpack(fo.read(struct.calcsize('f')))[0])
 
 class bf2head:
     def __init__(self, fo):
@@ -71,7 +78,7 @@ class StdMeshFile:
         self.u2 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         for geomnum in range(self.geomnum):
             for lodnum in range(self.geom[geomnum].lodnum):
-                self.geom[geomnum].lod.insert(lodnum, bf2lod(fo))
+                self.geom[geomnum].lod.insert(lodnum, bf2lod(fo, self.head.version))
 
 
 

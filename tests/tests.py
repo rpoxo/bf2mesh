@@ -130,12 +130,11 @@ class TestStdMesh(unittest.TestCase):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         self.assertTrue(vmesh.u2 is 8)
 
-    def test_can_read_nodes(self):
+    def test_can_read_nodes_bounds(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         self.assertTrue(vmesh.geom[0].lod[0].min == (-0.5, 0, -0.5))
         self.assertTrue(vmesh.geom[0].lod[0].max == (0.5, 1.0, 0.5))
-
-
+        self.assertTrue(vmesh.geom[0].lod[0].pivot == (0.5, 1.0, 0.5))
 
 
 

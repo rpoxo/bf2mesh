@@ -12,15 +12,53 @@ def LoadBF2Mesh(filepath):
 
 class bf2lod:
     def __init__(self, fo, version):
-        self.min = tuple(struct.Struct('f f f').unpack(fo.read(struct.calcsize('f f f'))))
-        self.max = tuple(struct.Struct('f f f').unpack(fo.read(struct.calcsize('f f f'))))
+        self.min = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
+        self.max = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
         if version <= 6:
-            self.pivot = tuple(struct.Struct('f f f').unpack(fo.read(struct.calcsize('f f f'))))
+            self.pivot = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
         self.nodenum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.node = []
+        self.polycount = 0
+    
+    def read_lod_node_table(self, fo):
         for i in range(self.nodenum):
             for j in range(16):
                 self.node.append(struct.Struct('f').unpack(fo.read(struct.calcsize('f')))[0])
+            
+    def read_geom_lod(self, fo):
+        self.matnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.mat = []
+        #self.mat.append(bf2mat(fo))
+        for i in range(self.matnum):
+            self.mat.append(bf2mat(fo))
+
+class bf2mat:
+    def __init__(self, fo):
+        self.alphamode = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.fxfile = self.__get_string(fo)
+        self.technique = self.__get_string(fo)
+        self.mapnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.map = self.__get_maps(fo)
+        self.vstart = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.istart = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.vnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.inum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.u4 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.u5 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.nmin = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
+        self.nmax = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
+        
+    def __get_string(self, fo):
+        string_len = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        string_fmt = str(string_len) + 's'
+        return struct.Struct(string_fmt).unpack(fo.read(struct.calcsize(string_fmt)))[0]
+    
+    def __get_maps(self, fo):
+        mapnames = []
+        for i in range(self.mapnum):
+            mapnames.append(self.__get_string(fo))
+        return mapnames
+            
 
 class bf2head:
     def __init__(self, fo):
@@ -79,6 +117,10 @@ class StdMeshFile:
         for geomnum in range(self.geomnum):
             for lodnum in range(self.geom[geomnum].lodnum):
                 self.geom[geomnum].lod.insert(lodnum, bf2lod(fo, self.head.version))
+                self.geom[geomnum].lod[lodnum].read_lod_node_table(fo)
+        for geomnum in range(self.geomnum):
+            for lodnum in range(self.geom[geomnum].lodnum):
+                self.geom[geomnum].lod[lodnum].read_geom_lod(fo)
 
 
 

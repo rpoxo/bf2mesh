@@ -30,7 +30,9 @@ class bf2lod:
         self.mat = []
         #self.mat.append(bf2mat(fo))
         for i in range(self.matnum):
-            self.mat.append(bf2mat(fo))
+            material = bf2mat(fo)
+            self.mat.append(material)
+            self.polycount = self.polycount + material.inum / 3
 
 class bf2mat:
     def __init__(self, fo):
@@ -41,8 +43,8 @@ class bf2mat:
         self.map = self.__get_maps(fo)
         self.vstart = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.istart = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        self.vnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.inum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.vnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.u4 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.u5 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.nmin = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
@@ -121,6 +123,7 @@ class StdMeshFile:
         for geomnum in range(self.geomnum):
             for lodnum in range(self.geom[geomnum].lodnum):
                 self.geom[geomnum].lod[lodnum].read_geom_lod(fo)
+        print(fo.tell())
 
 
 

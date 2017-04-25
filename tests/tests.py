@@ -160,13 +160,13 @@ class TestStdMesh(unittest.TestCase):
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].map[1] == b'Common\Textures\SpecularLUT_pow36.dds')
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].vstart == 0)
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].istart == 0)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].vnum == 36)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].inum == 25)
+        self.assertTrue(vmesh.geom[0].lod[0].mat[0].inum == 36)
+        self.assertTrue(vmesh.geom[0].lod[0].mat[0].vnum == 25)
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].u4 == 8064)
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].u5 == 65535)
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmin == (-0.5, 0.0, -0.5))
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmax == (0.5, 1.0, 0.5))
-        
+        self.assertTrue(vmesh.geom[0].lod[0].polycount == 12)
 
 
 

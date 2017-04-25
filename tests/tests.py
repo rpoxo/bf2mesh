@@ -49,127 +49,88 @@ class TestStdMesh(unittest.TestCase):
         self.path_object_two_lods = os.path.join(bf2.Mod().root, test_object_two_lods)
         self.path_object_dest = os.path.join(bf2.Mod().root, test_object_dest)
 
-    def test_can_store_path(self):
-        self.assertTrue(mesher.StdMeshFile(self.path_object_std))
-    
     def test_can_read_header(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_header()
-        self.assertTrue(mesh.struct.header.u1 is 0)
-        self.assertTrue(mesh.struct.header.version in [10, 6, 11])
-        self.assertTrue(mesh.struct.header.u3 is 0)
-        self.assertTrue(mesh.struct.header.u4 is 0)
-        self.assertTrue(mesh.struct.header.u5 is 0)
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.head.u1 is 0)
+        self.assertTrue(vmesh.head.version in [10, 6, 11])
+        self.assertTrue(vmesh.head.u3 is 0)
+        self.assertTrue(vmesh.head.u4 is 0)
+        self.assertTrue(vmesh.head.u5 is 0)
     
-    def test_can_read_unknown_byte(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_unknown2()
-        self.assertTrue(mesh.struct.unknown2.u1 is 0)
-    
-    def test_can_read_bf2geom_num(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_bf2geom_num()
-        self.assertTrue(mesh.struct.bf2geom.num is 1)
+    def test_can_read_u1(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.head.u1 is 0)
 
-        mesh = mesher.StdMeshFile(self.path_object_dest)
-        mesh.read_bf2geom_num()
-        self.assertTrue(mesh.struct.bf2geom.num is 2)
+    def test_can_read_geomnum(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        print(vmesh.geomnum)
+        self.assertTrue(vmesh.geomnum is 1)
 
-    def test_can_read_bf2geom_table(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_bf2geom_lodnum()
-        self.assertTrue(mesh.struct.bf2geom.lodnum is 1)
-        
-        mesh = mesher.StdMeshFile(self.path_object_two_lods)
-        mesh.read_bf2geom_lodnum()
-        self.assertTrue(mesh.struct.bf2geom.lodnum is 2)
-        
-        mesh = mesher.StdMeshFile(self.path_object_dest)
-        mesh.read_bf2geom_lodnum()
-        self.assertTrue(mesh.struct.bf2geom.lodnum is 2)
+        vmesh = mesher.LoadBF2Mesh(self.path_object_dest)
+        self.assertTrue(vmesh.geomnum is 2)
 
-    def test_can_read_vertattrib_num(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_vertattrib_num()
-        self.assertTrue(mesh.struct.vertattrib.num is 9)
+    def test_can_read_geom_table(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.geom[0].lodnum is 1)
 
-    def test_can_read_vertattrib_num_CUSTOM_PR_DEST(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_two_lods)
+        self.assertTrue(vmesh.geom[0].lodnum is 2)
+
+        vmesh = mesher.LoadBF2Mesh(self.path_object_dest)
+        self.assertTrue(len(vmesh.geom) is 2)
+        self.assertTrue(vmesh.geom[0].lodnum is 2)
+        self.assertTrue(vmesh.geom[1].lodnum is 2)
+
+    def test_can_read_vertattribnum_CUSTOM_PR_DEST(self):
         try:
             test_object_custom = os.path.join(*['objects', 'staticobjects', 'pr', 'destroyable_objects', 'doors', 'wooddoor1m_03', 'meshes', 'wooddoor1m_03.staticmesh'])
             self.path_object_custom = os.path.join(bf2.Mod().root, test_object_custom)
-            mesh = mesher.StdMeshFile(self.path_object_custom)
-            mesh.read_vertattrib_num()
-            print(mesh.struct.vertattrib.num)
-            self.assertTrue(mesh.struct.vertattrib.num is 10)
+            vmesh = mesher.LoadBF2Mesh(self.path_object_custom)
+            self.assertTrue(vmesh.vertattribnum is 10)
         except FileNotFoundError:
             self.skipTest('cannot find PR "wooddoor1m_03" mesh')
-            
-    def test_can_read_vertex_attributes(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_vertattributes()
-        self.assertTrue(mesh.struct.vertattrib.table[0] == (0, 0, 2, 0))
-        self.assertTrue(mesh.struct.vertattrib.table[1] == (0, 12, 2, 3))
-        self.assertTrue(mesh.struct.vertattrib.table[2] == (0, 24, 4, 2))
-        self.assertTrue(mesh.struct.vertattrib.table[3] == (0, 28, 1, 5))
-        self.assertTrue(mesh.struct.vertattrib.table[4] == (0, 36, 1, 261))
-        self.assertTrue(mesh.struct.vertattrib.table[5] == (0, 44, 1, 517))
-        self.assertTrue(mesh.struct.vertattrib.table[6] == (0, 52, 1, 773))
-        self.assertTrue(mesh.struct.vertattrib.table[7] == (0, 60, 2, 6))
-        self.assertTrue(mesh.struct.vertattrib.table[8] == (255, 0, 17, 0))
+
+    def test_can_read_vertex_attribute_table(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.vertattrib[0] == (0, 0, 2, 0))
+        self.assertTrue(vmesh.vertattrib[1] == (0, 12, 2, 3))
+        self.assertTrue(vmesh.vertattrib[2] == (0, 24, 4, 2))
+        self.assertTrue(vmesh.vertattrib[3] == (0, 28, 1, 5))
+        self.assertTrue(vmesh.vertattrib[4] == (0, 36, 1, 261))
+        self.assertTrue(vmesh.vertattrib[5] == (0, 44, 1, 517))
+        self.assertTrue(vmesh.vertattrib[6] == (0, 52, 1, 773))
+        self.assertTrue(vmesh.vertattrib[7] == (0, 60, 2, 6))
+        self.assertTrue(vmesh.vertattrib[8] == (255, 0, 17, 0))
 
     def test_can_read_vertformat(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_vertformat()
-        self.assertTrue(mesh.struct.vertices.vertformat == 4)
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.vertformat == 4)
 
     def test_can_read_vertstride(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_vertstride()
-        self.assertTrue(mesh.struct.vertices.vertstride == 72)
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.vertstride == 72)
 
     def test_can_read_vertnum(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_vertnum()
-        self.assertTrue(mesh.struct.vertices.vertnum == 25)
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.vertnum == 25)
 
-    #@unittest.skip('investigating float precision issues')
     def test_can_read_vertex_block(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_vertex_block()
-        self.assertTrue(len(mesh.struct.vertices.table) == 450)
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(len(vmesh.vertices) == 450)
 
     def test_can_read_indexnum(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_indexnum()
-        self.assertTrue(mesh.struct.index.num is 36)
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.indexnum is 36)
 
-    def test_can_read_index(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_index_block()
-        self.assertTrue(len(mesh.struct.index.table) == 36)
+    def test_can_read_index_block(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(len(vmesh.index) == 36)
+
+    def test_can_read_u2(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.u2 is 8)
+
     
-    def test_can_read_nodes_u2(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_nodes_u2()
-        self.assertTrue(mesh.struct.nodes.u2 is 8)
-
-    @unittest.skip('not ready')
-    def test_can_read_nodes_num(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_nodes_block()
-        self.assertTrue(mesh.struct.nodes.num is 2)
-
-    @unittest.skip('not ready')
-    def test_can_read_nodes_data(self):
-        mesh = mesher.StdMeshFile(self.path_object_std)
-        mesh.read_nodes_block()
-        self.assertTrue(mesh.struct.nodes.num is 2)
-
-
-
-
-
-
 
 
 

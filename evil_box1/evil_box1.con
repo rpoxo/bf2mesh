@@ -2,7 +2,6 @@ GeometryTemplate.create StaticMesh evil_box1
 
 ObjectTemplate.create SimpleObject evil_box1
 ObjectTemplate.saveInSeparateFile 1
-ObjectTemplate.Anchor 0.0/0.0/0.0
 ObjectTemplate.creator DECENT-PC:Administrator
 ObjectTemplate.geometry evil_box1
 

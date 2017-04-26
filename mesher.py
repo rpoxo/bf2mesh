@@ -19,6 +19,8 @@ class bf2lod:
         self.nodenum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.node = []
         self.polycount = 0
+        self.matnum = None
+        self.mat = []
     
     def read_lod_node_table(self, fo):
         for i in range(self.nodenum):
@@ -27,7 +29,6 @@ class bf2lod:
             
     def read_geom_lod(self, fo):
         self.matnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        self.mat = []
         #self.mat.append(bf2mat(fo))
         for i in range(self.matnum):
             material = bf2mat(fo)
@@ -69,6 +70,14 @@ class bf2head:
         self.u3 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.u4 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.u5 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+    
+    def __eq__(self, other):
+        if self.u1 != other.u1: return False
+        if self.version != other.version : return False
+        if self.u3 != other.u3: return False
+        if self.u4 != other.u4: return False
+        if self.u5 != other.u5: return False
+        return True
 
 class bf2geom:
     def __init__(self, fo):
@@ -123,7 +132,7 @@ class StdMeshFile:
         for geomnum in range(self.geomnum):
             for lodnum in range(self.geom[geomnum].lodnum):
                 self.geom[geomnum].lod[lodnum].read_geom_lod(fo)
-        print(fo.tell())
+        print('file len = {}'.format(fo.tell()))
 
 
 

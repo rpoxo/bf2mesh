@@ -52,9 +52,21 @@ class bf2mat:
         self.nmax = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
         
     def __get_string(self, fo):
-        string_len = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        string_fmt = str(string_len) + 's'
-        return struct.Struct(string_fmt).unpack(fo.read(struct.calcsize(string_fmt)))[0]
+        if fo.name == 'D:\Games\Project Reality\mods\pr_repo\objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh':
+            string_len = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+            string_fmt = str(string_len) + 's'
+            try:
+                data = struct.Struct(string_fmt).unpack(fo.read(struct.calcsize(string_fmt)))[0]
+            except MemoryError:
+                string_fmt2 = 'l'
+                data = struct.Struct(string_fmt2).unpack(fo.read(struct.calcsize(string_fmt2)))
+                print('reading {}'.format(fo.tell()))
+            print(data)
+            return data
+        else:
+            string_len = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+            string_fmt = str(string_len) + 's'
+            return struct.Struct(string_fmt).unpack(fo.read(struct.calcsize(string_fmt)))[0]
     
     def __get_maps(self, fo):
         mapnames = []

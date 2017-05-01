@@ -280,7 +280,7 @@ class TestStdMeshWriting(unittest.TestCase):
         vmesh._write_u1_bfp4f_version(self.path_object_clone)
 
         with open(self.path_object_clone, 'rb') as clonemesh:
-            offset = mesher.bf2head(clonemesh)._size
+            offset = mesher._write_header(filepath)
             u1 = mesher._read_u1_bfp4f(clonemesh, offset)
 
         self.assertTrue(u1 is 0)
@@ -290,13 +290,20 @@ class TestStdMeshWriting(unittest.TestCase):
         vmesh._write_geomnum(self.path_object_clone)
 
         with open(self.path_object_clone, 'rb') as clonemesh:
-            offset = mesher.bf2head(clonemesh)._size + struct.calcsize('b')
+            offset = mesher._write_u1_bfp4f_version(filepath)
             geomnum = mesher._read_geomnum(clonemesh, offset)
 
         self.assertTrue(geomnum is 1)
 
+    def test_can_write_geoms(self)
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_geoms(self.path_object_clone)
 
+        with open(self.path_object_clone, 'rb') as clonemesh:
+            offset = mesher._write_geomnum(filepath)
+            geomnum = mesher._read_geomnum(clonemesh, offset)
 
+        self.assertTrue(geomnum is 1)
 
 
 

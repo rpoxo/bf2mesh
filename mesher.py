@@ -168,12 +168,13 @@ class StdMeshFile:
                     self.head.u4,
                     self.head.u5)
             fo.write(struct.Struct(self.head._fmt).pack(*dataset))
+            return fo.tell()
 
     def _write_u1_bfp4f_version(self, filepath):
-        self._write_header(filepath)
         with open(filepath, 'ab+') as fo:
             fmt = 'b'
             fo.write(struct.Struct(fmt).pack(self.u1))
+            return fo.tell()
 
 
     def _write_geomnum(self, filepath):
@@ -181,6 +182,7 @@ class StdMeshFile:
         with open(filepath, 'ab+') as fo:
             fmt = 'l'
             fo.write(struct.Struct(fmt).pack(self.geomnum))
+            return fo.tell()
 
 
 

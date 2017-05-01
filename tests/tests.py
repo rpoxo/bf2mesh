@@ -224,7 +224,7 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmax != vmesh2.geom[0].lod[0].mat[0].nmax) # diff
         #raise
 
-    @unittest.skip('i\o intensive')
+    #@unittest.skip('i\o intensive')
     def test_can_read_PR_MESHES_1480(self):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects', 'staticobjects')):
@@ -236,7 +236,7 @@ class TestStdMeshReading(unittest.TestCase):
                     except MemoryError:
                         print('Failed to load {}'.format(os.path.join(bf2.Mod().root, dir, filename)))
         print(counter)
-        raise
+        #raise
     
 class TestStdMeshReading_Special(unittest.TestCase):
 

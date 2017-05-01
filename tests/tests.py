@@ -3,6 +3,7 @@ import unittest.mock as mock
 import tempfile
 import os
 import sys
+import struct
 
 import bf2
 import mesher
@@ -224,7 +225,7 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmax != vmesh2.geom[0].lod[0].mat[0].nmax) # diff
         #raise
 
-    #@unittest.skip('i\o intensive')
+    @unittest.skip('i\o intensive')
     def test_can_read_PR_MESHES_1480(self):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects', 'staticobjects')):
@@ -243,6 +244,60 @@ class TestStdMeshReading_Special(unittest.TestCase):
     def test_can_read_not_skinned_mesh_version_4(self):
         vmesh = mesher.LoadBF2Mesh(os.path.join(bf2.Mod().root, 'objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh'))
         #raise
+
+
+class TestStdMeshWriting(unittest.TestCase):
+
+    def setUp(self):
+        # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
+        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
+        test_object_clone = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1_clone.staticmesh'])
+        
+        self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
+        self.path_object_clone = os.path.join(bf2.Mod().root, test_object_clone)
+
+    def tearDown(self):
+        try:
+            os.remove(self.path_object_clone)
+        except FileNotFoundError:
+            print('Nothing to clean up')
+
+    def test_can_write_header(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_header(self.path_object_clone)
+        
+        with open(self.path_object_clone, 'rb') as clonemesh:
+            cloned_head = mesher.bf2head(clonemesh)
+
+        self.assertTrue(cloned_head.u1 is 0)
+        self.assertTrue(cloned_head.version in [10, 6, 11])
+        self.assertTrue(cloned_head.u3 is 0)
+        self.assertTrue(cloned_head.u4 is 0)
+        self.assertTrue(cloned_head.u5 is 0)
+
+    def test_can_write_u1_bfp4f_version(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_u1_bfp4f_version(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as clonemesh:
+            offset = mesher.bf2head(clonemesh)._size
+            u1 = mesher._read_u1_bfp4f(clonemesh, offset)
+
+        self.assertTrue(u1 is 0)
+
+    def test_can_write_geomnum(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_geomnum(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as clonemesh:
+            offset = mesher.bf2head(clonemesh)._size + struct.calcsize('b')
+            geomnum = mesher._read_geomnum(clonemesh, offset)
+
+        self.assertTrue(geomnum is 1)
+
+
+
+
 
 
 

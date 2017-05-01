@@ -76,11 +76,17 @@ class bf2mat:
 
 class bf2head:
     def __init__(self, fo):
-        self.u1 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        self.version = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        self.u3 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        self.u4 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        self.u5 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        # some internals
+        self._fmt = ('l l l l l')
+        self._size = struct.calcsize(self._fmt)
+
+        # reading bin
+        data = struct.Struct(self._fmt).unpack(fo.read(self._size))
+        self.u1 = data[0]
+        self.version = data[1]
+        self.u3 = data[2]
+        self.u4 = data[3]
+        self.u5 = data[4]
     
     def __eq__(self, other):
         if self.u1 != other.u1: return False
@@ -120,6 +126,14 @@ def get_vert(fo):
 def get_index(fo):
     return struct.Struct('h').unpack(fo.read(struct.calcsize('h')))[0]
 
+def _read_u1_bfp4f(fo, offset):
+    fo.seek(offset)
+    return struct.Struct('b').unpack(fo.read(struct.calcsize('b')))[0]
+
+def _read_geomnum(fo, offset):
+    fo.seek(offset)
+    return struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+
 class StdMeshFile:
 
     def __init__(self, fo, mesh_types):
@@ -146,14 +160,27 @@ class StdMeshFile:
         print('file len = {}'.format(fo.tell()))
 
 
+    def _write_header(self, filepath):
+        with open(filepath, 'wb+') as fo:
+            dataset = (self.head.u1,
+                    self.head.version,
+                    self.head.u3,
+                    self.head.u4,
+                    self.head.u5)
+            fo.write(struct.Struct(self.head._fmt).pack(*dataset))
+
+    def _write_u1_bfp4f_version(self, filepath):
+        self._write_header(filepath)
+        with open(filepath, 'ab+') as fo:
+            fmt = 'b'
+            fo.write(struct.Struct(fmt).pack(self.u1))
 
 
-
-
-
-
-
-
+    def _write_geomnum(self, filepath):
+        self._write_u1_bfp4f_version(filepath)
+        with open(filepath, 'ab+') as fo:
+            fmt = 'l'
+            fo.write(struct.Struct(fmt).pack(self.geomnum))
 
 
 

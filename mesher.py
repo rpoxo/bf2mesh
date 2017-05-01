@@ -7,7 +7,16 @@ import bf2
 
 def LoadBF2Mesh(filepath):
     with open(filepath, 'rb') as meshfile:
-        vmesh = StdMeshFile(meshfile)
+        isSkinnedMesh = False
+        isBundledMesh = False
+        isStaticMesh = False
+        mesh_types = {
+            '.skinnedmesh' : isSkinnedMesh,
+            '.bundledmesh' : isBundledMesh,
+            '.staticmesh' : isStaticMesh
+            }
+        mesh_types[os.path.splitext(filepath)[0].lower()] = True
+        vmesh = StdMeshFile(meshfile, mesh_types)
     return vmesh
 
 class bf2lod:
@@ -27,16 +36,17 @@ class bf2lod:
             for j in range(16):
                 self.node.append(struct.Struct('f').unpack(fo.read(struct.calcsize('f')))[0])
             
-    def read_geom_lod(self, fo):
+    def read_geom_lod(self, fo, mesh_types, version):
         self.matnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        #print('matnum = {}'.format(self.matnum))
         #self.mat.append(bf2mat(fo))
         for i in range(self.matnum):
-            material = bf2mat(fo)
+            material = bf2mat(fo, mesh_types, version)
             self.mat.append(material)
             self.polycount = self.polycount + material.inum / 3
 
 class bf2mat:
-    def __init__(self, fo):
+    def __init__(self, fo, mesh_types, version):
         self.alphamode = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.fxfile = self.__get_string(fo)
         self.technique = self.__get_string(fo)
@@ -48,25 +58,14 @@ class bf2mat:
         self.vnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.u4 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.u5 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        self.nmin = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
-        self.nmax = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
+        if not mesh_types['.skinnedmesh'] and version == 11:
+            self.nmin = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
+            self.nmax = tuple(struct.Struct('3f').unpack(fo.read(struct.calcsize('3f'))))
         
     def __get_string(self, fo):
-        if fo.name == 'D:\Games\Project Reality\mods\pr_repo\objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh':
-            string_len = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-            string_fmt = str(string_len) + 's'
-            try:
-                data = struct.Struct(string_fmt).unpack(fo.read(struct.calcsize(string_fmt)))[0]
-            except MemoryError:
-                string_fmt2 = 'l'
-                data = struct.Struct(string_fmt2).unpack(fo.read(struct.calcsize(string_fmt2)))
-                print('reading {}'.format(fo.tell()))
-            print(data)
-            return data
-        else:
-            string_len = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-            string_fmt = str(string_len) + 's'
-            return struct.Struct(string_fmt).unpack(fo.read(struct.calcsize(string_fmt)))[0]
+        string_len = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        string_fmt = str(string_len) + 's'
+        return struct.Struct(string_fmt).unpack(fo.read(struct.calcsize(string_fmt)))[0]
     
     def __get_maps(self, fo):
         mapnames = []
@@ -123,7 +122,7 @@ def get_index(fo):
 
 class StdMeshFile:
 
-    def __init__(self, fo):
+    def __init__(self, fo, mesh_types):
         self.head = bf2head(fo)
         self.u1 = struct.Struct('b').unpack(fo.read(struct.calcsize('b')))[0]
         self.geomnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
@@ -143,7 +142,7 @@ class StdMeshFile:
                 self.geom[geomnum].lod[lodnum].read_lod_node_table(fo)
         for geomnum in range(self.geomnum):
             for lodnum in range(self.geom[geomnum].lodnum):
-                self.geom[geomnum].lod[lodnum].read_geom_lod(fo)
+                self.geom[geomnum].lod[lodnum].read_geom_lod(fo, mesh_types, self.head.version)
         print('file len = {}'.format(fo.tell()))
 
 

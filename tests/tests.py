@@ -36,6 +36,7 @@ class TestMod(unittest.TestCase):
                 mod.root = temp_dir
                 self.assertTrue(mod.get_object_path(test_object_name) == os.path.join(temp_mod, test_object_name, confile.name))
 
+#@unittest.skip('testing failed mesh load')
 class TestStdMeshReading(unittest.TestCase):
 
     def setUp(self):
@@ -209,11 +210,11 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].map[1] == vmesh2.geom[0].lod[0].mat[0].map[1])
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].vstart == vmesh2.geom[0].lod[0].mat[0].vstart)
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].istart == vmesh2.geom[0].lod[0].mat[0].istart)
-        print('vmesh inum = {}'.format(vmesh.geom[0].lod[0].mat[0].inum))
-        print('vmesh2 inum = {}'.format(vmesh2.geom[0].lod[0].mat[0].inum))
+        #print('vmesh inum = {}'.format(vmesh.geom[0].lod[0].mat[0].inum))
+        #print('vmesh2 inum = {}'.format(vmesh2.geom[0].lod[0].mat[0].inum))
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].inum != vmesh2.geom[0].lod[0].mat[0].inum) # diff
-        print('vmesh vnum = {}'.format(vmesh.geom[0].lod[0].mat[0].vnum))
-        print('vmesh2 vnum = {}'.format(vmesh2.geom[0].lod[0].mat[0].vnum))
+        #print('vmesh vnum = {}'.format(vmesh.geom[0].lod[0].mat[0].vnum))
+        #print('vmesh2 vnum = {}'.format(vmesh2.geom[0].lod[0].mat[0].vnum))
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].vnum != vmesh2.geom[0].lod[0].mat[0].vnum) # diff
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].u4 == vmesh2.geom[0].lod[0].mat[0].u4)
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].u5 == vmesh2.geom[0].lod[0].mat[0].u5)
@@ -237,8 +238,11 @@ class TestStdMeshReading(unittest.TestCase):
         print(counter)
         raise
     
-    def test_can_read_failed_mesh(self):
+class TestStdMeshReading_Special(unittest.TestCase):
+
+    def test_can_read_not_skinned_mesh_version_4(self):
         vmesh = mesher.LoadBF2Mesh(os.path.join(bf2.Mod().root, 'objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh'))
+        #raise
 
 
 

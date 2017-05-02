@@ -55,48 +55,90 @@ class TestStdMeshReading(unittest.TestCase):
         self.path_object_merged = os.path.join(bf2.Mod().root, test_object_merged)
 
     def test_can_read_header(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        self.assertTrue(vmesh.head.u1 is 0)
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_head(meshfile)
+            
+        self.assertTrue(vmesh.head.u1 == 0)
         self.assertTrue(vmesh.head.version in [10, 6, 11])
-        self.assertTrue(vmesh.head.u3 is 0)
-        self.assertTrue(vmesh.head.u4 is 0)
-        self.assertTrue(vmesh.head.u5 is 0)
+        self.assertTrue(vmesh.head.u3 == 0)
+        self.assertTrue(vmesh.head.u4 == 0)
+        self.assertTrue(vmesh.head.u5 == 0)
+        self.assertTrue(vmesh._tail == 20)
+
+    def test_can_read_u1_bfp4f_version(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_u1_bfp4f_version(meshfile)
+            
+        self.assertTrue(vmesh.u1 == 0)
+        self.assertTrue(vmesh._tail == 21)
+
+    def test_can_read_geomnum_mesh_std(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_geomnum(meshfile)
+            
+        self.assertTrue(vmesh.geomnum == 1)
+        self.assertTrue(vmesh._tail == 25)
     
-    def test_can_read_u1(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        self.assertTrue(vmesh.head.u1 is 0)
+    def test_can_read_geomnum_mesh_dest(self):
+        with open(self.path_object_dest, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_geomnum(meshfile)
+            
+        self.assertTrue(vmesh.geomnum == 2)
+        self.assertTrue(vmesh._tail == 25)
 
-    def test_can_read_geomnum(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        print(vmesh.geomnum)
-        self.assertTrue(vmesh.geomnum is 1)
+    def test_can_read_geom_table_mesh_std(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_geoms(meshfile)
 
-        vmesh = mesher.LoadBF2Mesh(self.path_object_dest)
-        self.assertTrue(vmesh.geomnum is 2)
+        self.assertTrue(len(vmesh.geoms) == 1)
+        self.assertTrue(vmesh.geoms[0].lodnum == 1)
+        self.assertTrue(vmesh._tail == 29)
+    
+    def test_can_read_geom_table_mesh_two_lods(self):
+        with open(self.path_object_two_lods, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_geoms(meshfile)
 
-    def test_can_read_geom_table(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        self.assertTrue(vmesh.geom[0].lodnum is 1)
+        self.assertTrue(len(vmesh.geoms) == 1)
+        self.assertTrue(vmesh.geoms[0].lodnum == 2)
+        self.assertTrue(vmesh._tail == 29)
+    
+    def test_can_read_geom_table_mesh_dest(self):
+        with open(self.path_object_dest, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_geoms(meshfile)
 
-        vmesh = mesher.LoadBF2Mesh(self.path_object_two_lods)
-        self.assertTrue(vmesh.geom[0].lodnum is 2)
+        self.assertTrue(len(vmesh.geoms) == 2)
+        self.assertTrue(vmesh.geoms[0].lodnum == 2)
+        self.assertTrue(vmesh.geoms[1].lodnum == 2)
+        self.assertTrue(vmesh._tail == 33)
 
-        vmesh = mesher.LoadBF2Mesh(self.path_object_dest)
-        self.assertTrue(len(vmesh.geom) is 2)
-        self.assertTrue(vmesh.geom[0].lodnum is 2)
-        self.assertTrue(vmesh.geom[1].lodnum is 2)
+    def test_can_read_vertattribnum_mesh_std(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_vertattribnum(meshfile)
 
-    def test_can_read_vertattribnum_CUSTOM_PR_DEST(self):
-        try:
-            test_object_custom = os.path.join(*['objects', 'staticobjects', 'pr', 'destroyable_objects', 'doors', 'wooddoor1m_03', 'meshes', 'wooddoor1m_03.staticmesh'])
-            self.path_object_custom = os.path.join(bf2.Mod().root, test_object_custom)
-            vmesh = mesher.LoadBF2Mesh(self.path_object_custom)
-            self.assertTrue(vmesh.vertattribnum is 10)
-        except FileNotFoundError:
-            self.skipTest('cannot find PR "wooddoor1m_03" mesh')
+        self.assertTrue(vmesh.vertattribnum == 9)
+        self.assertTrue(vmesh._tail == 33)
 
+    def test_can_read_vertattribnum_mesh_dest(self):
+        with open(self.path_object_dest, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_vertattribnum(meshfile)
+
+        self.assertTrue(vmesh.vertattribnum == 9)
+        self.assertTrue(vmesh._tail == 37)
+    
     def test_can_read_vertex_attribute_table(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_vertext_attribute_table(meshfile)
+
         self.assertTrue(vmesh.vertattrib[0] == (0, 0, 2, 0))
         self.assertTrue(vmesh.vertattrib[1] == (0, 12, 2, 3))
         self.assertTrue(vmesh.vertattrib[2] == (0, 24, 4, 2))
@@ -106,53 +148,92 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.vertattrib[6] == (0, 52, 1, 773))
         self.assertTrue(vmesh.vertattrib[7] == (0, 60, 2, 6))
         self.assertTrue(vmesh.vertattrib[8] == (255, 0, 17, 0))
+        self.assertTrue(vmesh._tail == 105)
 
     def test_can_read_vertformat(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_vertformat(meshfile)
+
         self.assertTrue(vmesh.vertformat == 4)
+        self.assertTrue(vmesh._tail == 109)
 
     def test_can_read_vertstride(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_vertstride(meshfile)
+
         self.assertTrue(vmesh.vertstride == 72)
+        self.assertTrue(vmesh._tail == 113)
 
     def test_can_read_vertnum(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_vertnum(meshfile)
+
         self.assertTrue(vmesh.vertnum == 25)
+        self.assertTrue(vmesh._tail == 117)
 
     def test_can_read_vertex_block(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_vertex_block(meshfile)
+
         self.assertTrue(len(vmesh.vertices) == 450)
+        self.assertTrue(vmesh._tail == 1917)
 
     def test_can_read_indexnum(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        self.assertTrue(vmesh.indexnum is 36)
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_indexnum(meshfile)
+
+        self.assertTrue(vmesh.indexnum == 36)
+        self.assertTrue(vmesh._tail == 1921)
 
     def test_can_read_index_block(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_index_block(meshfile)
+
         self.assertTrue(len(vmesh.index) == 36)
+        self.assertTrue(vmesh._tail == 1993)
 
     def test_can_read_u2(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh.isSkinnedMesh = False
+            vmesh._read_u2(meshfile)
+
         self.assertTrue(vmesh.u2 is 8)
+        self.assertTrue(vmesh._tail == 1997)
 
-    def test_can_read_nodes_bounds(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        self.assertTrue(vmesh.geom[0].lod[0].min == (-0.5, 0, -0.5))
-        self.assertTrue(vmesh.geom[0].lod[0].max == (0.5, 1.0, 0.5))
+    def test_can_read_node_bounds(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_nodes(meshfile)
+
+        self.assertTrue(vmesh.geoms[0].lod[0].min == (-0.5, 0, -0.5))
+        self.assertTrue(vmesh.geoms[0].lod[0].max == (0.5, 1.0, 0.5))
         #self.assertTrue(vmesh.geom[0].lod[0].pivot == (0.5, 1.0, 0.5)) # some old bundleds?
+        self.assertTrue(vmesh._tail == 2089)
 
-    def test_can_read_nodes_nodenum(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        self.assertTrue(vmesh.geom[0].lod[0].nodenum == 1)
+    def test_can_read_node_nodenum(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_nodes(meshfile)
 
-    @unittest.skip('no idea how to verify, lenght seems to be correct')
-    def test_can_read_nodes_matrices(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_dest)
-        #for geomnum in range(vmesh.geomnum):
-        #    for lodnum in range(vmesh.geom[geomnum].lodnum):
-        #        print(vmesh.geom[geomnum].lod[lodnum].node)
-        #raise
+        self.assertTrue(vmesh.geoms[0].lod[0].nodenum == 1)
+        self.assertTrue(vmesh._tail == 2089)
 
+    @unittest.skip('reworking')
+    def test_can_read_node_matrix(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh(meshfile)
+            vmesh._read_node_matrix(meshfile)
+
+        self.assertTrue(vmesh.geoms[0].lod[0].nodenum == 1)
+
+    @unittest.skip('reworking')
     def test_can_read_geom_lod(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         self.assertTrue(vmesh.geom[0].lod[0].matnum == 1)
@@ -171,10 +252,11 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmin == (-0.5, 0.0, -0.5))
         self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmax == (0.5, 1.0, 0.5))
         self.assertTrue(vmesh.geom[0].lod[0].polycount == 12)
-    
+    @unittest.skip('reworking')
     def test_can_read_merged_mesh(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_merged)
 
+    @unittest.skip('reworking')
     def test_meshes_diff(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         vmesh2 = mesher.LoadBF2Mesh(self.path_object_merged)
@@ -241,11 +323,12 @@ class TestStdMeshReading(unittest.TestCase):
     
 class TestStdMeshReading_Special(unittest.TestCase):
 
+    @unittest.skip('reworking')
     def test_can_read_not_skinned_mesh_version_4(self):
         vmesh = mesher.LoadBF2Mesh(os.path.join(bf2.Mod().root, 'objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh'))
         #raise
 
-
+@unittest.skip('reworking')
 class TestStdMeshWriting(unittest.TestCase):
 
     def setUp(self):
@@ -295,7 +378,7 @@ class TestStdMeshWriting(unittest.TestCase):
 
         self.assertTrue(geomnum is 1)
 
-    def test_can_write_geoms(self)
+    def test_can_write_geoms(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         vmesh._write_geoms(self.path_object_clone)
 

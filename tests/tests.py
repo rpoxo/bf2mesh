@@ -56,7 +56,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_header(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_head(meshfile)
             
         self.assertTrue(vmesh.head.u1 == 0)
@@ -68,7 +68,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_u1_bfp4f_version(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_u1_bfp4f_version(meshfile)
             
         self.assertTrue(vmesh.u1 == 0)
@@ -76,7 +76,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_geomnum_mesh_std(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_geomnum(meshfile)
             
         self.assertTrue(vmesh.geomnum == 1)
@@ -84,7 +84,7 @@ class TestStdMeshReading(unittest.TestCase):
     
     def test_can_read_geomnum_mesh_dest(self):
         with open(self.path_object_dest, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_geomnum(meshfile)
             
         self.assertTrue(vmesh.geomnum == 2)
@@ -92,7 +92,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_geom_table_mesh_std(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_geoms(meshfile)
 
         self.assertTrue(len(vmesh.geoms) == 1)
@@ -101,7 +101,7 @@ class TestStdMeshReading(unittest.TestCase):
     
     def test_can_read_geom_table_mesh_two_lods(self):
         with open(self.path_object_two_lods, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_geoms(meshfile)
 
         self.assertTrue(len(vmesh.geoms) == 1)
@@ -110,7 +110,7 @@ class TestStdMeshReading(unittest.TestCase):
     
     def test_can_read_geom_table_mesh_dest(self):
         with open(self.path_object_dest, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_geoms(meshfile)
 
         self.assertTrue(len(vmesh.geoms) == 2)
@@ -120,7 +120,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_vertattribnum_mesh_std(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_vertattribnum(meshfile)
 
         self.assertTrue(vmesh.vertattribnum == 9)
@@ -128,7 +128,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_vertattribnum_mesh_dest(self):
         with open(self.path_object_dest, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_vertattribnum(meshfile)
 
         self.assertTrue(vmesh.vertattribnum == 9)
@@ -136,7 +136,7 @@ class TestStdMeshReading(unittest.TestCase):
     
     def test_can_read_vertex_attribute_table(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_vertext_attribute_table(meshfile)
 
         self.assertTrue(vmesh.vertattrib[0] == (0, 0, 2, 0))
@@ -152,7 +152,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_vertformat(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_vertformat(meshfile)
 
         self.assertTrue(vmesh.vertformat == 4)
@@ -160,7 +160,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_vertstride(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_vertstride(meshfile)
 
         self.assertTrue(vmesh.vertstride == 72)
@@ -168,7 +168,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_vertnum(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_vertnum(meshfile)
 
         self.assertTrue(vmesh.vertnum == 25)
@@ -176,7 +176,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_vertex_block(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_vertex_block(meshfile)
 
         self.assertTrue(len(vmesh.vertices) == 450)
@@ -184,7 +184,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_indexnum(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_indexnum(meshfile)
 
         self.assertTrue(vmesh.indexnum == 36)
@@ -192,7 +192,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_index_block(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_index_block(meshfile)
 
         self.assertTrue(len(vmesh.index) == 36)
@@ -200,63 +200,50 @@ class TestStdMeshReading(unittest.TestCase):
 
     def test_can_read_u2(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
-            vmesh.isSkinnedMesh = False
+            vmesh = mesher.StdMesh()
             vmesh._read_u2(meshfile)
 
         self.assertTrue(vmesh.u2 is 8)
         self.assertTrue(vmesh._tail == 1997)
 
-    def test_can_read_node_bounds(self):
+    def test_can_read_nodes(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
+            vmesh = mesher.StdMesh()
             vmesh._read_nodes(meshfile)
 
         self.assertTrue(vmesh.geoms[0].lod[0].min == (-0.5, 0, -0.5))
         self.assertTrue(vmesh.geoms[0].lod[0].max == (0.5, 1.0, 0.5))
-        #self.assertTrue(vmesh.geom[0].lod[0].pivot == (0.5, 1.0, 0.5)) # some old bundleds?
-        self.assertTrue(vmesh._tail == 2089)
-
-    def test_can_read_node_nodenum(self):
-        with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
-            vmesh._read_nodes(meshfile)
-
+        #self.assertTrue(vmesh.geoms[0].lod[0].pivot == (0.5, 1.0, 0.5)) # some old bundleds?
         self.assertTrue(vmesh.geoms[0].lod[0].nodenum == 1)
         self.assertTrue(vmesh._tail == 2089)
 
-    @unittest.skip('reworking')
-    def test_can_read_node_matrix(self):
+    def test_can_read_materials(self):
         with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh(meshfile)
-            vmesh._read_node_matrix(meshfile)
+            vmesh = mesher.StdMesh()
+            vmesh._read_materials(meshfile)
 
-        self.assertTrue(vmesh.geoms[0].lod[0].nodenum == 1)
+        self.assertTrue(vmesh.geoms[0].lod[0].matnum == 1)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].alphamode == 0)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].fxfile == b'StaticMesh.fx')
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].technique == b'Base')
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].mapnum == 2)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == b'objects/staticobjects/test/evil_box1/textures/evil_box1_c.dds')
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[1] == b'Common\Textures\SpecularLUT_pow36.dds')
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vstart == 0)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].istart == 0)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].inum == 36)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vnum == 25)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u4 == 8064)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u5 == 65535)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmin == (-0.5, 0.0, -0.5))
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax == (0.5, 1.0, 0.5))
+        self.assertTrue(vmesh.geoms[0].lod[0].polycount == 12)
+        self.assertTrue(vmesh._tail == 2280)
 
-    @unittest.skip('reworking')
-    def test_can_read_geom_lod(self):
+    def test_can_load_bf2_mesh(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        self.assertTrue(vmesh.geom[0].lod[0].matnum == 1)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].alphamode == 0)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].fxfile == b'StaticMesh.fx')
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].technique == b'Base')
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].mapnum == 2)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].map[0] == b'objects/staticobjects/test/evil_box1/textures/evil_box1_c.dds')
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].map[1] == b'Common\Textures\SpecularLUT_pow36.dds')
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].vstart == 0)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].istart == 0)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].inum == 36)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].vnum == 25)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].u4 == 8064)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].u5 == 65535)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmin == (-0.5, 0.0, -0.5))
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmax == (0.5, 1.0, 0.5))
-        self.assertTrue(vmesh.geom[0].lod[0].polycount == 12)
-    @unittest.skip('reworking')
-    def test_can_read_merged_mesh(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_merged)
+        self.assertTrue(isinstance(vmesh, mesher.StdMesh))
 
-    @unittest.skip('reworking')
     def test_meshes_diff(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         vmesh2 = mesher.LoadBF2Mesh(self.path_object_merged)
@@ -264,15 +251,15 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.head == vmesh2.head)
         self.assertTrue(vmesh.u1 == vmesh2.u1)
         self.assertTrue(vmesh.geomnum == vmesh2.geomnum)
-        self.assertTrue(len(vmesh.geom) == len(vmesh2.geom) == 1)
-        self.assertTrue(vmesh.geom[0].lodnum == vmesh2.geom[0].lodnum)
-        self.assertTrue(len(vmesh.geom[0].lod) == len(vmesh2.geom[0].lod) == 1)
-        self.assertTrue(vmesh.geom[0].lod[0].min == vmesh2.geom[0].lod[0].min)
-        self.assertTrue(vmesh.geom[0].lod[0].max != vmesh2.geom[0].lod[0].max) # diff
-        self.assertTrue(vmesh2.geom[0].lod[0].max == (1.5, 1.0, 0.5))
-        self.assertTrue(vmesh.geom[0].lod[0].nodenum == vmesh2.geom[0].lod[0].nodenum)
-        self.assertTrue(vmesh.geom[0].lod[0].node == vmesh2.geom[0].lod[0].node) # not geometry?
-        self.assertTrue(vmesh.geom[0].lod[0].polycount != vmesh2.geom[0].lod[0].polycount != 0) # diff
+        self.assertTrue(len(vmesh.geoms) == len(vmesh2.geoms) == 1)
+        self.assertTrue(vmesh.geoms[0].lodnum == vmesh2.geoms[0].lodnum)
+        self.assertTrue(len(vmesh.geoms[0].lod) == len(vmesh2.geoms[0].lod) == 1)
+        self.assertTrue(vmesh.geoms[0].lod[0].min == vmesh2.geoms[0].lod[0].min)
+        self.assertTrue(vmesh.geoms[0].lod[0].max != vmesh2.geoms[0].lod[0].max) # diff
+        self.assertTrue(vmesh2.geoms[0].lod[0].max == (1.5, 1.0, 0.5))
+        self.assertTrue(vmesh.geoms[0].lod[0].nodenum == vmesh2.geoms[0].lod[0].nodenum)
+        self.assertTrue(vmesh.geoms[0].lod[0].node == vmesh2.geoms[0].lod[0].node) # not geometry?
+        self.assertTrue(vmesh.geoms[0].lod[0].polycount != vmesh2.geoms[0].lod[0].polycount != 0) # diff
         self.assertTrue(vmesh.vertattribnum == vmesh2.vertattribnum)
         self.assertTrue(vmesh.vertattrib == vmesh2.vertattrib)
         self.assertTrue(vmesh.vertformat == vmesh2.vertformat)
@@ -284,31 +271,31 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.indexnum != vmesh2.indexnum) # diff
         self.assertTrue(vmesh.index != vmesh2.index) # diff reversed order?
         self.assertTrue(vmesh.u2 == vmesh2.u2)
-        self.assertTrue(vmesh.geom[0].lod[0].matnum == vmesh2.geom[0].lod[0].matnum == 1)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].alphamode == vmesh2.geom[0].lod[0].mat[0].alphamode)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].fxfile == vmesh2.geom[0].lod[0].mat[0].fxfile)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].technique == vmesh2.geom[0].lod[0].mat[0].technique)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].mapnum == vmesh2.geom[0].lod[0].mat[0].mapnum)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].map[0] == vmesh2.geom[0].lod[0].mat[0].map[0])
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].map[1] == vmesh2.geom[0].lod[0].mat[0].map[1])
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].vstart == vmesh2.geom[0].lod[0].mat[0].vstart)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].istart == vmesh2.geom[0].lod[0].mat[0].istart)
-        #print('vmesh inum = {}'.format(vmesh.geom[0].lod[0].mat[0].inum))
-        #print('vmesh2 inum = {}'.format(vmesh2.geom[0].lod[0].mat[0].inum))
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].inum != vmesh2.geom[0].lod[0].mat[0].inum) # diff
-        #print('vmesh vnum = {}'.format(vmesh.geom[0].lod[0].mat[0].vnum))
-        #print('vmesh2 vnum = {}'.format(vmesh2.geom[0].lod[0].mat[0].vnum))
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].vnum != vmesh2.geom[0].lod[0].mat[0].vnum) # diff
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].u4 == vmesh2.geom[0].lod[0].mat[0].u4)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].u5 == vmesh2.geom[0].lod[0].mat[0].u5)
-        #print('vmesh nmax = {}'.format(vmesh.geom[0].lod[0].mat[0].nmax))
-        #print('vmesh2 nmax = {}'.format(vmesh2.geom[0].lod[0].mat[0].nmax))
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmin == vmesh2.geom[0].lod[0].mat[0].nmin)
-        self.assertTrue(vmesh.geom[0].lod[0].mat[0].nmax != vmesh2.geom[0].lod[0].mat[0].nmax) # diff
+        self.assertTrue(vmesh.geoms[0].lod[0].matnum == vmesh2.geoms[0].lod[0].matnum == 1)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].alphamode == vmesh2.geoms[0].lod[0].mat[0].alphamode)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].fxfile == vmesh2.geoms[0].lod[0].mat[0].fxfile)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].technique == vmesh2.geoms[0].lod[0].mat[0].technique)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].mapnum == vmesh2.geoms[0].lod[0].mat[0].mapnum)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == vmesh2.geoms[0].lod[0].mat[0].map[0])
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[1] == vmesh2.geoms[0].lod[0].mat[0].map[1])
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vstart == vmesh2.geoms[0].lod[0].mat[0].vstart)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].istart == vmesh2.geoms[0].lod[0].mat[0].istart)
+        #print('vmesh inum = {}'.format(vmesh.geoms[0].lod[0].mat[0].inum))
+        #print('vmesh2 inum = {}'.format(vmesh2.geoms[0].lod[0].mat[0].inum))
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].inum != vmesh2.geoms[0].lod[0].mat[0].inum) # diff
+        #print('vmesh vnum = {}'.format(vmesh.geoms[0].lod[0].mat[0].vnum))
+        #print('vmesh2 vnum = {}'.format(vmesh2.geoms[0].lod[0].mat[0].vnum))
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vnum != vmesh2.geoms[0].lod[0].mat[0].vnum) # diff
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u4 == vmesh2.geoms[0].lod[0].mat[0].u4)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u5 == vmesh2.geoms[0].lod[0].mat[0].u5)
+        #print('vmesh nmax = {}'.format(vmesh.geoms[0].lod[0].mat[0].nmax))
+        #print('vmesh2 nmax = {}'.format(vmesh2.geoms[0].lod[0].mat[0].nmax))
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmin == vmesh2.geoms[0].lod[0].mat[0].nmin)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax != vmesh2.geoms[0].lod[0].mat[0].nmax) # diff
         #raise
 
-    @unittest.skip('i\o intensive')
-    def test_can_read_PR_MESHES_1480(self):
+    #@unittest.skip('i\o intensive')
+    def test_can_read_PR_MESHES_REPO_1490(self):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects', 'staticobjects')):
             for filename in filenames:
@@ -321,12 +308,16 @@ class TestStdMeshReading(unittest.TestCase):
         print(counter)
         #raise
     
-class TestStdMeshReading_Special(unittest.TestCase):
+class TestStdMeshReading_Specials(unittest.TestCase):
 
-    @unittest.skip('reworking')
+    # objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh
+    # it has version 4 and inum and vnum in material
     def test_can_read_not_skinned_mesh_version_4(self):
-        vmesh = mesher.LoadBF2Mesh(os.path.join(bf2.Mod().root, 'objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh'))
-        #raise
+        path_mesh = os.path.join(bf2.Mod().root, 'objects', 'staticobjects', 'Bridges', 'EoD_Bridge_Big', 'Meshes', 'eod_bridge_big.staticmesh')
+        #vmesh = mesher.LoadBF2Mesh(path_mesh)
+        with open(path_mesh, 'rb') as meshfile:
+            vmesh = mesher.StdMesh()
+            vmesh._read_materials(meshfile)
 
 @unittest.skip('reworking')
 class TestStdMeshWriting(unittest.TestCase):

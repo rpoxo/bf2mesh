@@ -2,25 +2,29 @@ import os
 import re
 import sys
 
+
 class Mod(object):
-    
+
     def __init__(self):
         self.root = self.find_mod_root()
-    
+
     def find_mod_root(self):
         working_dir_parts = os.getcwd().split(os.sep)
-        return os.sep.join(working_dir_parts[:working_dir_parts.index('mods')+2])
-    
+        return os.sep.join(
+            working_dir_parts[
+                :working_dir_parts.index('mods') + 2])
+
     def get_object_path(self, name):
-        for dirname, dirnames, filenames in os.walk(os.path.join(self.root, 'objects')):
+        for dirname, dirnames, filenames in os.walk(
+                os.path.join(self.root, 'objects')):
             for filename in filenames:
                 if filename.split('.')[-1] in ['con', 'tweak']:
-                    filepath = os.path.join(self.root, 'objects', dirname, filename)
+                    filepath = os.path.join(
+                        self.root, 'objects', dirname, filename)
                     root = TemplateParser(filepath).get_root()
                     if root is not None and root[1] == name:
                         return filepath
 
-                    
 
 class TemplateParser:
     # regex from mats
@@ -37,7 +41,7 @@ class TemplateParser:
             'RotationalBundle',
             'Engine'
             'SimpleObject'
-            ]
+        ]
 
     def get_root_folder(self, filepath):
         path, filename = os.path.split(filepath)
@@ -54,8 +58,7 @@ class TemplateParser:
                     type = match.group().split(' ')[1]
                     name = match.group().split(' ')[2]
                     return (type, name)
-    
-    
+
     def get_child_list(self):
         child_list = []
         object_types_string = '|'.join(self.object_types_list)
@@ -103,16 +106,16 @@ class TemplateParser:
 class Materials:
     # MaterialManager.createCell 1 18
     # MaterialManager.damageMod 1
-    
+
     class Material:
-        
+
         def __init__(self, id):
             self.id = id
             self.name = None
             self.damage_mod = {}
-        
+
         def __eq__(self, other):
-            return self.id==other.id
+            return self.id == other.id
 
         def __hash__(self):
             return hash('id', self.id)
@@ -123,16 +126,20 @@ class Materials:
     def parse_settings(self, filepath):
         cells = {}
         with open(filepath) as fo:
-            matches = re.finditer(r'MaterialManager.createCell (\d+) (\d+)\nMaterialManager.damageMod ((\d+\.\d+)|(\d+))', fo.read())
+            matches = re.finditer(
+                r'MaterialManager.createCell (\d+) (\d+)\nMaterialManager.damageMod ((\d+\.\d+)|(\d+))',
+                fo.read())
             for match in matches:
                 #pattern_cell = r'MaterialManager.createCell (\d+) (\d+)'
                 #match_cell = re.match(pattern_cell, match.group())
-                mat_id_attacker, mat_id_target = int(match.group(1)), int(match.group(2))
+                mat_id_attacker, mat_id_target = int(
+                    match.group(1)), int(match.group(2))
                 attacker = self.Material(mat_id_attacker)
                 if attacker.id not in cells:
                     cells[attacker.id] = attacker
                 if mat_id_target not in cells[attacker.id].damage_mod:
-                    cells[attacker.id].damage_mod[mat_id_target] = float(match.group(3))
+                    cells[attacker.id].damage_mod[
+                        mat_id_target] = float(match.group(3))
         return cells
 
 
@@ -149,7 +156,8 @@ class GameObject:
         parser = TemplateParser(path_confile)
         self.type, self.name = parser.get_root()
         self.childs_created = parser.get_child_list()
-        #print(self.childs_created)
+        # print(self.childs_created)
+
 
 class Jet:
 
@@ -157,19 +165,16 @@ class Jet:
         self.name = None
         self.type = None
         self.wings = []
-    
+
     def loadFromCon(self, path_confile):
         parser = TemplateParser(path_confile)
         self.type, self.name = parser.get_root()
         self.wings = parser.get_wings()
 
+
 class Wing():
-    
+
     def __init__(self, name):
         self.name = name
         self.lift_wing = 0
         self.lift_flap = 0
-    
-
-
-

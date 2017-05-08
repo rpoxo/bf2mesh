@@ -294,7 +294,7 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax != vmesh2.geoms[0].lod[0].mat[0].nmax) # diff
         #raise
 
-    #@unittest.skip('i\o intensive')
+    @unittest.skip('i\o intensive')
     def test_can_read_PR_MESHES_REPO_1490(self):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects', 'staticobjects')):
@@ -318,16 +318,27 @@ class TestStdMeshReading_Specials(unittest.TestCase):
         with open(path_mesh, 'rb') as meshfile:
             vmesh = mesher.StdMesh()
             vmesh._read_materials(meshfile)
+        
 
-@unittest.skip('reworking')
 class TestStdMeshWriting(unittest.TestCase):
 
     def setUp(self):
         # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
         test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
+        test_object_alt_uvw = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box2', 'meshes', 'evil_box2.staticmesh'])
+        test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box3', 'meshes', 'evil_box3.staticmesh'])
+        test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box4', 'meshes', 'evil_box4.staticmesh'])
+        test_object_merged = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box5', 'meshes', 'evil_box5.staticmesh'])
+        
         test_object_clone = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1_clone.staticmesh'])
         
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
+        self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
+        self.path_object_alt_uvw = os.path.join(bf2.Mod().root, test_object_alt_uvw)
+        self.path_object_two_lods = os.path.join(bf2.Mod().root, test_object_two_lods)
+        self.path_object_dest = os.path.join(bf2.Mod().root, test_object_dest)
+        self.path_object_merged = os.path.join(bf2.Mod().root, test_object_merged)
+
         self.path_object_clone = os.path.join(bf2.Mod().root, test_object_clone)
 
     def tearDown(self):
@@ -340,45 +351,222 @@ class TestStdMeshWriting(unittest.TestCase):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         vmesh._write_header(self.path_object_clone)
         
-        with open(self.path_object_clone, 'rb') as clonemesh:
-            cloned_head = mesher.bf2head(clonemesh)
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_head(meshfile)
 
-        self.assertTrue(cloned_head.u1 is 0)
-        self.assertTrue(cloned_head.version in [10, 6, 11])
-        self.assertTrue(cloned_head.u3 is 0)
-        self.assertTrue(cloned_head.u4 is 0)
-        self.assertTrue(cloned_head.u5 is 0)
+        self.assertTrue(vmesh2.head.u1 == vmesh.head.u1)
+        self.assertTrue(vmesh2.head.version == vmesh.head.version)
+        self.assertTrue(vmesh2.head.u3 is vmesh.head.u3)
+        self.assertTrue(vmesh2.head.u4 is vmesh.head.u4)
+        self.assertTrue(vmesh2.head.u5 is vmesh.head.u5)
 
     def test_can_write_u1_bfp4f_version(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         vmesh._write_u1_bfp4f_version(self.path_object_clone)
 
-        with open(self.path_object_clone, 'rb') as clonemesh:
-            offset = mesher._write_header(filepath)
-            u1 = mesher._read_u1_bfp4f(clonemesh, offset)
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_u1_bfp4f_version(meshfile)
 
-        self.assertTrue(u1 is 0)
+        self.assertTrue(vmesh2.u1 == vmesh.u1)
 
-    def test_can_write_geomnum(self):
+    def test_can_write_geomnum_mesh_std(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         vmesh._write_geomnum(self.path_object_clone)
 
-        with open(self.path_object_clone, 'rb') as clonemesh:
-            offset = mesher._write_u1_bfp4f_version(filepath)
-            geomnum = mesher._read_geomnum(clonemesh, offset)
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_geomnum(meshfile)
 
-        self.assertTrue(geomnum is 1)
+        self.assertTrue(vmesh2.geomnum == vmesh.geomnum)
 
-    def test_can_write_geoms(self):
+    def test_can_write_geomnum_mesh_dest(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_dest)
+        vmesh._write_geomnum(self.path_object_clone)
+    
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_geomnum(meshfile)
+            
+        self.assertTrue(vmesh2.geomnum == vmesh.geomnum)
+
+    def test_can_write_geom_table_mesh_std(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_geoms(self.path_object_clone)
+        vmesh._write_geom_table(self.path_object_clone)
 
-        with open(self.path_object_clone, 'rb') as clonemesh:
-            offset = mesher._write_geomnum(filepath)
-            geomnum = mesher._read_geomnum(clonemesh, offset)
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_geoms(meshfile)
 
-        self.assertTrue(geomnum is 1)
+        self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
+        self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)
 
+    def test_can_write_geom_table_mesh_two_lods(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_two_lods)
+        vmesh._write_geom_table(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_geoms(meshfile)
+
+        self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
+        self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)
+
+    def test_can_write_geom_table_mesh_dest(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_dest)
+        vmesh._write_geom_table(self.path_object_clone)
+        
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_geoms(meshfile)
+
+        self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
+        self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)
+        self.assertTrue(vmesh2.geoms[1].lodnum == vmesh.geoms[1].lodnum)
+
+    def test_can_write_vertattribnum_mesh_std(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_vertattribnum(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_vertattribnum(meshfile)
+
+        self.assertTrue(vmesh2.vertattribnum == vmesh.vertattribnum)
+
+    def test_can_write_vertattribnum_mesh_dest(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_dest)
+        vmesh._write_vertattribnum(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_vertattribnum(meshfile)
+
+        self.assertTrue(vmesh2.vertattribnum == vmesh.vertattribnum)
+
+    def test_can_write_vertex_attribute_table(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_vertex_attribute_table(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_vertext_attribute_table(meshfile)
+
+        self.assertTrue(vmesh2.vertattrib[0] == vmesh.vertattrib[0])
+        self.assertTrue(vmesh2.vertattrib[1] == vmesh.vertattrib[1])
+        self.assertTrue(vmesh2.vertattrib[2] == vmesh.vertattrib[2])
+        self.assertTrue(vmesh2.vertattrib[3] == vmesh.vertattrib[3])
+        self.assertTrue(vmesh2.vertattrib[4] == vmesh.vertattrib[4])
+        self.assertTrue(vmesh2.vertattrib[5] == vmesh.vertattrib[5])
+        self.assertTrue(vmesh2.vertattrib[6] == vmesh.vertattrib[6])
+        self.assertTrue(vmesh2.vertattrib[7] == vmesh.vertattrib[7])
+        self.assertTrue(vmesh2.vertattrib[8] == vmesh.vertattrib[8])
+
+    def test_can_write_vertformat(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_vertformat(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_vertformat(meshfile)
+
+        self.assertTrue(vmesh2.vertformat == vmesh.vertformat)
+
+    def test_can_write_vertstride(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_vertstride(self.path_object_clone)
+    
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_vertstride(meshfile)
+
+        self.assertTrue(vmesh2.vertstride == vmesh.vertstride)
+
+    def test_can_write_vertnum(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_vertnum(self.path_object_clone)
+    
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_vertnum(meshfile)
+
+        self.assertTrue(vmesh2.vertnum == vmesh.vertnum)
+
+    def test_can_write_vertex_block(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_vertex_block(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_vertex_block(meshfile)
+
+        self.assertTrue(len(vmesh2.vertices) == len(vmesh2.vertices))
+
+    def test_can_write_indexnum(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_indexnum(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_indexnum(meshfile)
+
+        self.assertTrue(vmesh2.indexnum == vmesh.indexnum)
+
+    def test_can_write_index_block(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_index_block(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_index_block(meshfile)
+
+        self.assertTrue(len(vmesh2.index) == len(vmesh2.index))
+
+    def test_can_write_u2(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_u2(self.path_object_clone)
+        
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_u2(meshfile)
+
+        self.assertTrue(vmesh2.u2 == vmesh.u2)
+
+    def test_can_write_nodes(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_nodes(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_nodes(meshfile)
+
+        self.assertTrue(vmesh2.geoms[0].lod[0].min == vmesh.geoms[0].lod[0].min)
+        self.assertTrue(vmesh2.geoms[0].lod[0].max == vmesh.geoms[0].lod[0].max)
+        #self.assertTrue(vmesh.geoms[0].lod[0].pivot == (0.5, 1.0, 0.5)) # some old bundleds?
+        self.assertTrue(vmesh2.geoms[0].lod[0].nodenum == vmesh.geoms[0].lod[0].nodenum)
+        self.assertTrue(vmesh2.geoms[0].lod[0].node == vmesh.geoms[0].lod[0].node)
+
+    def test_can_write_materials(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_materials(self.path_object_clone)
+
+        with open(self.path_object_clone, 'rb') as meshfile:
+            vmesh2 = mesher.StdMesh()
+            vmesh2._read_materials(meshfile)
+
+        self.assertTrue(vmesh2.geoms[0].lod[0].matnum == vmesh2.geoms[0].lod[0].matnum)
+        self.assertTrue(vmesh2.geoms[0].lod[0].mat == vmesh2.geoms[0].lod[0].mat)
+        self.assertTrue(vmesh2.geoms[0].lod[0].polycount == vmesh2.geoms[0].lod[0].polycount)
+
+    def test_can_load_bf2_mesh_cloned(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh.write_file_data(self.path_object_clone)
+        
+        vmesh2 = mesher.LoadBF2Mesh(self.path_object_clone)
+
+        self.assertTrue(vmesh2._tail == vmesh._tail)
+        
 
 
 

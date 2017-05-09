@@ -345,6 +345,9 @@ class StdMesh:
     # WRITING FILEDATA
     #-----------------------------
     def _write_header(self, filepath):
+        directory = os.path.dirname(filepath)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
         with open(filepath, 'wb+') as fo:
             dataset = (self.head.u1,
                        self.head.version,

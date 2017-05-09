@@ -610,11 +610,15 @@ class TestStdMeshMerging(unittest.TestCase):
         #    print('Nothing to clean up')
         pass
     
-    #def test_can_move_mesh(self):
-    #    vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+    def test_can_move_mesh(self):
+        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         
-        
-        
+        for vertice in vmesh.vertices_attributes:
+            new_position_x = vertice['position'][0] + 1.0
+            new_position = (new_position_x, vertice['position'][1], vertice['position'][2])
+            vertice['position'] = new_position
+        vmesh._write_vertices_attributes()
+        vmesh.write_file_data(self.path_object_generated)
         
     
     @unittest.skip('theory')

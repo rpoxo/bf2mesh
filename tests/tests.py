@@ -8,6 +8,10 @@ import struct
 import bf2
 import mesher
 
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
 
 class TestMod(unittest.TestCase):
     
@@ -47,12 +51,14 @@ class TestStdMeshReading(unittest.TestCase):
         test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box3', 'meshes', 'evil_box3.staticmesh'])
         test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box4', 'meshes', 'evil_box4.staticmesh'])
         test_object_merged = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box5', 'meshes', 'evil_box5.staticmesh'])
+        test_object_2merge = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box6', 'meshes', 'evil_box6.staticmesh'])
 
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
         self.path_object_alt_uvw = os.path.join(bf2.Mod().root, test_object_alt_uvw)
         self.path_object_two_lods = os.path.join(bf2.Mod().root, test_object_two_lods)
         self.path_object_dest = os.path.join(bf2.Mod().root, test_object_dest)
         self.path_object_merged = os.path.join(bf2.Mod().root, test_object_merged)
+        self.path_object_2merge = os.path.join(bf2.Mod().root, test_object_2merge)
 
     def test_can_read_header(self):
         with open(self.path_object_std, 'rb') as meshfile:
@@ -243,57 +249,49 @@ class TestStdMeshReading(unittest.TestCase):
     def test_can_load_bf2_mesh(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         self.assertTrue(isinstance(vmesh, mesher.StdMesh))
+    
+    def test_can_generate_vertices_attributes(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh()
+            vmesh._read_filedata(meshfile)
+        
+        vmesh._generate_vertices_attributes()
+        vertsinfo = []
+        for chunk in chunks(vmesh.vertices, 18):
+            position = tuple(chunk[0:3])
+            normal = tuple(chunk[3:6])
+            blend_indices = chunk[6]
+            uv1 = tuple(chunk[7:9])
+            uv2 = tuple(chunk[9:11])
+            uv3 = tuple(chunk[11:13])
+            uv4 = tuple(chunk[13:15])
+            tangent = tuple(chunk[15:18])
 
-    def test_meshes_diff(self):
-        vmesh = mesher.LoadBF2Mesh(self.path_object_std)
-        vmesh2 = mesher.LoadBF2Mesh(self.path_object_merged)
+            vert = {
+                'position' : position,
+                'normal' : normal,
+                'blend_indices' : blend_indices,
+                'uv1' : uv1,
+                'uv2' : uv2,
+                'uv3' : uv3,
+                'uv4' : uv4,
+                'tangent' : tangent
+                }
+            vertsinfo.append(vert)
+        self.assertTrue(vmesh.vertices_attributes == vertsinfo)
 
-        self.assertTrue(vmesh.head == vmesh2.head)
-        self.assertTrue(vmesh.u1 == vmesh2.u1)
-        self.assertTrue(vmesh.geomnum == vmesh2.geomnum)
-        self.assertTrue(len(vmesh.geoms) == len(vmesh2.geoms) == 1)
-        self.assertTrue(vmesh.geoms[0].lodnum == vmesh2.geoms[0].lodnum)
-        self.assertTrue(len(vmesh.geoms[0].lod) == len(vmesh2.geoms[0].lod) == 1)
-        self.assertTrue(vmesh.geoms[0].lod[0].min == vmesh2.geoms[0].lod[0].min)
-        self.assertTrue(vmesh.geoms[0].lod[0].max != vmesh2.geoms[0].lod[0].max) # diff
-        self.assertTrue(vmesh2.geoms[0].lod[0].max == (1.5, 1.0, 0.5))
-        self.assertTrue(vmesh.geoms[0].lod[0].nodenum == vmesh2.geoms[0].lod[0].nodenum)
-        self.assertTrue(vmesh.geoms[0].lod[0].node == vmesh2.geoms[0].lod[0].node) # not geometry?
-        self.assertTrue(vmesh.geoms[0].lod[0].polycount != vmesh2.geoms[0].lod[0].polycount != 0) # diff
-        self.assertTrue(vmesh.vertattribnum == vmesh2.vertattribnum)
-        self.assertTrue(vmesh.vertattrib == vmesh2.vertattrib)
-        self.assertTrue(vmesh.vertformat == vmesh2.vertformat)
-        self.assertTrue(vmesh.vertstride == vmesh2.vertstride)
-        self.assertTrue(vmesh.vertnum != vmesh2.vertnum) # diff
-        self.assertTrue(vmesh.vertices != vmesh2.vertices) # diff it's appears that this is real geom data, perhaps just add?
-        #for index, id in enumerate(vmesh.index):
-            #print('index[{}] {}'.format(index, id))
-        self.assertTrue(vmesh.indexnum != vmesh2.indexnum) # diff
-        self.assertTrue(vmesh.index != vmesh2.index) # diff reversed order?
-        self.assertTrue(vmesh.u2 == vmesh2.u2)
-        self.assertTrue(vmesh.geoms[0].lod[0].matnum == vmesh2.geoms[0].lod[0].matnum == 1)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].alphamode == vmesh2.geoms[0].lod[0].mat[0].alphamode)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].fxfile == vmesh2.geoms[0].lod[0].mat[0].fxfile)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].technique == vmesh2.geoms[0].lod[0].mat[0].technique)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].mapnum == vmesh2.geoms[0].lod[0].mat[0].mapnum)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == vmesh2.geoms[0].lod[0].mat[0].map[0])
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[1] == vmesh2.geoms[0].lod[0].mat[0].map[1])
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vstart == vmesh2.geoms[0].lod[0].mat[0].vstart)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].istart == vmesh2.geoms[0].lod[0].mat[0].istart)
-        #print('vmesh inum = {}'.format(vmesh.geoms[0].lod[0].mat[0].inum))
-        #print('vmesh2 inum = {}'.format(vmesh2.geoms[0].lod[0].mat[0].inum))
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].inum != vmesh2.geoms[0].lod[0].mat[0].inum) # diff
-        #print('vmesh vnum = {}'.format(vmesh.geoms[0].lod[0].mat[0].vnum))
-        #print('vmesh2 vnum = {}'.format(vmesh2.geoms[0].lod[0].mat[0].vnum))
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vnum != vmesh2.geoms[0].lod[0].mat[0].vnum) # diff
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u4 == vmesh2.geoms[0].lod[0].mat[0].u4)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u5 == vmesh2.geoms[0].lod[0].mat[0].u5)
-        #print('vmesh nmax = {}'.format(vmesh.geoms[0].lod[0].mat[0].nmax))
-        #print('vmesh2 nmax = {}'.format(vmesh2.geoms[0].lod[0].mat[0].nmax))
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmin == vmesh2.geoms[0].lod[0].mat[0].nmin)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax != vmesh2.geoms[0].lod[0].mat[0].nmax) # diff
-        #raise
+    
+class TestStdMeshReading_Specials(unittest.TestCase):
 
+    # objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh
+    # it has version 4 and inum and vnum in material
+    def test_can_read_not_skinned_mesh_version_4(self):
+        path_mesh = os.path.join(bf2.Mod().root, 'objects', 'staticobjects', 'Bridges', 'EoD_Bridge_Big', 'Meshes', 'eod_bridge_big.staticmesh')
+        #vmesh = mesher.LoadBF2Mesh(path_mesh)
+        with open(path_mesh, 'rb') as meshfile:
+            vmesh = mesher.StdMesh()
+            vmesh._read_materials(meshfile)
+            
     @unittest.skip('i\o intensive')
     def test_can_read_PR_MESHES_REPO_1490(self):
         counter = 0
@@ -307,18 +305,6 @@ class TestStdMeshReading(unittest.TestCase):
                         print('Failed to load {}'.format(os.path.join(bf2.Mod().root, dir, filename)))
         print(counter)
         #raise
-    
-class TestStdMeshReading_Specials(unittest.TestCase):
-
-    # objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh
-    # it has version 4 and inum and vnum in material
-    def test_can_read_not_skinned_mesh_version_4(self):
-        path_mesh = os.path.join(bf2.Mod().root, 'objects', 'staticobjects', 'Bridges', 'EoD_Bridge_Big', 'Meshes', 'eod_bridge_big.staticmesh')
-        #vmesh = mesher.LoadBF2Mesh(path_mesh)
-        with open(path_mesh, 'rb') as meshfile:
-            vmesh = mesher.StdMesh()
-            vmesh._read_materials(meshfile)
-        
 
 class TestStdMeshWriting(unittest.TestCase):
 
@@ -559,6 +545,41 @@ class TestStdMeshWriting(unittest.TestCase):
         self.assertTrue(vmesh2.geoms[0].lod[0].mat == vmesh2.geoms[0].lod[0].mat)
         self.assertTrue(vmesh2.geoms[0].lod[0].polycount == vmesh2.geoms[0].lod[0].polycount)
 
+    def test_can_write_vertices_attiributes_to_vertices(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = mesher.StdMesh()
+            vmesh._read_filedata(meshfile)
+            vmesh._generate_vertices_attributes()
+
+        vertices_new = []
+        for vertice in vmesh.vertices_attributes:
+            for axis in vertice['position']:
+                vertices_new.append(axis)
+            for axis in vertice['normal']:
+                vertices_new.append(axis)
+            vertices_new.append(vertice['blend_indices'])
+
+            vertices_new.append(vertice['uv1'][0])
+            vertices_new.append(vertice['uv1'][1])
+            
+            vertices_new.append(vertice['uv2'][0])
+            vertices_new.append(vertice['uv2'][1])
+            
+            vertices_new.append(vertice['uv3'][0])
+            vertices_new.append(vertice['uv3'][1])
+            
+            vertices_new.append(vertice['uv4'][0])
+            vertices_new.append(vertice['uv4'][1])
+            
+            for axis in vertice['tangent']:
+                vertices_new.append(axis)
+
+        # converting to tuple after generating
+        vertices_new = tuple(vertices_new)
+
+        self.assertTrue(len(vmesh.vertices) == len(vertices_new))
+        self.assertTrue(vmesh.vertices == vertices_new)
+
     def test_can_load_bf2_mesh_cloned(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         vmesh.write_file_data(self.path_object_clone)
@@ -567,7 +588,203 @@ class TestStdMeshWriting(unittest.TestCase):
 
         self.assertTrue(vmesh2._tail == vmesh._tail)
         
+class TestStdMeshMerging(unittest.TestCase):
 
+    def setUp(self):
+        # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
+        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
+        test_object_std_2 = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box6', 'meshes', 'evil_box6.staticmesh'])
+        test_object_merged = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box5', 'meshes', 'evil_box5.staticmesh'])
+        test_object_generated = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box7', 'meshes', 'evil_box7.staticmesh'])
+        
+        self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
+        self.path_object_std_2 = os.path.join(bf2.Mod().root, test_object_std_2)
+        self.path_object_merged = os.path.join(bf2.Mod().root, test_object_merged)
+        self.path_object_generated = os.path.join(bf2.Mod().root, test_object_generated)
+        
+
+    def tearDown(self):
+        #try:
+        #    os.remove(self.path_object_clone)
+        #except FileNotFoundError:
+        #    print('Nothing to clean up')
+        pass
+    
+    #def test_can_move_mesh(self):
+    #    vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        
+        
+        
+        
+    
+    @unittest.skip('theory')
+    def test_meshes_read_plane(self):
+        test_object_triangle = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box8', 'meshes', 'evil_box8.staticmesh'])
+        test_object_plane = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box9', 'meshes', 'evil_box9.staticmesh'])
+        test_object_plane2 = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box10', 'meshes', 'evil_box10.staticmesh'])
+
+        path_object_triangle = os.path.join(bf2.Mod().root, test_object_triangle)
+        path_object_plane = os.path.join(bf2.Mod().root, test_object_plane)
+        path_object_plane2 = os.path.join(bf2.Mod().root, test_object_plane2)
+        #vmesh = mesher.LoadBF2Mesh(self.path_object_std)
+        #vmesh = mesher.LoadBF2Mesh(path_object_triangle)
+        vmesh = mesher.LoadBF2Mesh(path_object_plane)
+        vmesh2 = mesher.LoadBF2Mesh(path_object_plane2)
+        #print('vmesh.vertnum = {}'.format(vmesh.vertnum))
+        #for index, vertice in enumerate(vmesh.vertices):
+        #    print('v1[{}] {}'.format(index, vertice))
+        #print('len(vmesh.vertices) = {}'.format(len(vmesh.vertices)))
+        
+        vertinfo = []
+        for chunk in chunks(vmesh.vertices, 18):
+            position = tuple(chunk[0:3])
+            #print('position = {}'.format(position))
+            normal = tuple(chunk[3:6])
+            #print('normal = {}'.format(normal))
+            blend_indices = chunk[7]
+            #print('blend indices = {}'.format(blend_indices))
+            uv1 = tuple(chunk[7:9])
+            #print('uv1 = {}'.format(uv1))
+            uv2 = tuple(chunk[9:11])
+            #print('uv2 = {}'.format(uv2))
+            uv3 = tuple(chunk[11:13])
+            #print('uv3 = {}'.format(uv3))
+            uv4 = tuple(chunk[13:15])
+            #print('uv4 = {}'.format(uv4))
+            tangent = tuple(chunk[15:18])
+            #print('tangent = {}'.format(tangent))
+            vert = {
+                'position' : position,
+                'normal' : normal,
+                'blend_indices' : blend_indices,
+                'uv1' : uv1,
+                'uv2' : uv2,
+                'uv3' : uv3,
+                'uv4' : uv4,
+                'tangent' : tangent
+                }
+            vertinfo.append(vert)
+
+        vertinfo2 = []
+        for chunk in chunks(vmesh2.vertices, 18):
+            position = tuple(chunk[0:3])
+            #print('position = {}'.format(position))
+            normal = tuple(chunk[3:6])
+            #print('normal = {}'.format(normal))
+            blend_indices = chunk[7]
+            #print('blend indices = {}'.format(blend_indices))
+            uv1 = tuple(chunk[7:9])
+            #print('uv1 = {}'.format(uv1))
+            uv2 = tuple(chunk[9:11])
+            #print('uv2 = {}'.format(uv2))
+            uv3 = tuple(chunk[11:13])
+            #print('uv3 = {}'.format(uv3))
+            uv4 = tuple(chunk[13:15])
+            #print('uv4 = {}'.format(uv4))
+            tangent = tuple(chunk[15:18])
+            #print('tangent = {}'.format(tangent))
+            vert = {
+                'position' : position,
+                'normal' : normal,
+                'blend_indices' : blend_indices,
+                'uv1' : uv1,
+                'uv2' : uv2,
+                'uv3' : uv3,
+                'uv4' : uv4,
+                'tangent' : tangent
+                }
+            vertinfo2.append(vert)
+        for index, vert in enumerate(vertinfo):
+            print('position1 = {}, position2 = {}'.format(vert['position'], vertinfo2[index]['position']))
+            print('normal1 = {}, normal2 = {}'.format(vert['normal'], vertinfo2[index]['normal']))
+            print('blend_indices1 = {}, blend_indices2 = {}'.format(vert['blend_indices'], vertinfo2[index]['blend_indices']))
+            print('uv1_1 = {}, uv1_2 = {}'.format(vert['uv1'], vertinfo2[index]['uv1']))
+            print('uv2_1 = {}, uv2_2 = {}'.format(vert['uv2'], vertinfo2[index]['uv2']))
+            print('uv3_1 = {}, uv3_2 = {}'.format(vert['uv3'], vertinfo2[index]['uv3']))
+            print('uv4_1 = {}, uv4_2 = {}'.format(vert['uv4'], vertinfo2[index]['uv4']))
+            print('tangent1 = {}, tangent2 = {}'.format(vert['tangent'], vertinfo2[index]['tangent']))
+
+        raise
+        
+    def test_meshes_diff_moved_box(self):
+        vmesh_std = mesher.LoadBF2Mesh(self.path_object_std)
+        vmesh_std_2 = mesher.LoadBF2Mesh(self.path_object_std_2)
+
+        # this stuff seems to be same for my boxes
+        self.assertTrue(vmesh_std.head == vmesh_std_2.head)
+        self.assertTrue(vmesh_std.u1 == vmesh_std_2.u1)
+        self.assertTrue(vmesh_std.geomnum == vmesh_std_2.geomnum)
+        self.assertTrue(len(vmesh_std.geoms) == len(vmesh_std_2.geoms) == 1)
+        self.assertTrue(vmesh_std.geoms[0].lodnum == vmesh_std_2.geoms[0].lodnum)
+        self.assertTrue(len(vmesh_std.geoms[0].lod) == len(vmesh_std_2.geoms[0].lod) == 1)
+
+        # in 3dsmax it's a (-5, -5, 0) which is (-5, 0, -5)*0.1 as bf2 y and z swapped and divided by 10
+        self.assertTrue(vmesh_std.geoms[0].lod[0].min== (-0.5, 0.0, -0.5))
+        # std_2 box is moved to right by 10 so it's min starting from +5
+        self.assertTrue(vmesh_std_2.geoms[0].lod[0].min == (0.5, 0.0, -0.5))
+
+        # std_2 boxe have right side further than std box
+        self.assertTrue(vmesh_std.geoms[0].lod[0].max == (0.5, 1.0, 0.5))
+        self.assertTrue(vmesh_std_2.geoms[0].lod[0].max == (1.5, 1.0, 0.5))
+
+        # NOT ACTUAL GEOMETRY???? i expected this to be diffirent
+        self.assertTrue(vmesh_std.geoms[0].lod[0].nodenum == vmesh_std_2.geoms[0].lod[0].nodenum)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].node == vmesh_std_2.geoms[0].lod[0].node)
+        
+        # that's same for single boxes
+        self.assertTrue(vmesh_std.geoms[0].lod[0].polycount == vmesh_std_2.geoms[0].lod[0].polycount == 12)
+
+        self.assertTrue(vmesh_std.vertattribnum == vmesh_std_2.vertattribnum)
+        self.assertTrue(vmesh_std.vertattrib == vmesh_std_2.vertattrib)
+        self.assertTrue(vmesh_std.vertformat == vmesh_std_2.vertformat)
+        self.assertTrue(vmesh_std.vertstride == vmesh_std_2.vertstride)
+
+        # that's same for single boxes, diffirent for merged one
+        # what are those vertices?
+        self.assertTrue(vmesh_std.vertnum == vmesh_std_2.vertnum == 25)
+
+        # seems like a real geom data
+        # 72 / 4 * 25
+        # _vertices_num = int(self.vertstride / self.vertformat * self.vertnum)
+        # vertstride appears to be a struct of 
+        '''
+        for index, vertice in enumerate(vmesh_std.vertices):
+            if vertice == vmesh_std_2.vertices[index]:
+                #print('v[{}] {}'.format(index, vertice))
+                continue
+            print('v1[{}] {} == v2[{}] {}'.format(index, vertice, index, vmesh_std_2.vertices[index],))
+        print('len(vmesh_std.vertices) = {}'.format(len(vmesh_std.vertices)))
+        print('len(vmesh_std_2.vertices) = {}'.format(len(vmesh_std_2.vertices)))
+        self.assertTrue(vmesh_std.vertices == vmesh_std_2.vertices)
+        '''
+        
+        #for index, id in enumerate(vmesh_std.index):
+        #    print('index[{}] {}'.format(index, id))
+        #self.assertTrue(vmesh.indexnum != vmesh2.indexnum) # diff
+        #self.assertTrue(vmesh.index != vmesh2.index) # diff reversed order?
+        #self.assertTrue(vmesh.u2 == vmesh2.u2)
+        #self.assertTrue(vmesh.geoms[0].lod[0].matnum == vmesh2.geoms[0].lod[0].matnum == 1)
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].alphamode == vmesh2.geoms[0].lod[0].mat[0].alphamode)
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].fxfile == vmesh2.geoms[0].lod[0].mat[0].fxfile)
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].technique == vmesh2.geoms[0].lod[0].mat[0].technique)
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].mapnum == vmesh2.geoms[0].lod[0].mat[0].mapnum)
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == vmesh2.geoms[0].lod[0].mat[0].map[0])
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[1] == vmesh2.geoms[0].lod[0].mat[0].map[1])
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vstart == vmesh2.geoms[0].lod[0].mat[0].vstart)
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].istart == vmesh2.geoms[0].lod[0].mat[0].istart)
+        #print('vmesh inum = {}'.format(vmesh.geoms[0].lod[0].mat[0].inum))
+        #print('vmesh2 inum = {}'.format(vmesh2.geoms[0].lod[0].mat[0].inum))
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].inum != vmesh2.geoms[0].lod[0].mat[0].inum) # diff
+        #print('vmesh vnum = {}'.format(vmesh.geoms[0].lod[0].mat[0].vnum))
+        #print('vmesh2 vnum = {}'.format(vmesh2.geoms[0].lod[0].mat[0].vnum))
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vnum != vmesh2.geoms[0].lod[0].mat[0].vnum) # diff
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u4 == vmesh2.geoms[0].lod[0].mat[0].u4)
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u5 == vmesh2.geoms[0].lod[0].mat[0].u5)
+        #print('vmesh nmax = {}'.format(vmesh.geoms[0].lod[0].mat[0].nmax))
+        #print('vmesh2 nmax = {}'.format(vmesh2.geoms[0].lod[0].mat[0].nmax))
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmin == vmesh2.geoms[0].lod[0].mat[0].nmin)
+        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax != vmesh2.geoms[0].lod[0].mat[0].nmax) # diff
+        #raise
 
 
 

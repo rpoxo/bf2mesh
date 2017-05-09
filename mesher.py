@@ -18,6 +18,11 @@ def LoadBF2Mesh(filepath):
         vmesh.load_file_data(meshfile)
     return vmesh
 
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
 
 class bf2lod:
 
@@ -178,6 +183,7 @@ class StdMesh:
         self.vertstride = None
         self.vertnum = None
         self.vertices = None
+        self.vertices_attributes = None
         self.indexnum = None
         self.index = None
         self.u2 = None
@@ -185,7 +191,8 @@ class StdMesh:
     # just a wrapper for better name
     def load_file_data(self, fo):
         # materials read will read everything inb4
-        self._read_materials(fo)
+        self._read_filedata(fo)
+        self._generate_vertices_attributes()
 
     def write_file_data(self, fo):
         # materials read will read everything inb4
@@ -330,6 +337,9 @@ class StdMesh:
                 print(' mesh {} end at {}'.format(lodnum, fo.tell()))
         self._tail = fo.tell()
         print('geom block ends at {}'.format(fo.tell()))
+    
+    def _read_filedata(self, fo):
+        self._read_materials(fo)
 
     #-----------------------------
     # WRITING FILEDATA
@@ -540,3 +550,62 @@ class StdMesh:
             if not self.isSkinnedMesh and self.head.version == 11:
                 fo.write(struct.Struct('3f').pack(*lod.mat[i].nmin))
                 fo.write(struct.Struct('3f').pack(*lod.mat[i].nmax))
+
+    def _generate_vertices_attributes(self):
+        self.vertices_attributes = []
+        for chunk in chunks(self.vertices, 18):
+            position = tuple(chunk[0:3])
+            normal = tuple(chunk[3:6])
+            blend_indices = chunk[6]
+            uv1 = tuple(chunk[7:9])
+            uv2 = tuple(chunk[9:11])
+            uv3 = tuple(chunk[11:13])
+            uv4 = tuple(chunk[13:15])
+            tangent = tuple(chunk[15:18])
+
+            vert = {
+                'position' : position,
+                'normal' : normal,
+                'blend_indices' : blend_indices,
+                'uv1' : uv1,
+                'uv2' : uv2,
+                'uv3' : uv3,
+                'uv4' : uv4,
+                'tangent' : tangent
+                }
+            self.vertices_attributes.append(vert)
+
+    def _write_vertices_attributes(self):
+        vertices_new = []
+        for vertice in self.vertices_attributes:
+            for axis in vertice['position']:
+                vertices_new.append(axis)
+            for axis in vertice['normal']:
+                vertices_new.append(axis)
+            vertices_new.append(vertice['blend_indices'])
+
+            vertices_new.append(vertice['uv1'][0])
+            vertices_new.append(vertice['uv1'][1])
+            
+            vertices_new.append(vertice['uv2'][0])
+            vertices_new.append(vertice['uv2'][1])
+            
+            vertices_new.append(vertice['uv3'][0])
+            vertices_new.append(vertice['uv3'][1])
+            
+            vertices_new.append(vertice['uv4'][0])
+            vertices_new.append(vertice['uv4'][1])
+            
+            for axis in vertice['tangent']:
+                vertices_new.append(axis)
+        
+        # converting to set after generating
+        self.vertices = tuple(vertices_new)
+
+
+
+
+
+
+
+

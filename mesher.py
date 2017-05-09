@@ -556,7 +556,11 @@ class StdMesh:
 
     def _generate_vertices_attributes(self):
         self.vertices_attributes = []
-        for chunk in chunks(self.vertices, 18):
+        if self.vertstride == 72:
+            lenght = 18
+        elif self.vertstride == 80:
+            lenght = 20
+        for chunk in chunks(self.vertices, lenght):
             position = tuple(chunk[0:3])
             normal = tuple(chunk[3:6])
             blend_indices = chunk[6]
@@ -564,7 +568,12 @@ class StdMesh:
             uv2 = tuple(chunk[9:11])
             uv3 = tuple(chunk[11:13])
             uv4 = tuple(chunk[13:15])
-            tangent = tuple(chunk[15:18])
+            if lenght == 18:
+                uv5 = None
+                tangent = tuple(chunk[15:18])
+            elif lenght == 20:
+                uv5 = tuple(chunk[15:17])
+                tangent = tuple(chunk[17:20])
 
             vert = {
                 'position' : position,
@@ -576,6 +585,8 @@ class StdMesh:
                 'uv4' : uv4,
                 'tangent' : tangent
                 }
+            if lenght == 20:
+                vert['uv5'] = uv5
             self.vertices_attributes.append(vert)
 
     def _write_vertices_attributes(self):
@@ -598,6 +609,10 @@ class StdMesh:
             
             vertices_new.append(vertice['uv4'][0])
             vertices_new.append(vertice['uv4'][1])
+            
+            if self.vertstride == 80:
+                vertices_new.append(vertice['uv5'][0])
+                vertices_new.append(vertice['uv5'][1])
             
             for axis in vertice['tangent']:
                 vertices_new.append(axis)

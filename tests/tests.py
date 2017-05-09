@@ -571,6 +571,10 @@ class TestStdMeshWriting(unittest.TestCase):
             vertices_new.append(vertice['uv4'][0])
             vertices_new.append(vertice['uv4'][1])
             
+            if vmesh.vertstride == 80:
+                vertices_new.append(vertice['uv5'][0])
+                vertices_new.append(vertice['uv5'][1])
+            
             for axis in vertice['tangent']:
                 vertices_new.append(axis)
 
@@ -595,7 +599,7 @@ class TestStdMeshMerging(unittest.TestCase):
         test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
         test_object_std_2 = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box6', 'meshes', 'evil_box6.staticmesh'])
         test_object_merged = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box5', 'meshes', 'evil_box5.staticmesh'])
-        test_object_generated = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box7', 'meshes', 'evil_box7.staticmesh'])
+        test_object_generated = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_generated', 'meshes', 'evil_box_generated.staticmesh'])
         
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
         self.path_object_std_2 = os.path.join(bf2.Mod().root, test_object_std_2)
@@ -615,6 +619,19 @@ class TestStdMeshMerging(unittest.TestCase):
         
         for vertice in vmesh.vertices_attributes:
             new_position_x = vertice['position'][0] + 1.0
+            new_position = (new_position_x, vertice['position'][1], vertice['position'][2])
+            vertice['position'] = new_position
+        vmesh._write_vertices_attributes()
+        vmesh.write_file_data(self.path_object_generated)
+    
+    def test_can_move_mesh_TOILET(self):
+        #objects\staticobjects\pr\toilet
+        path_object_toilet = os.path.join(bf2.Mod().root, os.path.join(*['objects', 'staticobjects', 'pr', 'toilet', 'meshes', 'toilet.staticmesh']))
+        vmesh = mesher.LoadBF2Mesh(path_object_toilet)
+        
+        
+        for vertice in vmesh.vertices_attributes:
+            new_position_x = vertice['position'][0] + 5.0
             new_position = (new_position_x, vertice['position'][1], vertice['position'][2])
             vertice['position'] = new_position
         vmesh._write_vertices_attributes()

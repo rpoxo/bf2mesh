@@ -46,25 +46,25 @@ class bf2mat:
     def __init__(self, fo, isSkinnedMesh, version):
         self.alphamode = struct.Struct('l').unpack(
             fo.read(struct.calcsize('l')))[0]
-        print('   alphamode: {}'.format(self.alphamode))
+        #print('   alphamode: {}'.format(self.alphamode))
         self.fxfile = self.__get_string(fo)
-        print('   fxfile: {}'.format(self.fxfile))
+        #print('   fxfile: {}'.format(self.fxfile))
         self.technique = self.__get_string(fo)
-        print('   technique: {}'.format(self.technique))
+        #print('   technique: {}'.format(self.technique))
         self.mapnum = struct.Struct('l').unpack(
             fo.read(struct.calcsize('l')))[0]
-        print('   mapnum: {}'.format(self.mapnum))
+        #print('   mapnum: {}'.format(self.mapnum))
         self.map = self.__get_maps(fo)
         self.vstart = struct.Struct('l').unpack(
             fo.read(struct.calcsize('l')))[0]
-        print('   vstart: {}'.format(self.vstart))
+        #print('   vstart: {}'.format(self.vstart))
         self.istart = struct.Struct('l').unpack(
             fo.read(struct.calcsize('l')))[0]
-        print('   istart: {}'.format(self.istart))
+        #print('   istart: {}'.format(self.istart))
         self.inum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        print('   inum: {}'.format(self.inum))
+        #print('   inum: {}'.format(self.inum))
         self.vnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        print('   vnum: {}'.format(self.vnum))
+        #print('   vnum: {}'.format(self.vnum))
         self.u4 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         self.u5 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
         if not isSkinnedMesh and version == 11:
@@ -89,7 +89,7 @@ class bf2mat:
         for i in range(self.mapnum):
             mapname = self.__get_string(fo)
             mapnames.append(mapname)
-            print('    {}'.format(mapname))
+            #print('    {}'.format(mapname))
         return mapnames
 
 
@@ -173,20 +173,20 @@ class StdMesh:
         self._tail = 0
 
         # mesh data
-        self.head = None
-        self.u1 = None
-        self.geomnum = None
-        self.geoms = None
-        self.vertattribnum = None
-        self.vertattrib = None
-        self.vertformat = None
-        self.vertstride = None
-        self.vertnum = None
-        self.vertices = None
-        self.vertices_attributes = None
-        self.indexnum = None
-        self.index = None
-        self.u2 = None
+        self.head = None # header contains version and some bfp4f data
+        self.u1 = None # version flag for bfp4f
+        self.geomnum = None # amount of geoms
+        self.geoms = None # geoms data struct, to be filled as we reading file
+        self.vertattribnum = None # number of vertattributes xDDD
+        self.vertattrib = None # vertattrib array, no idea what it does
+        self.vertformat = None # vert format? no idea hwta it does, perhaps bytes len(all floats)
+        self.vertstride = None # bytes size for vertex attributes buffer
+        self.vertnum = None # number of vertices
+        self.vertices = None # vertices array, actual geometry
+        self.vertices_attributes = None # generated buffers for better reading 
+        self.indexnum = None # number of indices
+        self.index = None # vertex indices
+        self.u2 = None # some another bfp4f garbage..
 
     # just a wrapper for better name
     def load_file_data(self, fo):
@@ -204,7 +204,7 @@ class StdMesh:
     def _read_head(self, fo):
         self.head = bf2head(fo, self._tail)
         self._tail = fo.tell()
-        print('head ends at {}'.format(fo.tell()))
+        #print('head ends at {}'.format(fo.tell()))
 
     def _read_u1_bfp4f_version(self, fo):
         self._read_head(fo)
@@ -216,7 +216,7 @@ class StdMesh:
 
     def _read_geomnum(self, fo):
         self._read_u1_bfp4f_version(fo)
-        print('geomtable starts at {}'.format(fo.tell()))
+        #print('geomtable starts at {}'.format(fo.tell()))
         _fmt = 'l'
         _size = struct.calcsize(_fmt)
 
@@ -227,7 +227,7 @@ class StdMesh:
         self._read_geomnum(fo)
         self.geoms = [bf2geom(fo) for i in range(self.geomnum)]
         self._tail = fo.tell()
-        print('geomtable ends at {}'.format(fo.tell()))
+        #print('geomtable ends at {}'.format(fo.tell()))
 
     def _read_vertattribnum(self, fo):
         self._read_geoms(fo)
@@ -236,13 +236,13 @@ class StdMesh:
 
         self.vertattribnum = struct.Struct(_fmt).unpack(fo.read(_size))[0]
         self._tail = fo.tell()
-        print('attribtable starts at {}'.format(fo.tell()))
+        #print('attribtable starts at {}'.format(fo.tell()))
 
     def _read_vertext_attribute_table(self, fo):
         self._read_vertattribnum(fo)
         self.vertattrib = [vertattrib(fo) for i in range(self.vertattribnum)]
         self._tail = fo.tell()
-        print('attribtable ends at {}'.format(fo.tell()))
+        #print('attribtable ends at {}'.format(fo.tell()))
 
     def _read_vertformat(self, fo):
         self._read_vertext_attribute_table(fo)
@@ -276,7 +276,7 @@ class StdMesh:
 
         self.vertices = struct.Struct(_fmt).unpack(fo.read(_size))
         self._tail = fo.tell()
-        print('vertex block ends at {}'.format(fo.tell()))
+        #print('vertex block ends at {}'.format(fo.tell()))
 
     def _read_indexnum(self, fo):
         self._read_vertex_block(fo)
@@ -293,7 +293,7 @@ class StdMesh:
 
         self.index = struct.Struct(_fmt).unpack(fo.read(_size))
         self._tail = fo.tell()
-        print('index block ends at {}'.format(fo.tell()))
+        #print('index block ends at {}'.format(fo.tell()))
 
     def _read_u2(self, fo):
         if not self.isSkinnedMesh:
@@ -316,7 +316,7 @@ class StdMesh:
     def _read_materials(self, fo):
         self._read_nodes(fo)
 
-        print('geom block starts at {}'.format(fo.tell()))
+        #print('geom block starts at {}'.format(fo.tell()))
 
         def _read_matnum(fo, lod):
             _fmt = 'l'
@@ -327,17 +327,17 @@ class StdMesh:
 
         for geomnum in range(self.geomnum):
             for lodnum in range(self.geoms[geomnum].lodnum):
-                print(' mesh {} start at {}'.format(lodnum, fo.tell()))
+                #print(' mesh {} start at {}'.format(lodnum, fo.tell()))
                 _read_matnum(fo, self.geoms[geomnum].lod[lodnum])
-                print(
-                    ' matnum: {}'.format(
-                        self.geoms[geomnum].lod[lodnum].matnum))
+                #print(
+                #    ' matnum: {}'.format(
+                #        self.geoms[geomnum].lod[lodnum].matnum))
                 # for matnum in range(self.geoms[geomnum].lod[lodnum].matnum):
                 self.__read_lod_material(fo, self.geoms[geomnum].lod[lodnum])
-                print(' mesh {} end at {}'.format(lodnum, fo.tell()))
+                #print(' mesh {} end at {}'.format(lodnum, fo.tell()))
         self._tail = fo.tell()
-        print('geom block ends at {}'.format(fo.tell()))
-    
+        #print('geom block ends at {}'.format(fo.tell()))
+
     def _read_filedata(self, fo):
         self._read_materials(fo)
 
@@ -459,7 +459,7 @@ class StdMesh:
     #-----------------------------
 
     def __read_lod_node_table(self, fo, lod):
-        print('nodes chunk start at  {}'.format(fo.tell()))
+        #print('nodes chunk start at  {}'.format(fo.tell()))
 
         def _read_bounds(fo, lod):
             _fmt = '6f'
@@ -494,10 +494,10 @@ class StdMesh:
                 _size = struct.calcsize(_fmt)
                 _data = struct.Struct(_fmt).unpack(fo.read(_size))
                 lod.node.append(_data[0])
-        print('nodes chunk end at {}'.format(fo.tell()))
+        #print('nodes chunk end at {}'.format(fo.tell()))
 
     def __write_lod_node_table(self, fo, lod):
-        print('nodes chunk start at  {}'.format(fo.tell()))
+        #print('nodes chunk start at  {}'.format(fo.tell()))
 
         def _write_bounds(fo, lod):
             fmt = '3f'
@@ -526,9 +526,9 @@ class StdMesh:
 
     def __read_lod_material(self, fo, lod):
         for i in range(lod.matnum):
-            print('  mat {} start at {}'.format(i, fo.tell()))
+            #print('  mat {} start at {}'.format(i, fo.tell()))
             material = bf2mat(fo, self.isSkinnedMesh, self.head.version)
-            print('  mat {} ends at {}'.format(i, fo.tell()))
+            #print('  mat {} ends at {}'.format(i, fo.tell()))
             lod.mat.insert(i, material)
             lod.polycount = lod.polycount + material.inum / 3
 

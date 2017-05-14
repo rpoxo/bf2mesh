@@ -614,6 +614,7 @@ class TestStdMeshMerging(unittest.TestCase):
         #    print('Nothing to clean up')
         pass
     
+    @unittest.skip('theory')
     def test_can_move_mesh(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         
@@ -624,12 +625,12 @@ class TestStdMeshMerging(unittest.TestCase):
         vmesh._write_vertices_attributes()
         vmesh.write_file_data(self.path_object_generated)
     
+    @unittest.skip('theory')
     def test_can_move_mesh_TOILET(self):
         #objects\staticobjects\pr\toilet
         path_object_toilet = os.path.join(bf2.Mod().root, os.path.join(*['objects', 'staticobjects', 'pr', 'toilet', 'meshes', 'toilet.staticmesh']))
         vmesh = mesher.LoadBF2Mesh(path_object_toilet)
-        
-        
+
         for vertice in vmesh.vertices_attributes:
             new_position_x = vertice['position'][0] + 5.0
             new_position = (new_position_x, vertice['position'][1], vertice['position'][2])
@@ -755,6 +756,7 @@ class TestStdMeshMerging(unittest.TestCase):
         # that's same for single boxes
         self.assertTrue(vmesh_std.geoms[0].lod[0].polycount == vmesh_std_2.geoms[0].lod[0].polycount == 12)
 
+        # ###### ACTUAL GEOM ######
         self.assertTrue(vmesh_std.vertattribnum == vmesh_std_2.vertattribnum)
         self.assertTrue(vmesh_std.vertattrib == vmesh_std_2.vertattrib)
         self.assertTrue(vmesh_std.vertformat == vmesh_std_2.vertformat)
@@ -778,33 +780,36 @@ class TestStdMeshMerging(unittest.TestCase):
         print('len(vmesh_std_2.vertices) = {}'.format(len(vmesh_std_2.vertices)))
         self.assertTrue(vmesh_std.vertices == vmesh_std_2.vertices)
         '''
+        # ###### ACTUAL GEOM ######
         
         #for index, id in enumerate(vmesh_std.index):
         #    print('index[{}] {}'.format(index, id))
-        #self.assertTrue(vmesh.indexnum != vmesh2.indexnum) # diff
-        #self.assertTrue(vmesh.index != vmesh2.index) # diff reversed order?
-        #self.assertTrue(vmesh.u2 == vmesh2.u2)
-        #self.assertTrue(vmesh.geoms[0].lod[0].matnum == vmesh2.geoms[0].lod[0].matnum == 1)
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].alphamode == vmesh2.geoms[0].lod[0].mat[0].alphamode)
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].fxfile == vmesh2.geoms[0].lod[0].mat[0].fxfile)
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].technique == vmesh2.geoms[0].lod[0].mat[0].technique)
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].mapnum == vmesh2.geoms[0].lod[0].mat[0].mapnum)
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == vmesh2.geoms[0].lod[0].mat[0].map[0])
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[1] == vmesh2.geoms[0].lod[0].mat[0].map[1])
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vstart == vmesh2.geoms[0].lod[0].mat[0].vstart)
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].istart == vmesh2.geoms[0].lod[0].mat[0].istart)
-        #print('vmesh inum = {}'.format(vmesh.geoms[0].lod[0].mat[0].inum))
-        #print('vmesh2 inum = {}'.format(vmesh2.geoms[0].lod[0].mat[0].inum))
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].inum != vmesh2.geoms[0].lod[0].mat[0].inum) # diff
-        #print('vmesh vnum = {}'.format(vmesh.geoms[0].lod[0].mat[0].vnum))
-        #print('vmesh2 vnum = {}'.format(vmesh2.geoms[0].lod[0].mat[0].vnum))
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vnum != vmesh2.geoms[0].lod[0].mat[0].vnum) # diff
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u4 == vmesh2.geoms[0].lod[0].mat[0].u4)
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u5 == vmesh2.geoms[0].lod[0].mat[0].u5)
-        #print('vmesh nmax = {}'.format(vmesh.geoms[0].lod[0].mat[0].nmax))
-        #print('vmesh2 nmax = {}'.format(vmesh2.geoms[0].lod[0].mat[0].nmax))
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmin == vmesh2.geoms[0].lod[0].mat[0].nmin)
-        #self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax != vmesh2.geoms[0].lod[0].mat[0].nmax) # diff
+        self.assertTrue(vmesh_std.indexnum == vmesh_std_2.indexnum)
+        self.assertTrue(vmesh_std.index == vmesh_std_2.index)
+        self.assertTrue(vmesh_std.u2 == vmesh_std_2.u2)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].matnum == vmesh_std_2.geoms[0].lod[0].matnum == 1)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].alphamode == vmesh_std_2.geoms[0].lod[0].mat[0].alphamode)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].fxfile == vmesh_std_2.geoms[0].lod[0].mat[0].fxfile)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].technique == vmesh_std_2.geoms[0].lod[0].mat[0].technique)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].mapnum == vmesh_std_2.geoms[0].lod[0].mat[0].mapnum)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].map[0] == vmesh_std_2.geoms[0].lod[0].mat[0].map[0])
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].map[1] == vmesh_std_2.geoms[0].lod[0].mat[0].map[1])
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].vstart == vmesh_std_2.geoms[0].lod[0].mat[0].vstart)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].istart == vmesh_std_2.geoms[0].lod[0].mat[0].istart)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].inum == vmesh_std_2.geoms[0].lod[0].mat[0].inum)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].vnum == vmesh_std_2.geoms[0].lod[0].mat[0].vnum)
+        
+        # some stuff from BFP4F
+        #print('vmesh_std.geoms[0].lod[0].mat[0].u4 = {}'.format(vmesh_std.geoms[0].lod[0].mat[0].u4))
+        #print('vmesh_std_2.geoms[0].lod[0].mat[0].u4 = {}'.format(vmesh_std_2.geoms[0].lod[0].mat[0].u4))
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].u4 != vmesh_std_2.geoms[0].lod[0].mat[0].u4)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].u5 != vmesh_std_2.geoms[0].lod[0].mat[0].u5)
+        
+        # boundaries
+        #print('vmesh_std.geoms[0].lod[0].mat[0].nmin = {}'.format(vmesh_std.geoms[0].lod[0].mat[0].nmin))
+        #print('vmesh_std_2.geoms[0].lod[0].mat[0].nmin = {}'.format(vmesh_std_2.geoms[0].lod[0].mat[0].nmin))
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].nmin != vmesh_std_2.geoms[0].lod[0].mat[0].nmin)
+        self.assertTrue(vmesh_std.geoms[0].lod[0].mat[0].nmax != vmesh_std_2.geoms[0].lod[0].mat[0].nmax)
         #raise
 
 

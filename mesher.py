@@ -507,7 +507,7 @@ class StdMesh:
         def _write_pivot(fo, lod):
             if lod.version <= 6:
                 fmt = '3f'
-                fo.write(struct.Struct(fmt).pack(lod.pivot))
+                fo.write(struct.Struct(fmt).pack(*lod.pivot))
 
         def _write_nodenum(fo, lod):
             fmt = 'l'

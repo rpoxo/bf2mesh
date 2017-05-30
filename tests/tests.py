@@ -46,7 +46,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def setUp(self):
         # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
-        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
+        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box.staticmesh'])
         test_object_alt_uvw = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box2', 'meshes', 'evil_box2.staticmesh'])
         test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box3', 'meshes', 'evil_box3.staticmesh'])
         test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box4', 'meshes', 'evil_box4.staticmesh'])
@@ -233,7 +233,7 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.geoms[0].lod[0].mat[0].fxfile == b'StaticMesh.fx')
         self.assertTrue(vmesh.geoms[0].lod[0].mat[0].technique == b'Base')
         self.assertTrue(vmesh.geoms[0].lod[0].mat[0].mapnum == 2)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == b'objects/staticobjects/test/evil_box1/textures/evil_box1_c.dds')
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == b'objects/staticobjects/test/evil_box/textures/evil_box_c.dds')
         self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[1] == b'Common\Textures\SpecularLUT_pow36.dds')
         self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vstart == 0)
         self.assertTrue(vmesh.geoms[0].lod[0].mat[0].istart == 0)
@@ -244,7 +244,7 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmin == (-0.5, 0.0, -0.5))
         self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax == (0.5, 1.0, 0.5))
         self.assertTrue(vmesh.geoms[0].lod[0].polycount == 12)
-        self.assertTrue(vmesh._tail == 2280)
+        self.assertTrue(vmesh._tail == 2278)
 
     def test_can_load_bf2_mesh(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
@@ -310,13 +310,13 @@ class TestStdMeshWriting(unittest.TestCase):
 
     def setUp(self):
         # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
-        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
+        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box.staticmesh'])
         test_object_alt_uvw = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box2', 'meshes', 'evil_box2.staticmesh'])
         test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box3', 'meshes', 'evil_box3.staticmesh'])
         test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box4', 'meshes', 'evil_box4.staticmesh'])
         test_object_merged = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box5', 'meshes', 'evil_box5.staticmesh'])
         
-        test_object_clone = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1_clone.staticmesh'])
+        test_object_clone = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box_clone.staticmesh'])
         
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
@@ -596,13 +596,13 @@ class TestStdMeshMerging(unittest.TestCase):
 
     def setUp(self):
         # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
-        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box1', 'meshes', 'evil_box1.staticmesh'])
-        test_object_std_2 = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box6', 'meshes', 'evil_box6.staticmesh'])
+        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box.staticmesh'])
+        test_object_with_offset = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_single_offset', 'meshes', 'evil_box_single_offset.staticmesh'])
         test_object_merged = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box5', 'meshes', 'evil_box5.staticmesh'])
         test_object_generated = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_generated', 'meshes', 'evil_box_generated.staticmesh'])
         
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
-        self.path_object_std_2 = os.path.join(bf2.Mod().root, test_object_std_2)
+        self.path_object_std_2 = os.path.join(bf2.Mod().root, test_object_with_offset)
         self.path_object_merged = os.path.join(bf2.Mod().root, test_object_merged)
         self.path_object_generated = os.path.join(bf2.Mod().root, test_object_generated)
         

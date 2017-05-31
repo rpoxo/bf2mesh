@@ -95,12 +95,23 @@ class bf2mat:
 
 class bf2head:
 
-    def __init__(self, fo, offset):
+    def __init__(self):
         # some internals
+        self._fmt = None
+        self._size = None
+
+        # reading bin
+        data = None
+        self.u1 = None
+        self.version = None
+        self.u3 = None
+        self.u4 = None
+        self.u5 = None
+    
+    def read(self, fo, offset):
         self._fmt = ('5l')
         self._size = struct.calcsize(self._fmt)
 
-        # reading bin
         data = struct.Struct(self._fmt).unpack(fo.read(self._size))
         self.u1 = data[0]
         self.version = data[1]
@@ -202,7 +213,9 @@ class StdMesh:
     # READING FILEDATA
     #-----------------------------
     def _read_head(self, fo):
-        self.head = bf2head(fo, self._tail)
+        header = bf2head()
+        header.read(fo, self._tail)
+        self.head = header
         self._tail = fo.tell()
         #print('head ends at {}'.format(fo.tell()))
 

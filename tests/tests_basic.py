@@ -7,6 +7,7 @@ import struct
 
 import bf2
 import mesher
+import samples
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
@@ -593,5 +594,21 @@ class TestStdMeshWriting(unittest.TestCase):
         self.assertTrue(vmesh2._tail == vmesh._tail)
 
 
+#@unittest.skip('testing failed mesh load')
+class TestSamplesReading(unittest.TestCase):
 
+    def setUp(self):
+        # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
+        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box.samples'])
+
+        self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
+
+    def test_can_read_header(self):
+        with open(self.path_object_std, 'rb') as samplefile:
+            sample = samples.StdSample()
+            sample._read_head(samplefile)
+
+        self.assertTrue(sample.fourcc == b'SMP2')
+        self.assertTrue(sample.width == 256)
+        self.assertTrue(sample.height == 256)
 

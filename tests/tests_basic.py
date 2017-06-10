@@ -294,7 +294,7 @@ class TestStdMeshReading_Specials(unittest.TestCase):
             vmesh._read_materials(meshfile)
             
     @unittest.skip('i\o intensive')
-    def test_can_read_PR_MESHES_REPO_1490(self):
+    def test_can_read_PR_MESHES_REPO(self):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects', 'staticobjects')):
             for filename in filenames:
@@ -593,8 +593,6 @@ class TestStdMeshWriting(unittest.TestCase):
 
         self.assertTrue(vmesh2._tail == vmesh._tail)
 
-
-#@unittest.skip('testing failed mesh load')
 class TestSamplesReading(unittest.TestCase):
 
     def setUp(self):
@@ -611,4 +609,15 @@ class TestSamplesReading(unittest.TestCase):
         self.assertTrue(sample.fourcc == b'SMP2')
         self.assertTrue(sample.width == 256)
         self.assertTrue(sample.height == 256)
+        self.assertTrue(sample.datanum == sample.width * sample.height)
+
+    def test_can_read_smp_samples(self):
+        with open(self.path_object_std, 'rb') as samplefile:
+            sample = samples.StdSample()
+            sample._read_data(samplefile)
+
+        self.assertTrue(len(sample.data) == sample.datanum)
+        self.assertTrue(isinstance(sample.data[0], samples.smp_sample))
+        
+    
 

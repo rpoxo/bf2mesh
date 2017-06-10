@@ -2,6 +2,7 @@ import os
 import struct
 
 import bf2
+import samples
 
 # https://github.com/ByteHazard/BfMeshView/blob/master/source/modStdMesh.bas
 

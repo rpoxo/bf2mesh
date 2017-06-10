@@ -619,6 +619,20 @@ class TestSamplesReading(unittest.TestCase):
         self.assertTrue(len(sample.data) == sample.datanum)
         self.assertTrue(isinstance(sample.data[0], samples.smp_sample))
 
-        
+    def test_can_read_smp_faces(self):
+        with open(self.path_object_std, 'rb') as samplefile:
+            sample = samples.StdSample()
+            sample._read_faces(samplefile)
+
+        self.assertTrue(sample.facenum == 12)
+        self.assertTrue(len(sample.faces) == sample.facenum)
+        self.assertTrue(isinstance(sample.faces[0], samples.smp_face))
+    
+    def test_can_read_filedata(self):
+        with open(self.path_object_std, 'rb') as samplefile:
+            sample = samples.StdSample()
+            sample.read_filedata(samplefile)
+
+        self.assertTrue(isinstance(sample, samples.StdSample))
     
 

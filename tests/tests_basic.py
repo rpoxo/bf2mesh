@@ -609,15 +609,16 @@ class TestSamplesReading(unittest.TestCase):
         self.assertTrue(sample.fourcc == b'SMP2')
         self.assertTrue(sample.width == 256)
         self.assertTrue(sample.height == 256)
-        self.assertTrue(sample.datanum == sample.width * sample.height)
 
     def test_can_read_smp_samples(self):
         with open(self.path_object_std, 'rb') as samplefile:
             sample = samples.StdSample()
             sample._read_data(samplefile)
 
+        self.assertTrue(sample.datanum == sample.width * sample.height)
         self.assertTrue(len(sample.data) == sample.datanum)
         self.assertTrue(isinstance(sample.data[0], samples.smp_sample))
+
         
     
 

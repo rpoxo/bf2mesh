@@ -49,11 +49,11 @@ class StdSample:
         size = struct.calcsize(fmt)
 
         self.fourcc, self.width, self.height = struct.Struct(fmt).unpack(fo.read(size))
-        self.datanum = self.width * self.height
 
     def _read_data(self, fo):
         self._read_head(fo)
 
+        self.datanum = self.width * self.height
         for i in range(self.datanum):
             sample = smp_sample()
             sample.read(fo)

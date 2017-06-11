@@ -5,6 +5,13 @@ import bf2
 import modmath
 
 
+def LoadBF2Sample(filepath):
+    with open(filepath, 'rb') as samplefile:
+        sample = StdSample()
+        sample.load_file_data(samplefile)
+    return sample
+
+
 class smp_sample:
 
     def __init__(self):
@@ -65,7 +72,7 @@ class StdSample:
         self.facenum = None
         self.faces = []
 
-    def read_filedata(self, fo):
+    def load_file_data(self, fo):
         self._read_faces(fo)
 
     def _read_head(self, fo):

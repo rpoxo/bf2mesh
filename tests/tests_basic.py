@@ -601,11 +601,13 @@ class TestSamplesReading(unittest.TestCase):
         self.assertTrue(len(sample.faces) == sample.facenum)
         self.assertTrue(isinstance(sample.faces[0], samples.smp_face))
     
-    def test_can_read_filedata(self):
-        with open(self.path_object_std, 'rb') as samplefile:
-            sample = samples.StdSample()
-            sample.read_filedata(samplefile)
-
+    def test_can_load_samplefile(self):
+        sample = samples.LoadBF2Sample(self.path_object_std)
         self.assertTrue(isinstance(sample, samples.StdSample))
+
+    def test_can_load_bf2_mesh_with_samples(self):
+        meshpath = self.path_object_std.replace('.samples', '.staticmesh')
+        vmesh = mesher.LoadBF2Mesh(meshpath, loadSamples=True)
+        self.assertTrue(isinstance(vmesh.geoms[0].lod[0].sample, samples.StdSample))
     
 

@@ -8,7 +8,11 @@ import samples
 # https://github.com/ByteHazard/BfMeshView/blob/master/source/modStdMesh.bas
 
 
-def LoadBF2Mesh(filepath):
+def LoadBF2Mesh(
+        filepath,
+        loadTextures=False,
+        loadSamples=False,
+        loadCon=False):
     with open(filepath, 'rb') as meshfile:
         file_extension = os.path.splitext(filepath)[1].lower()
 
@@ -18,6 +22,24 @@ def LoadBF2Mesh(filepath):
 
         vmesh = StdMesh(isSkinnedMesh, isBundledMesh, isStaticMesh)
         vmesh.load_file_data(meshfile)
+
+        if loadSamples:
+            dir = os.path.dirname(filepath)
+            for filename in os.listdir(dir):
+                filepath = os.path.join(dir, filename)
+                name = os.path.splitext(filename)[0]
+                ext = os.path.splitext(filename)[1]
+                if ext[:5] == '.samp':
+                    if ext == '.samples':
+                        vmesh.geoms[
+                            0].lod[
+                            0].sample = samples.LoadBF2Sample(filepath)
+                    else:
+                        geom = ext.split('_')[1][0]
+                        lod = ext.split('_')[1][1]
+                        vmesh.geoms[
+                            geom].lod[
+                            lod].sample = samples.LoadBF2Sample(filepath)
     return vmesh
 
 
@@ -42,6 +64,8 @@ class bf2lod:
         self.polycount = 0
         self.matnum = None
         self.mat = []
+
+        self.sample = None
 
 
 class bf2mat:

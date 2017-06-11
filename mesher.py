@@ -2,6 +2,7 @@ import os
 import struct
 
 import bf2
+import modmath
 import samples
 
 # https://github.com/ByteHazard/BfMeshView/blob/master/source/modStdMesh.bas
@@ -18,6 +19,7 @@ def LoadBF2Mesh(filepath):
         vmesh = StdMesh(isSkinnedMesh, isBundledMesh, isStaticMesh)
         vmesh.load_file_data(meshfile)
     return vmesh
+
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
@@ -45,45 +47,32 @@ class bf2lod:
 class bf2mat:
 
     def __init__(self, fo, isSkinnedMesh, version):
-        self.alphamode = struct.Struct('l').unpack(
-            fo.read(struct.calcsize('l')))[0]
+        self.alphamode = modmath.long(fo)
         #print('   alphamode: {}'.format(self.alphamode))
         self.fxfile = self.__get_string(fo)
         #print('   fxfile: {}'.format(self.fxfile))
         self.technique = self.__get_string(fo)
         #print('   technique: {}'.format(self.technique))
-        self.mapnum = struct.Struct('l').unpack(
-            fo.read(struct.calcsize('l')))[0]
+        self.mapnum = modmath.long(fo)
         #print('   mapnum: {}'.format(self.mapnum))
         self.map = self.__get_maps(fo)
-        self.vstart = struct.Struct('l').unpack(
-            fo.read(struct.calcsize('l')))[0]
+        self.vstart = modmath.long(fo)
         #print('   vstart: {}'.format(self.vstart))
-        self.istart = struct.Struct('l').unpack(
-            fo.read(struct.calcsize('l')))[0]
+        self.istart = modmath.long(fo)
         #print('   istart: {}'.format(self.istart))
-        self.inum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.inum = modmath.long(fo)
         #print('   inum: {}'.format(self.inum))
-        self.vnum = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.vnum = modmath.long(fo)
         #print('   vnum: {}'.format(self.vnum))
-        self.u4 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
-        self.u5 = struct.Struct('l').unpack(fo.read(struct.calcsize('l')))[0]
+        self.u4 = modmath.long(fo)
+        self.u5 = modmath.long(fo)
         if not isSkinnedMesh and version == 11:
-            self.nmin = tuple(
-                struct.Struct('3f').unpack(
-                    fo.read(
-                        struct.calcsize('3f'))))
-            self.nmax = tuple(
-                struct.Struct('3f').unpack(
-                    fo.read(
-                        struct.calcsize('3f'))))
+            self.nmin = modmath.float3(fo)
+            self.nmax = modmath.float3(fo)
 
     def __get_string(self, fo):
-        string_len = struct.Struct('l').unpack(
-            fo.read(struct.calcsize('l')))[0]
-        string_fmt = str(string_len) + 's'
-        return struct.Struct(string_fmt).unpack(
-            fo.read(struct.calcsize(string_fmt)))[0]
+        string_len = modmath.long(fo)
+        return modmath.string(fo, string_len)
 
     def __get_maps(self, fo):
         mapnames = []
@@ -108,17 +97,18 @@ class bf2head:
         self.u3 = None
         self.u4 = None
         self.u5 = None
-    
-    def read(self, fo, offset):
+
+    def read(self, fo):
+        # for some reason it fails when using modmath
         self._fmt = ('5l')
         self._size = struct.calcsize(self._fmt)
 
-        data = struct.Struct(self._fmt).unpack(fo.read(self._size))
-        self.u1 = data[0]
-        self.version = data[1]
-        self.u3 = data[2]
-        self.u4 = data[3]
-        self.u5 = data[4]
+        #data = struct.Struct(self._fmt).unpack(fo.read(self._size))
+        self.u1 = modmath.long(fo)
+        self.version = modmath.long(fo)
+        self.u3 = modmath.long(fo)
+        self.u4 = modmath.long(fo)
+        self.u5 = modmath.long(fo)
 
     def __eq__(self, other):
         if self.u1 != other.u1:
@@ -137,29 +127,17 @@ class bf2head:
 class bf2geom:
 
     def __init__(self, fo):
-        # some internals
-        self._fmt = ('l')
-        self._size = struct.calcsize(self._fmt)
-
-        # reading bin
-        data = struct.Struct(self._fmt).unpack(fo.read(self._size))
-        self.lodnum = data[0]
+        self.lodnum = modmath.long(fo)
         self.lod = []
 
 
 class vertattrib:
 
     def __init__(self, fo):
-        # some internals
-        self._fmt = ('4h')
-        self._size = struct.calcsize(self._fmt)
-
-        # reading bin
-        data = struct.Struct(self._fmt).unpack(fo.read(self._size))
-        self.flag = data[0]
-        self.offset = data[1]
-        self.vartype = data[2]
-        self.usage = data[3]
+        self.flag = modmath.short(fo)
+        self.offset = modmath.short(fo)
+        self.vartype = modmath.short(fo)
+        self.usage = modmath.short(fo)
 
     def __str__(self):
         return str((self.flag, self.offset, self.vartype, self.usage))
@@ -182,23 +160,23 @@ class StdMesh:
         self.isSkinnedMesh = False
         self.isBundledMesh = False
         self.isStaticMesh = False
-        self._tail = 0
 
         # mesh data
-        self.head = None # header contains version and some bfp4f data
-        self.u1 = None # version flag for bfp4f
-        self.geomnum = None # amount of geoms
-        self.geoms = None # geoms data struct, to be filled as we reading file
-        self.vertattribnum = None # number of vertattributes xDDD
-        self.vertattrib = None # vertattrib array, no idea what it does
-        self.vertformat = None # vert format? no idea hwta it does, perhaps bytes len(all floats)
-        self.vertstride = None # bytes size for vertex attributes buffer
-        self.vertnum = None # number of vertices
-        self.vertices = None # vertices array, actual geometry
-        self.vertices_attributes = None # generated buffers for better reading 
-        self.indexnum = None # number of indices
-        self.index = None # vertex indices
-        self.u2 = None # some another bfp4f garbage..
+        self.head = None  # header contains version and some bfp4f data
+        self.u1 = None  # version flag for bfp4f
+        self.geomnum = None  # amount of geoms
+        self.geoms = None  # geoms data struct, to be filled as we reading file
+        self.vertattribnum = None  # number of vertattributes xDDD
+        self.vertattrib = None  # vertattrib array, no idea what it does
+        # vert format? no idea hwta it does, perhaps bytes len(all floats)
+        self.vertformat = None
+        self.vertstride = None  # bytes size for vertex attributes buffer
+        self.vertnum = None  # number of vertices
+        self.vertices = []  # vertices array, actual geometry
+        self.vertices_attributes = None  # generated buffers for better reading
+        self.indexnum = None  # number of indices
+        self.index = None  # vertex indices
+        self.u2 = None  # some another bfp4f garbage..
 
     # just a wrapper for better name
     def load_file_data(self, fo):
@@ -215,117 +193,88 @@ class StdMesh:
     #-----------------------------
     def _read_head(self, fo):
         header = bf2head()
-        header.read(fo, self._tail)
+        header.read(fo)
         self.head = header
-        self._tail = fo.tell()
         #print('head ends at {}'.format(fo.tell()))
 
     def _read_u1_bfp4f_version(self, fo):
         self._read_head(fo)
-        _fmt = 'b'
-        _size = struct.calcsize(_fmt)
 
-        self.u1 = struct.Struct(_fmt).unpack(fo.read(_size))[0]
-        self._tail = fo.tell()
+        self.u1 = modmath.byte(fo)
 
     def _read_geomnum(self, fo):
         self._read_u1_bfp4f_version(fo)
-        #print('geomtable starts at {}'.format(fo.tell()))
-        _fmt = 'l'
-        _size = struct.calcsize(_fmt)
 
-        self.geomnum = struct.Struct(_fmt).unpack(fo.read(_size))[0]
-        self._tail += _size
+        self.geomnum = modmath.long(fo)
 
     def _read_geoms(self, fo):
         self._read_geomnum(fo)
+
         self.geoms = [bf2geom(fo) for i in range(self.geomnum)]
-        self._tail = fo.tell()
-        #print('geomtable ends at {}'.format(fo.tell()))
 
     def _read_vertattribnum(self, fo):
         self._read_geoms(fo)
-        _fmt = 'l'
-        _size = struct.calcsize(_fmt)
 
-        self.vertattribnum = struct.Struct(_fmt).unpack(fo.read(_size))[0]
-        self._tail = fo.tell()
-        #print('attribtable starts at {}'.format(fo.tell()))
+        self.vertattribnum = modmath.long(fo)
 
     def _read_vertext_attribute_table(self, fo):
         self._read_vertattribnum(fo)
+
         self.vertattrib = [vertattrib(fo) for i in range(self.vertattribnum)]
-        self._tail = fo.tell()
-        #print('attribtable ends at {}'.format(fo.tell()))
 
     def _read_vertformat(self, fo):
         self._read_vertext_attribute_table(fo)
-        _fmt = 'l'
-        _size = struct.calcsize(_fmt)
 
-        self.vertformat = struct.Struct(_fmt).unpack(fo.read(_size))[0]
-        self._tail = fo.tell()
+        self.vertformat = modmath.long(fo)
 
     def _read_vertstride(self, fo):
         self._read_vertformat(fo)
-        _fmt = 'l'
-        _size = struct.calcsize(_fmt)
 
-        self.vertstride = struct.Struct(_fmt).unpack(fo.read(_size))[0]
-        self._tail = fo.tell()
+        self.vertstride = modmath.long(fo)
 
     def _read_vertnum(self, fo):
         self._read_vertstride(fo)
-        _fmt = 'l'
-        _size = struct.calcsize(_fmt)
 
-        self.vertnum = struct.Struct(_fmt).unpack(fo.read(_size))[0]
-        self._tail = fo.tell()
+        self.vertnum = modmath.long(fo)
 
     def _read_vertex_block(self, fo):
         self._read_vertnum(fo)
-        _vertices_num = int(self.vertstride / self.vertformat * self.vertnum)
-        _fmt = '{}f'.format(_vertices_num)
-        _size = struct.calcsize(_fmt)
 
-        self.vertices = struct.Struct(_fmt).unpack(fo.read(_size))
-        self._tail = fo.tell()
-        #print('vertex block ends at {}'.format(fo.tell()))
+        vertices_num = int(self.vertstride / self.vertformat * self.vertnum)
+        # TODO: refactor
+        fmt = '{}f'.format(vertices_num)
+        size = struct.calcsize(fmt)
+
+        self.vertices = struct.Struct(fmt).unpack(fo.read(size))
 
     def _read_indexnum(self, fo):
         self._read_vertex_block(fo)
-        _fmt = 'l'
-        _size = struct.calcsize(_fmt)
 
-        self.indexnum = struct.Struct(_fmt).unpack(fo.read(_size))[0]
-        self._tail = fo.tell()
+        self.indexnum = modmath.long(fo)
 
     def _read_index_block(self, fo):
         self._read_indexnum(fo)
-        _fmt = '{}h'.format(self.indexnum)
-        _size = struct.calcsize(_fmt)
 
-        self.index = struct.Struct(_fmt).unpack(fo.read(_size))
-        self._tail = fo.tell()
-        #print('index block ends at {}'.format(fo.tell()))
+        # TODO: refactor
+        fmt = '{}h'.format(self.indexnum)
+        size = struct.calcsize(fmt)
+
+        self.index = struct.Struct(fmt).unpack(fo.read(size))
 
     def _read_u2(self, fo):
         if not self.isSkinnedMesh:
             self._read_index_block(fo)
-            _fmt = 'l'.format(self.indexnum)
-            _size = struct.calcsize(_fmt)
 
-            self.u2 = struct.Struct(_fmt).unpack(fo.read(_size))[0]
-            self._tail = fo.tell()
+            self.u2 = modmath.long(fo)
 
     def _read_nodes(self, fo):
         self._read_u2(fo)
+
         for geomnum in range(self.geomnum):
             for lodnum in range(self.geoms[geomnum].lodnum):
                 self.geoms[geomnum].lod.insert(
                     lodnum, bf2lod(fo, self.head.version))
                 self.__read_lod_node_table(fo, self.geoms[geomnum].lod[lodnum])
-        self._tail = fo.tell()
 
     def _read_materials(self, fo):
         self._read_nodes(fo)
@@ -333,23 +282,18 @@ class StdMesh:
         #print('geom block starts at {}'.format(fo.tell()))
 
         def _read_matnum(fo, lod):
-            _fmt = 'l'
-            _size = struct.calcsize(_fmt)
-
-            data = struct.Struct(_fmt).unpack(fo.read(_size))
-            lod.matnum = data[0]
+            lod.matnum = modmath.long(fo)
 
         for geomnum in range(self.geomnum):
             for lodnum in range(self.geoms[geomnum].lodnum):
                 #print(' mesh {} start at {}'.format(lodnum, fo.tell()))
                 _read_matnum(fo, self.geoms[geomnum].lod[lodnum])
-                #print(
+                # print(
                 #    ' matnum: {}'.format(
                 #        self.geoms[geomnum].lod[lodnum].matnum))
                 # for matnum in range(self.geoms[geomnum].lod[lodnum].matnum):
                 self.__read_lod_material(fo, self.geoms[geomnum].lod[lodnum])
                 #print(' mesh {} end at {}'.format(lodnum, fo.tell()))
-        self._tail = fo.tell()
         #print('geom block ends at {}'.format(fo.tell()))
 
     def _read_filedata(self, fo):
@@ -399,7 +343,7 @@ class StdMesh:
         self._write_vertattribnum(filepath)
         with open(filepath, 'ab+') as fo:
             for vertattribnum in range(self.vertattribnum):
-                fmt = self.vertattrib[vertattribnum]._fmt
+                fmt = '4h'
                 data = (self.vertattrib[vertattribnum].flag,
                         self.vertattrib[vertattribnum].offset,
                         self.vertattrib[vertattribnum].vartype,
@@ -476,25 +420,14 @@ class StdMesh:
         #print('nodes chunk start at  {}'.format(fo.tell()))
 
         def _read_bounds(fo, lod):
-            _fmt = '6f'
-            _size = struct.calcsize(_fmt)
-            _data = struct.Struct(_fmt).unpack(fo.read(_size))
-
-            lod.min = tuple(_data[0:3])
-            lod.max = tuple(_data[3:6])
+            lod.min = modmath.float3(fo)
+            lod.max = modmath.float3(fo)
 
         def _read_pivot(fo, lod):
-            _fmt = '3f'
-            _size = struct.calcsize(_fmt)
-            _data = struct.Struct(_fmt).unpack(fo.read(_size))
-            lod.pivot = tuple(_data)
+            lod.pivot = modmath.float3(fo)
 
         def _read_nodenum(fo, lod):
-            _fmt = 'l'
-            _size = struct.calcsize(_fmt)
-            _data = struct.Struct(_fmt).unpack(fo.read(_size))
-
-            lod.nodenum = int(_data[0])
+            lod.nodenum = modmath.long(fo)
 
         _read_bounds(fo, lod)
         if self.head.version <= 6:
@@ -504,10 +437,7 @@ class StdMesh:
         # reading nodes
         for i in range(lod.nodenum):
             for j in range(16):
-                _fmt = 'f'
-                _size = struct.calcsize(_fmt)
-                _data = struct.Struct(_fmt).unpack(fo.read(_size))
-                lod.node.append(_data[0])
+                lod.node.append(modmath.float(fo))
         #print('nodes chunk end at {}'.format(fo.tell()))
 
     def __write_lod_node_table(self, fo, lod):
@@ -590,15 +520,15 @@ class StdMesh:
                 tangent = tuple(chunk[17:20])
 
             vert = {
-                'position' : position,
-                'normal' : normal,
-                'blend_indices' : blend_indices,
-                'uv1' : uv1,
-                'uv2' : uv2,
-                'uv3' : uv3,
-                'uv4' : uv4,
-                'tangent' : tangent
-                }
+                'position': position,
+                'normal': normal,
+                'blend_indices': blend_indices,
+                'uv1': uv1,
+                'uv2': uv2,
+                'uv3': uv3,
+                'uv4': uv4,
+                'tangent': tangent
+            }
             if lenght == 20:
                 vert['uv5'] = uv5
             self.vertices_attributes.append(vert)
@@ -614,30 +544,22 @@ class StdMesh:
 
             vertices_new.append(vertice['uv1'][0])
             vertices_new.append(vertice['uv1'][1])
-            
+
             vertices_new.append(vertice['uv2'][0])
             vertices_new.append(vertice['uv2'][1])
-            
+
             vertices_new.append(vertice['uv3'][0])
             vertices_new.append(vertice['uv3'][1])
-            
+
             vertices_new.append(vertice['uv4'][0])
             vertices_new.append(vertice['uv4'][1])
-            
+
             if self.vertstride == 80:
                 vertices_new.append(vertice['uv5'][0])
                 vertices_new.append(vertice['uv5'][1])
-            
+
             for axis in vertice['tangent']:
                 vertices_new.append(axis)
-        
+
         # converting to set after generating
         self.vertices = tuple(vertices_new)
-
-
-
-
-
-
-
-

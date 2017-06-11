@@ -8,7 +8,7 @@ DEBUG = False
 
 excludes = [
     '\staticobjects\test',
-    ]
+]
 
 samples_extensions = [
     'samples',
@@ -21,10 +21,11 @@ samples_extensions = [
     'samp_07',
     'samp_08',
     'samp_09',
-    ]
+]
+
 
 class LM_data:
-    
+
     def __init__(self, name):
         self.name = name
         self.mesh = None
@@ -33,11 +34,13 @@ class LM_data:
 
 def main():
     modroot = bf2.Mod().root
-    
+
     lm_sizes_data = {}
-    for dir, dirnames, filenames in os.walk(os.path.join(modroot, 'objects', 'staticobjects')):
+    for dir, dirnames, filenames in os.walk(
+            os.path.join(modroot, 'objects', 'staticobjects')):
         for filename in filenames:
-            filepath = os.path.join(modroot, 'objects', 'staticobjects', dir, filename)
+            filepath = os.path.join(
+                modroot, 'objects', 'staticobjects', dir, filename)
             name = os.path.splitext(filename)[0]
             ext = os.path.splitext(filename)[1]
             if name not in lm_sizes_data.keys():

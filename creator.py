@@ -3,8 +3,9 @@ import struct
 
 import mesher
 
+
 class Box:
-    
+
     def __init__(self):
         self.vmesh = mesher.StdMesh()
         self._create_header(self.vmesh)

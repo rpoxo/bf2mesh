@@ -29,6 +29,8 @@ def worker(jobs, results, modroot):
                     else:
                         non_iniform_size = '*'.join([str(int(lod.sample.width/2)), str(int(lod.sample.height/2))])
                         meshname = ' '.join([meshname, non_iniform_size])
+                    if lod.sample.width == 0 or lod.sample.height == 0:
+                        meshname = ''.join(['ZERO:', meshname])
             answer = meshname
             # freeing memory lol
             del mesh
@@ -52,7 +54,7 @@ def main(modroot):
 
     # initializing workers
     processes = []
-    num_workers = int(multiprocessing.cpu_count()/2)
+    num_workers = int(multiprocessing.cpu_count())
     for i in range(num_workers):
         proc = multiprocessing.Process(target=worker, args=(tasks, results, modroot,))
         proc.start()
@@ -79,9 +81,13 @@ def main(modroot):
 
     # Start parsing results
     finished_processes = 0
-    samples_no_lods = []
-    destroyables = []
-    no_samples = []
+    lm_data = {
+        'nolods' : [],
+        'dest' : [],
+        'nosamp' : [],
+        'zeroed' : [],
+        'valid' : [],
+        }
     while 1:
         next_result = results.get()
         if next_result is None:
@@ -91,27 +97,44 @@ def main(modroot):
                 break
         if next_result != None:
             if next_result.startswith('INDEXERROR:'):
-                samples_no_lods.append(next_result.replace('INDEXERROR:', ''))
+                lm_data['nolods'].append(next_result.replace('INDEXERROR:', ''))
             elif next_result.startswith('DEST:'):
-                destroyables.append(next_result.replace('DEST:', ''))
+                lm_data['dest'].append(next_result.replace('DEST:', ''))
+            elif next_result.startswith('ZERO:'):
+                lm_data['zeroed'].append(next_result.replace('ZERO:', ''))
             elif len(next_result.split(' ')) == 1:
-                no_samples.append(next_result)
+                lm_data['nosamp'].append(next_result)
             else:
-                print('{}'.format(next_result))
+                lm_data['valid'].append(next_result)
         num_jobs -= 1
     
     # Wait for all of the tasks to finish
     tasks.join()
 
-    # printing special results
-    print('[NO_SAMPLES]: {}'.format(len(no_samples)))
-    for mesh_no_sample in no_samples:
+    # printing results
+    lm_data['valid'].sort()
+    print('[VALID]: {}'.format(len(lm_data['valid'])))
+    for mesh_with_sample in lm_data['valid']:
+        print(mesh_with_sample)
+    
+    lm_data['nosamp'].sort()
+    print('[NO_SAMPLES]: {}'.format(len(lm_data['nosamp'])))
+    for mesh_no_sample in lm_data['nosamp']:
         print(mesh_no_sample)
-    print('[DESTROYABLES]: {}'.format(len(destroyables)))
-    for destroyable_result in destroyables:
+    
+    lm_data['dest'].sort()
+    print('[DESTROYABLES]: {}'.format(len(lm_data['dest'])))
+    for destroyable_result in lm_data['dest']:
         print(destroyable_result)
-    print('[SAMPLES_NO_LODS]: {}'.format(len(samples_no_lods)))
-    for sample_without_lod in samples_no_lods:
+    
+    lm_data['zeroed'].sort()
+    print('[INVALID_ZEROED]: {}'.format(len(lm_data['zeroed'])))
+    for zeroed_sample in lm_data['zeroed']:
+        print(zeroed_sample)
+        
+    lm_data['nolods'].sort()
+    print('[SAMPLES_NO_LODS]: {}'.format(len(lm_data['nolods'])))
+    for sample_without_lod in lm_data['nolods']:
         print(sample_without_lod.replace(modroot, ''))
 
     time_total = time.time() - start_time

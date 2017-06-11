@@ -225,36 +225,6 @@ class TestStdMeshReading(unittest.TestCase):
     def test_can_load_bf2_mesh(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)
         self.assertTrue(isinstance(vmesh, mesher.StdMesh))
-    
-    def test_can_generate_vertices_attributes(self):
-        with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh()
-            vmesh._read_filedata(meshfile)
-        
-        vmesh._generate_vertices_attributes()
-        vertsinfo = []
-        for chunk in chunks(vmesh.vertices, 18):
-            position = tuple(chunk[0:3])
-            normal = tuple(chunk[3:6])
-            blend_indices = chunk[6]
-            uv1 = tuple(chunk[7:9])
-            uv2 = tuple(chunk[9:11])
-            uv3 = tuple(chunk[11:13])
-            uv4 = tuple(chunk[13:15])
-            tangent = tuple(chunk[15:18])
-
-            vert = {
-                'position' : position,
-                'normal' : normal,
-                'blend_indices' : blend_indices,
-                'uv1' : uv1,
-                'uv2' : uv2,
-                'uv3' : uv3,
-                'uv4' : uv4,
-                'tangent' : tangent
-                }
-            vertsinfo.append(vert)
-        self.assertTrue(vmesh.vertices_attributes == vertsinfo)
 
     
 class TestStdMeshReading_Specials(unittest.TestCase):
@@ -277,7 +247,7 @@ class TestStdMeshReading_Specials(unittest.TestCase):
                     counter += 1
                     try:
                         vmesh = mesher.LoadBF2Mesh(os.path.join(bf2.Mod().root, dir, filename))
-                    except MemoryError:
+                    except:
                         print('Failed to load {}'.format(os.path.join(bf2.Mod().root, dir, filename)))
         print(counter)
         #raise
@@ -520,45 +490,6 @@ class TestStdMeshWriting(unittest.TestCase):
         self.assertTrue(vmesh2.geoms[0].lod[0].matnum == vmesh2.geoms[0].lod[0].matnum)
         self.assertTrue(vmesh2.geoms[0].lod[0].mat == vmesh2.geoms[0].lod[0].mat)
         self.assertTrue(vmesh2.geoms[0].lod[0].polycount == vmesh2.geoms[0].lod[0].polycount)
-
-    def test_can_write_vertices_attiributes_to_vertices(self):
-        with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = mesher.StdMesh()
-            vmesh._read_filedata(meshfile)
-            vmesh._generate_vertices_attributes()
-
-        vertices_new = []
-        for vertice in vmesh.vertices_attributes:
-            for axis in vertice['position']:
-                vertices_new.append(axis)
-            for axis in vertice['normal']:
-                vertices_new.append(axis)
-            vertices_new.append(vertice['blend_indices'])
-
-            vertices_new.append(vertice['uv1'][0])
-            vertices_new.append(vertice['uv1'][1])
-            
-            vertices_new.append(vertice['uv2'][0])
-            vertices_new.append(vertice['uv2'][1])
-            
-            vertices_new.append(vertice['uv3'][0])
-            vertices_new.append(vertice['uv3'][1])
-            
-            vertices_new.append(vertice['uv4'][0])
-            vertices_new.append(vertice['uv4'][1])
-            
-            if vmesh.vertstride == 80:
-                vertices_new.append(vertice['uv5'][0])
-                vertices_new.append(vertice['uv5'][1])
-            
-            for axis in vertice['tangent']:
-                vertices_new.append(axis)
-
-        # converting to tuple after generating
-        vertices_new = tuple(vertices_new)
-
-        self.assertTrue(len(vmesh.vertices) == len(vertices_new))
-        self.assertTrue(vmesh.vertices == vertices_new)
 
     def test_can_load_bf2_mesh_cloned(self):
         vmesh = mesher.LoadBF2Mesh(self.path_object_std)

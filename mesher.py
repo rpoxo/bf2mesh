@@ -35,8 +35,8 @@ def LoadBF2Mesh(
                             0].lod[
                             0].sample = samples.LoadBF2Sample(filepath)
                     else:
-                        geom = ext.split('_')[1][0]
-                        lod = ext.split('_')[1][1]
+                        geom = int(ext.split('_')[1][0])
+                        lod = int(ext.split('_')[1][1])
                         vmesh.geoms[
                             geom].lod[
                             lod].sample = samples.LoadBF2Sample(filepath)
@@ -206,7 +206,6 @@ class StdMesh:
     def load_file_data(self, fo):
         # materials read will read everything inb4
         self._read_filedata(fo)
-        self._generate_vertices_attributes()
 
     def write_file_data(self, fo):
         # materials read will read everything inb4
@@ -521,69 +520,3 @@ class StdMesh:
             if not self.isSkinnedMesh and self.head.version == 11:
                 fo.write(struct.Struct('3f').pack(*lod.mat[i].nmin))
                 fo.write(struct.Struct('3f').pack(*lod.mat[i].nmax))
-
-    def _generate_vertices_attributes(self):
-        self.vertices_attributes = []
-        if self.vertstride == 72:
-            lenght = 18
-        elif self.vertstride == 80:
-            lenght = 20
-        for chunk in chunks(self.vertices, lenght):
-            position = tuple(chunk[0:3])
-            normal = tuple(chunk[3:6])
-            blend_indices = chunk[6]
-            uv1 = tuple(chunk[7:9])
-            uv2 = tuple(chunk[9:11])
-            uv3 = tuple(chunk[11:13])
-            uv4 = tuple(chunk[13:15])
-            if lenght == 18:
-                uv5 = None
-                tangent = tuple(chunk[15:18])
-            elif lenght == 20:
-                uv5 = tuple(chunk[15:17])
-                tangent = tuple(chunk[17:20])
-
-            vert = {
-                'position': position,
-                'normal': normal,
-                'blend_indices': blend_indices,
-                'uv1': uv1,
-                'uv2': uv2,
-                'uv3': uv3,
-                'uv4': uv4,
-                'tangent': tangent
-            }
-            if lenght == 20:
-                vert['uv5'] = uv5
-            self.vertices_attributes.append(vert)
-
-    def _write_vertices_attributes(self):
-        vertices_new = []
-        for vertice in self.vertices_attributes:
-            for axis in vertice['position']:
-                vertices_new.append(axis)
-            for axis in vertice['normal']:
-                vertices_new.append(axis)
-            vertices_new.append(vertice['blend_indices'])
-
-            vertices_new.append(vertice['uv1'][0])
-            vertices_new.append(vertice['uv1'][1])
-
-            vertices_new.append(vertice['uv2'][0])
-            vertices_new.append(vertice['uv2'][1])
-
-            vertices_new.append(vertice['uv3'][0])
-            vertices_new.append(vertice['uv3'][1])
-
-            vertices_new.append(vertice['uv4'][0])
-            vertices_new.append(vertice['uv4'][1])
-
-            if self.vertstride == 80:
-                vertices_new.append(vertice['uv5'][0])
-                vertices_new.append(vertice['uv5'][1])
-
-            for axis in vertice['tangent']:
-                vertices_new.append(axis)
-
-        # converting to set after generating
-        self.vertices = tuple(vertices_new)

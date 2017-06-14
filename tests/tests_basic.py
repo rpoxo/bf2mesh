@@ -9,11 +9,6 @@ import bf2
 import mesher
 import samples
 
-def chunks(l, n):
-    """Yield successive n-sized chunks from l."""
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
-
 class TestMod(unittest.TestCase):
     
     @mock.patch('os.getcwd')
@@ -47,6 +42,7 @@ class TestStdMeshReading(unittest.TestCase):
 
     def setUp(self):
         # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
+        # TODO: REFACTOR OBJECTS STRUCT
         test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box.staticmesh'])
         test_object_alt_uvw = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box2', 'meshes', 'evil_box2.staticmesh'])
         test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box3', 'meshes', 'evil_box3.staticmesh'])

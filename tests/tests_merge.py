@@ -5,8 +5,6 @@ import os
 import sys
 import struct
 
-from tests_basic import chunks
-
 import bf2
 import mesher
 

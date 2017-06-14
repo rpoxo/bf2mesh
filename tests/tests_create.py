@@ -2,8 +2,6 @@ import unittest
 import os
 import struct
 
-from tests_basic import chunks, TestMod
-
 import bf2
 import mesher
 import creator

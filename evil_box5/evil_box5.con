@@ -1,8 +1,0 @@
-GeometryTemplate.create StaticMesh evil_box5
-
-ObjectTemplate.create SimpleObject evil_box5
-ObjectTemplate.saveInSeparateFile 1
-ObjectTemplate.creator DECENT-PC:Administrator
-ObjectTemplate.geometry evil_box5
-
-include evil_box5.tweak

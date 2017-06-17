@@ -1,9 +1,0 @@
-GeometryTemplate.create StaticMesh evil_box_2xplane
-
-ObjectTemplate.create SimpleObject evil_box_2xplane
-ObjectTemplate.saveInSeparateFile 1
-ObjectTemplate.Anchor 0.0/0.0/0.0
-ObjectTemplate.creator DECENT-PC:Administrator
-ObjectTemplate.geometry evil_box_2xplane
-
-include evil_box_2xplane.tweak

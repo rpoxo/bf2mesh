@@ -44,18 +44,12 @@ class TestStdMeshReading(unittest.TestCase):
         # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
         # TODO: REFACTOR OBJECTS STRUCT
         test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box.staticmesh'])
-        test_object_alt_uvw = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box2', 'meshes', 'evil_box2.staticmesh'])
-        test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box3', 'meshes', 'evil_box3.staticmesh'])
-        test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box4', 'meshes', 'evil_box4.staticmesh'])
-        test_object_merged = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box5', 'meshes', 'evil_box5.staticmesh'])
-        test_object_2merge = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box6', 'meshes', 'evil_box6.staticmesh'])
+        test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_2_lod', 'meshes', 'evil_box_2_lod.staticmesh'])
+        test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_destroyable', 'meshes', 'evil_box_destroyable.staticmesh'])
 
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
-        self.path_object_alt_uvw = os.path.join(bf2.Mod().root, test_object_alt_uvw)
         self.path_object_two_lods = os.path.join(bf2.Mod().root, test_object_two_lods)
         self.path_object_dest = os.path.join(bf2.Mod().root, test_object_dest)
-        self.path_object_merged = os.path.join(bf2.Mod().root, test_object_merged)
-        self.path_object_2merge = os.path.join(bf2.Mod().root, test_object_2merge)
 
     def test_can_read_header(self):
         with open(self.path_object_std, 'rb') as meshfile:
@@ -253,19 +247,15 @@ class TestStdMeshWriting(unittest.TestCase):
     def setUp(self):
         # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
         test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box.staticmesh'])
-        test_object_alt_uvw = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box2', 'meshes', 'evil_box2.staticmesh'])
-        test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box3', 'meshes', 'evil_box3.staticmesh'])
-        test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box4', 'meshes', 'evil_box4.staticmesh'])
-        test_object_merged = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box5', 'meshes', 'evil_box5.staticmesh'])
+        test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_2_lod', 'meshes', 'evil_box_2_lod.staticmesh'])
+        test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_destroyable', 'meshes', 'evil_box_destroyable.staticmesh'])
         
         test_object_clone = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box_clone.staticmesh'])
         
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
-        self.path_object_alt_uvw = os.path.join(bf2.Mod().root, test_object_alt_uvw)
         self.path_object_two_lods = os.path.join(bf2.Mod().root, test_object_two_lods)
         self.path_object_dest = os.path.join(bf2.Mod().root, test_object_dest)
-        self.path_object_merged = os.path.join(bf2.Mod().root, test_object_merged)
 
         self.path_object_clone = os.path.join(bf2.Mod().root, test_object_clone)
 

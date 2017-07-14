@@ -4,7 +4,7 @@ import copy
 import struct
 
 import bf2
-import mesher
+import meshes
 
 class TestStdMesOperations(unittest.TestCase):
 
@@ -19,7 +19,7 @@ class TestStdMesOperations(unittest.TestCase):
         self.box_offset_UV = os.path.join(bf2.Mod().root, mesh_box_offset_UV)
     
     def test_offset_box_position(self):
-        vmesh = mesher.LoadBF2Mesh(self.box)
+        vmesh = meshes.LoadBF2Mesh(self.box)
         
         offset = (0.0, 1.0, 0.0)
         old_vertices = list(copy.deepcopy(vmesh.vertices))
@@ -44,7 +44,7 @@ class TestStdMesOperations(unittest.TestCase):
         vmesh.write_file_data(self.box_offset_position)
 
     def test_can_offset_UV1(self):
-        vmesh = mesher.LoadBF2Mesh(self.box)
+        vmesh = meshes.LoadBF2Mesh(self.box)
         
         offset = (0.0, -1.5)
         uvid = 1

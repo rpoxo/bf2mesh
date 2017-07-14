@@ -4,7 +4,7 @@ import multiprocessing
 import time
 
 import bf2
-import mesher
+import meshes
 
 def worker(jobs, results, modroot):
     while 1:
@@ -15,7 +15,7 @@ def worker(jobs, results, modroot):
             break
         filepath = next_task
         try:
-            mesh = mesher.LoadBF2Mesh(filepath, loadSamples=True)
+            mesh = meshes.LoadBF2Mesh(filepath, loadSamples=True)
             #answer = 'Success loaded samples for {}'.format(filepath)
             meshname = os.path.splitext(os.path.basename(filepath))[0]
             if len(mesh.geoms) == 2: # dest objects

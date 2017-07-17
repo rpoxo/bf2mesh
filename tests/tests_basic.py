@@ -216,8 +216,146 @@ class TestStdMeshReading(unittest.TestCase):
         vmesh = meshes.LoadBF2Mesh(self.path_object_std)
         self.assertTrue(isinstance(vmesh, meshes.StdMesh))
 
+
+#@unittest.skip('testing failed mesh load')
+class TestBundleMeshReading(unittest.TestCase):
+
+    def setUp(self):
+        # test for vehicle depot
+        # objects\common\vehicle_depot\Meshes
+        test_object_std = os.path.join(*['objects', 'common', 'vehicle_depot', 'meshes', 'vehicle_depot.bundledmesh'])
+
+        self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
+
+    def test_can_read_header(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_head(meshfile)
+            
+        self.assertTrue(vmesh.head.u1 == 0)
+        self.assertTrue(vmesh.head.version in [10, 6, 11])
+        self.assertTrue(vmesh.head.u3 == 0)
+        self.assertTrue(vmesh.head.u4 == 0)
+        self.assertTrue(vmesh.head.u5 == 0)
+
+    def test_can_read_u1_bfp4f_version(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_u1_bfp4f_version(meshfile)
+            
+        self.assertTrue(vmesh.u1 == 0)
+
+    def test_can_read_geomnum_mesh_std(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_geomnum(meshfile)
+            
+        self.assertTrue(vmesh.geomnum == 1)
+
+    def test_can_read_geom_table_mesh_std(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_geoms(meshfile)
+
+        self.assertTrue(len(vmesh.geoms) == 1)
+        self.assertTrue(vmesh.geoms[0].lodnum == 6)
+
+    def test_can_read_vertattribnum_mesh_std(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_vertattribnum(meshfile)
+
+        self.assertTrue(vmesh.vertattribnum == 6)
     
-class TestStdMeshReading_Specials(unittest.TestCase):
+    def test_can_read_vertex_attribute_table(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_vertext_attribute_table(meshfile)
+            
+        self.assertTrue(len(vmesh.vertattrib) == vmesh.vertattribnum)
+
+    def test_can_read_vertformat(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_vertformat(meshfile)
+        self.assertTrue(vmesh.vertformat == 4)
+
+    def test_can_read_vertstride(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_vertstride(meshfile)
+        self.assertTrue(vmesh.vertstride == 48)
+
+    def test_can_read_vertnum(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_vertnum(meshfile)
+        self.assertTrue(vmesh.vertnum == 131383)
+
+    def test_can_read_vertex_block(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_vertex_block(meshfile)
+            
+        print(len(vmesh.vertices))
+        self.assertTrue(len(vmesh.vertices) == 1576596)
+
+    def test_can_read_indexnum(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_indexnum(meshfile)
+
+        self.assertTrue(vmesh.indexnum == 278436)
+
+    def test_can_read_index_block(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_index_block(meshfile)
+
+        self.assertTrue(len(vmesh.index) == 278436)
+
+    def test_can_read_u2(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_u2(meshfile)
+
+        self.assertTrue(vmesh.u2 is 8)
+
+    def test_can_read_nodes(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh.isBundledMesh = True # should refactor tests for that file
+            vmesh._read_nodes(meshfile)
+
+        self.assertTrue(vmesh.geoms[0].lod[0].nodenum == 1)
+
+    def test_can_read_materials(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = meshes.StdMesh()
+            vmesh._read_materials(meshfile)
+
+        self.assertTrue(vmesh.geoms[0].lod[0].matnum == 1)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].alphamode == 0)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].fxfile == b'StaticMesh.fx')
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].technique == b'Base')
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].mapnum == 2)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == b'objects/staticobjects/test/evil_box/textures/evil_box_c.dds')
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[1] == b'Common\Textures\SpecularLUT_pow36.dds')
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vstart == 0)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].istart == 0)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].inum == 36)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vnum == 25)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u4 == 8064)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u5 == 65535)
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmin == (-0.5, 0.0, -0.5))
+        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax == (0.5, 1.0, 0.5))
+        self.assertTrue(vmesh.geoms[0].lod[0].polycount == 12)
+
+    def test_can_load_bf2_mesh(self):
+        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(isinstance(vmesh, meshes.StdMesh))
+    
+class TestMeshReading_Specials(unittest.TestCase):
 
     # objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh
     # it has version 4 and inum and vnum in material
@@ -231,14 +369,16 @@ class TestStdMeshReading_Specials(unittest.TestCase):
     @unittest.skip('i\o intensive')
     def test_can_read_PR_MESHES_REPO(self):
         counter = 0
-        for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects', 'staticobjects')):
+        for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects')):
             for filename in filenames:
-                if filename.split('.')[-1].lower() == 'staticmesh':
+                if filename.split('.')[-1].lower()[-4:] == 'mesh':
+                #if True:
                     counter += 1
                     try:
                         vmesh = meshes.LoadBF2Mesh(os.path.join(bf2.Mod().root, dir, filename))
-                    except:
+                    except struct.error:
                         print('Failed to load {}'.format(os.path.join(bf2.Mod().root, dir, filename)))
+                        raise
         print(counter)
         #raise
 

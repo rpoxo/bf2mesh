@@ -322,7 +322,7 @@ class StdMesh:
             for lodnum in range(self.geoms[geomnum].lodnum):
                 self.geoms[geomnum].lod.insert(
                     lodnum, bf2lod(fo, self.head.version))
-                self.__read_lod_node_table(fo, self.geoms[geomnum].lod[lodnum])
+                self.__read_lod_node_table(fo, self.geoms[geomnum].lod[lodnum]) # expected to be 28 bytes in static bundlemesh
 
     def _read_materials(self, fo):
         self._read_nodes(fo)
@@ -465,7 +465,7 @@ class StdMesh:
     #-----------------------------
 
     def __read_lod_node_table(self, fo, lod):
-        #print('nodes chunk start at  {}'.format(fo.tell()))
+        #print('>> {}'.format(fo.tell()))
 
         def _read_bounds(fo, lod):
             lod.min = modmath.float3(fo)
@@ -483,10 +483,10 @@ class StdMesh:
         _read_nodenum(fo, lod)
 
         # reading nodes
-        for i in range(lod.nodenum):
-            for j in range(16):
-                lod.node.append(modmath.float(fo))
-        #print('nodes chunk end at {}'.format(fo.tell()))
+        if not self.isBundledMesh:
+            for i in range(lod.nodenum):
+                for j in range(16):
+                    lod.node.append(modmath.float(fo))
 
     def __write_lod_node_table(self, fo, lod):
         #print('nodes chunk start at  {}'.format(fo.tell()))

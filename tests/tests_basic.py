@@ -332,27 +332,20 @@ class TestBundleMeshReading(unittest.TestCase):
     def test_can_read_materials(self):
         with open(self.path_object_std, 'rb') as meshfile:
             vmesh = meshes.StdMesh()
+            vmesh.isBundledMesh = True
             vmesh._read_materials(meshfile)
 
-        self.assertTrue(vmesh.geoms[0].lod[0].matnum == 1)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].alphamode == 0)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].fxfile == b'StaticMesh.fx')
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].technique == b'Base')
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].mapnum == 2)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == b'objects/staticobjects/test/evil_box/textures/evil_box_c.dds')
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[1] == b'Common\Textures\SpecularLUT_pow36.dds')
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vstart == 0)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].istart == 0)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].inum == 36)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vnum == 25)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u4 == 8064)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u5 == 65535)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmin == (-0.5, 0.0, -0.5))
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax == (0.5, 1.0, 0.5))
-        self.assertTrue(vmesh.geoms[0].lod[0].polycount == 12)
+        self.assertTrue(vmesh.geoms[0].lod[0].matnum == 14)
+        self.assertTrue(vmesh.geoms[0].lod[1].matnum == 13)
+        self.assertTrue(vmesh.geoms[0].lod[2].matnum == 12)
+        self.assertTrue(vmesh.geoms[0].lod[3].matnum == 12)
+        self.assertTrue(vmesh.geoms[0].lod[4].matnum == 10)
+        self.assertTrue(vmesh.geoms[0].lod[5].matnum == 8)
+        
 
-    def test_can_load_bf2_mesh(self):
+    def test_can_load_bf2_bundled_mesh(self):
         vmesh = meshes.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(vmesh.isBundledMesh)
         self.assertTrue(isinstance(vmesh, meshes.StdMesh))
     
 class TestMeshReading_Specials(unittest.TestCase):

@@ -181,9 +181,9 @@ class StdMesh:
             isBundledMesh=False,
             isStaticMesh=False):
         # setting some internals
-        self.isSkinnedMesh = False
-        self.isBundledMesh = False
-        self.isStaticMesh = False
+        self.isSkinnedMesh = isSkinnedMesh
+        self.isBundledMesh = isBundledMesh
+        self.isStaticMesh = isStaticMesh
 
         # mesh data
         self.head = None  # header contains version and some bfp4f data
@@ -465,7 +465,7 @@ class StdMesh:
     #-----------------------------
 
     def __read_lod_node_table(self, fo, lod):
-        #print('>> {}'.format(fo.tell()))
+        #print('nodes chunk start at  {}'.format(fo.tell()))
 
         def _read_bounds(fo, lod):
             lod.min = modmath.float3(fo)
@@ -481,7 +481,7 @@ class StdMesh:
         if self.head.version <= 6:
             _read_pivot(fo, lod)
         _read_nodenum(fo, lod)
-
+        
         # reading nodes
         if not self.isBundledMesh:
             for i in range(lod.nodenum):

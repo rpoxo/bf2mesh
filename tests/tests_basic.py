@@ -359,7 +359,7 @@ class TestMeshReading_Specials(unittest.TestCase):
             vmesh = meshes.StdMesh()
             vmesh._read_materials(meshfile)
             
-    @unittest.skip('i\o intensive')
+    #@unittest.skip('i\o intensive')
     def test_can_read_PR_MESHES_REPO(self):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects')):

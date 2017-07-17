@@ -364,12 +364,15 @@ class TestMeshReading_Specials(unittest.TestCase):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects')):
             for filename in filenames:
-                if filename.split('.')[-1].lower()[-4:] == 'mesh':
-                #if True:
+                ext = filename.split('.')[-1].lower()
+                if ext[-4:] == 'mesh' and ext not in ['collisionmesh', 'skinnedmesh']:
                     counter += 1
                     try:
                         vmesh = meshes.LoadBF2Mesh(os.path.join(bf2.Mod().root, dir, filename))
                     except struct.error:
+                        print('Failed to load {}'.format(os.path.join(bf2.Mod().root, dir, filename)))
+                        raise
+                    except TypeError:
                         print('Failed to load {}'.format(os.path.join(bf2.Mod().root, dir, filename)))
                         raise
         print(counter)

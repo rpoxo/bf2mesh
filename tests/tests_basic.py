@@ -372,9 +372,6 @@ class TestMeshReading_Specials(unittest.TestCase):
                     except struct.error:
                         print('Failed to load {}'.format(os.path.join(bf2.Mod().root, dir, filename)))
                         raise
-                    except TypeError:
-                        print('Failed to load {}'.format(os.path.join(bf2.Mod().root, dir, filename)))
-                        raise
         print(counter)
         #raise
 

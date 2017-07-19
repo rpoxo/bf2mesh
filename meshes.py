@@ -110,9 +110,9 @@ class bf2mat:
 class bf2head:
 
     def __init__(self):
-        # some internals
-        self._fmt = None
-        self._size = None
+        #some internals
+        self.fmt = '5l'
+        self.size = struct.calcsize(self.fmt)
 
         # reading bin
         data = None
@@ -123,11 +123,6 @@ class bf2head:
         self.u5 = None
 
     def read(self, fo):
-        # for some reason it fails when using modmath
-        self._fmt = ('5l')
-        self._size = struct.calcsize(self._fmt)
-
-        #data = struct.Struct(self._fmt).unpack(fo.read(self._size))
         self.u1 = modmath.long(fo)
         self.version = modmath.long(fo)
         self.u3 = modmath.long(fo)
@@ -150,9 +145,12 @@ class bf2head:
 
 class bf2geom:
 
-    def __init__(self, fo):
-        self.lodnum = modmath.long(fo)
+    def __init__(self):
+        self.lodnum = None
         self.lod = []
+    
+    def read_lodnum(self, fo):
+        self.lodnum = modmath.long(fo)
 
 
 class vertattrib:
@@ -254,14 +252,16 @@ class StdMesh:
         self._read_u1_bfp4f_version(fo)
 
         self.geomnum = modmath.long(fo)
-
-    def _read_geoms(self, fo):
+    
+    def _read_geom_table(self, fo):
         self._read_geomnum(fo)
-
-        self.geoms = [bf2geom(fo) for i in range(self.geomnum)]
+        
+        self.geoms = [bf2geom() for i in range(self.geomnum)]
+        for i in range(self.geomnum):
+            self.geoms[i].read_lodnum(fo)
 
     def _read_vertattribnum(self, fo):
-        self._read_geoms(fo)
+        self._read_geom_table(fo)
 
         self.vertattribnum = modmath.long(fo)
 
@@ -360,7 +360,7 @@ class StdMesh:
                        self.head.u3,
                        self.head.u4,
                        self.head.u5)
-            fo.write(struct.Struct(self.head._fmt).pack(*dataset))
+            fo.write(struct.Struct(self.head.fmt).pack(*dataset))
 
     def _write_u1_bfp4f_version(self, filepath):
         self._write_header(filepath)

@@ -86,7 +86,7 @@ class TestStdMeshReading(unittest.TestCase):
     def test_can_read_geom_table_mesh_std(self):
         with open(self.path_object_std, 'rb') as meshfile:
             vmesh = meshes.StdMesh()
-            vmesh._read_geoms(meshfile)
+            vmesh._read_geom_table(meshfile)
 
         self.assertTrue(len(vmesh.geoms) == 1)
         self.assertTrue(vmesh.geoms[0].lodnum == 1)
@@ -94,7 +94,7 @@ class TestStdMeshReading(unittest.TestCase):
     def test_can_read_geom_table_mesh_two_lods(self):
         with open(self.path_object_two_lods, 'rb') as meshfile:
             vmesh = meshes.StdMesh()
-            vmesh._read_geoms(meshfile)
+            vmesh._read_geom_table(meshfile)
 
         self.assertTrue(len(vmesh.geoms) == 1)
         self.assertTrue(vmesh.geoms[0].lodnum == 2)
@@ -102,7 +102,7 @@ class TestStdMeshReading(unittest.TestCase):
     def test_can_read_geom_table_mesh_dest(self):
         with open(self.path_object_dest, 'rb') as meshfile:
             vmesh = meshes.StdMesh()
-            vmesh._read_geoms(meshfile)
+            vmesh._read_geom_table(meshfile)
 
         self.assertTrue(len(vmesh.geoms) == 2)
         self.assertTrue(vmesh.geoms[0].lodnum == 2)
@@ -255,7 +255,7 @@ class TestBundleMeshReading(unittest.TestCase):
     def test_can_read_geom_table_mesh_std(self):
         with open(self.path_object_std, 'rb') as meshfile:
             vmesh = meshes.StdMesh()
-            vmesh._read_geoms(meshfile)
+            vmesh._read_geom_table(meshfile)
 
         self.assertTrue(len(vmesh.geoms) == 1)
         self.assertTrue(vmesh.geoms[0].lodnum == 6)
@@ -359,7 +359,7 @@ class TestMeshReading_Specials(unittest.TestCase):
             vmesh = meshes.StdMesh()
             vmesh._read_materials(meshfile)
             
-    #@unittest.skip('i\o intensive')
+    @unittest.skip('i\o intensive')
     def test_can_read_PR_MESHES_REPO(self):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects')):
@@ -448,7 +448,7 @@ class TestStdMeshWriting(unittest.TestCase):
 
         with open(self.path_object_clone, 'rb') as meshfile:
             vmesh2 = meshes.StdMesh()
-            vmesh2._read_geoms(meshfile)
+            vmesh2._read_geom_table(meshfile)
 
         self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
         self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)
@@ -459,7 +459,7 @@ class TestStdMeshWriting(unittest.TestCase):
 
         with open(self.path_object_clone, 'rb') as meshfile:
             vmesh2 = meshes.StdMesh()
-            vmesh2._read_geoms(meshfile)
+            vmesh2._read_geom_table(meshfile)
 
         self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
         self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)
@@ -470,7 +470,7 @@ class TestStdMeshWriting(unittest.TestCase):
         
         with open(self.path_object_clone, 'rb') as meshfile:
             vmesh2 = meshes.StdMesh()
-            vmesh2._read_geoms(meshfile)
+            vmesh2._read_geom_table(meshfile)
 
         self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
         self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)

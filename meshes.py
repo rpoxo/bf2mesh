@@ -281,10 +281,10 @@ class StdMesh:
     def _read_vertex_block(self, fo):
         self._read_vertnum(fo)
         #print('>> {}'.format(fo.tell()))
-        print('self.vertnum = {}'.format(self.vertnum))
+        #print('self.vertnum = {}'.format(self.vertnum))
 
         vertices_num = int(self.vertstride / self.vertformat * self.vertnum)
-        print('vertices_num = {}'.format(vertices_num))
+        #print('vertices_num = {}'.format(vertices_num))
         # TODO: refactor
         fmt = '{}f'.format(vertices_num)
         size = struct.calcsize(fmt)
@@ -294,10 +294,10 @@ class StdMesh:
 
     def _read_indexnum(self, fo):
         self._read_vertex_block(fo)
-        print('>> vertex block end at {}'.format(fo.tell()))
+        #print('>> vertex block end at {}'.format(fo.tell()))
 
         self.indexnum = modmath.long(fo)
-        print('self.indexnum = {}'.format(self.indexnum))
+        #print('self.indexnum = {}'.format(self.indexnum))
 
     def _read_index_block(self, fo):
         self._read_indexnum(fo)

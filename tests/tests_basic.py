@@ -124,7 +124,8 @@ class TestStdMeshReading(unittest.TestCase):
     def test_can_read_vertex_attribute_table(self):
         with open(self.path_object_std, 'rb') as meshfile:
             vmesh = meshes.StdMesh()
-            vmesh._read_vertext_attribute_table(meshfile)
+            vmesh._read_vertattrib_table(meshfile)
+    
         self.assertTrue(vmesh.vertattrib[0] == (0, 0, 2, 0))
         self.assertTrue(vmesh.vertattrib[1] == (0, 12, 2, 3))
         self.assertTrue(vmesh.vertattrib[2] == (0, 24, 4, 2))
@@ -185,32 +186,32 @@ class TestStdMeshReading(unittest.TestCase):
             vmesh = meshes.StdMesh()
             vmesh._read_nodes(meshfile)
 
-        self.assertTrue(vmesh.geoms[0].lod[0].min == (-0.5, 0, -0.5))
-        self.assertTrue(vmesh.geoms[0].lod[0].max == (0.5, 1.0, 0.5))
+        self.assertTrue(vmesh.geoms[0].lods[0].min == (-0.5, 0, -0.5))
+        self.assertTrue(vmesh.geoms[0].lods[0].max == (0.5, 1.0, 0.5))
         #self.assertTrue(vmesh.geoms[0].lod[0].pivot == (0.5, 1.0, 0.5)) # some old bundleds?
-        self.assertTrue(vmesh.geoms[0].lod[0].nodenum == 1)
+        self.assertTrue(vmesh.geoms[0].lods[0].nodenum == 1)
 
     def test_can_read_materials(self):
         with open(self.path_object_std, 'rb') as meshfile:
             vmesh = meshes.StdMesh()
             vmesh._read_materials(meshfile)
 
-        self.assertTrue(vmesh.geoms[0].lod[0].matnum == 1)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].alphamode == 0)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].fxfile == b'StaticMesh.fx')
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].technique == b'Base')
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].mapnum == 2)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[0] == b'objects/staticobjects/test/evil_box/textures/evil_box_c.dds')
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].map[1] == b'Common\Textures\SpecularLUT_pow36.dds')
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vstart == 0)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].istart == 0)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].inum == 36)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].vnum == 25)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u4 == 8064)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].u5 == 65535)
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmin == (-0.5, 0.0, -0.5))
-        self.assertTrue(vmesh.geoms[0].lod[0].mat[0].nmax == (0.5, 1.0, 0.5))
-        self.assertTrue(vmesh.geoms[0].lod[0].polycount == 12)
+        self.assertTrue(vmesh.geoms[0].lods[0].matnum == 1)
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].alphamode == 0)
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].fxfile == b'StaticMesh.fx')
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].technique == b'Base')
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].mapnum == 2)
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].maps[0] == b'objects/staticobjects/test/evil_box/textures/evil_box_c.dds')
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].maps[1] == b'Common\Textures\SpecularLUT_pow36.dds')
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].vstart == 0)
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].istart == 0)
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].inum == 36)
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].vnum == 25)
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].u4 == 8064)
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].u5 == 65535)
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].nmin == (-0.5, 0.0, -0.5))
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].nmax == (0.5, 1.0, 0.5))
+        self.assertTrue(vmesh.geoms[0].lods[0].polycount == 12)
 
     def test_can_load_bf2_mesh(self):
         vmesh = meshes.LoadBF2Mesh(self.path_object_std)
@@ -270,8 +271,8 @@ class TestBundleMeshReading(unittest.TestCase):
     def test_can_read_vertex_attribute_table(self):
         with open(self.path_object_std, 'rb') as meshfile:
             vmesh = meshes.StdMesh()
-            vmesh._read_vertext_attribute_table(meshfile)
-            
+            vmesh._read_vertattrib_table(meshfile)
+
         self.assertTrue(len(vmesh.vertattrib) == vmesh.vertattribnum)
 
     def test_can_read_vertformat(self):
@@ -327,7 +328,7 @@ class TestBundleMeshReading(unittest.TestCase):
             vmesh.isBundledMesh = True # should refactor tests for that file
             vmesh._read_nodes(meshfile)
 
-        self.assertTrue(vmesh.geoms[0].lod[0].nodenum == 1)
+        self.assertTrue(vmesh.geoms[0].lods[0].nodenum == 1)
 
     def test_can_read_materials(self):
         with open(self.path_object_std, 'rb') as meshfile:
@@ -335,12 +336,12 @@ class TestBundleMeshReading(unittest.TestCase):
             vmesh.isBundledMesh = True
             vmesh._read_materials(meshfile)
 
-        self.assertTrue(vmesh.geoms[0].lod[0].matnum == 14)
-        self.assertTrue(vmesh.geoms[0].lod[1].matnum == 13)
-        self.assertTrue(vmesh.geoms[0].lod[2].matnum == 12)
-        self.assertTrue(vmesh.geoms[0].lod[3].matnum == 12)
-        self.assertTrue(vmesh.geoms[0].lod[4].matnum == 10)
-        self.assertTrue(vmesh.geoms[0].lod[5].matnum == 8)
+        self.assertTrue(vmesh.geoms[0].lods[0].matnum == 14)
+        self.assertTrue(vmesh.geoms[0].lods[1].matnum == 13)
+        self.assertTrue(vmesh.geoms[0].lods[2].matnum == 12)
+        self.assertTrue(vmesh.geoms[0].lods[3].matnum == 12)
+        self.assertTrue(vmesh.geoms[0].lods[4].matnum == 10)
+        self.assertTrue(vmesh.geoms[0].lods[5].matnum == 8)
         
 
     def test_can_load_bf2_bundled_mesh(self):
@@ -352,6 +353,7 @@ class TestMeshReading_Specials(unittest.TestCase):
 
     # objects\staticobjects\Bridges\EoD_Bridge_Big\Meshes\eod_bridge_big.staticmesh
     # it has version 4 and inum and vnum in material
+    #@unittest.skip('memory issues')
     def test_can_read_not_skinned_mesh_version_4(self):
         path_mesh = os.path.join(bf2.Mod().root, 'objects', 'staticobjects', 'Bridges', 'EoD_Bridge_Big', 'Meshes', 'eod_bridge_big.staticmesh')
         #vmesh = meshes.LoadBF2Mesh(path_mesh)
@@ -359,20 +361,24 @@ class TestMeshReading_Specials(unittest.TestCase):
             vmesh = meshes.StdMesh()
             vmesh._read_materials(meshfile)
             
+    def test_can_read_mesh_two_lods(self):
+        path_mesh = os.path.join(bf2.Mod().root, 'objects', 'staticobjects', 'test', 'evil_box_2_lod', 'meshes', 'evil_box_2_lod.staticmesh')
+        vmesh = meshes.LoadBF2Mesh(path_mesh)
+            
     @unittest.skip('i\o intensive')
     def test_can_read_PR_MESHES_REPO(self):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects')):
             for filename in filenames:
                 ext = filename.split('.')[-1].lower()
-                if ext[-4:] == 'mesh' and ext not in ['collisionmesh', 'skinnedmesh']:
+                if ext[-4:] == 'mesh' and ext not in ['collisionmesh', 'skinnedmesh'] and 'test' not in dir:
                     counter += 1
                     try:
                         vmesh = meshes.LoadBF2Mesh(os.path.join(bf2.Mod().root, dir, filename))
                     except struct.error:
                         print('Failed to load {}'.format(os.path.join(bf2.Mod().root, dir, filename)))
                         raise
-        print(counter)
+            print(counter)
         #raise
 
 class TestStdMeshWriting(unittest.TestCase):
@@ -384,6 +390,7 @@ class TestStdMeshWriting(unittest.TestCase):
         test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_destroyable', 'meshes', 'evil_box_destroyable.staticmesh'])
         
         test_object_clone = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box_clone.staticmesh'])
+        test_object_clone2 = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box_clone2.staticmesh'])
         
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
@@ -391,6 +398,7 @@ class TestStdMeshWriting(unittest.TestCase):
         self.path_object_dest = os.path.join(bf2.Mod().root, test_object_dest)
 
         self.path_object_clone = os.path.join(bf2.Mod().root, test_object_clone)
+        self.path_object_clone2 = os.path.join(bf2.Mod().root, test_object_clone)
 
     def tearDown(self):
         try:
@@ -453,6 +461,7 @@ class TestStdMeshWriting(unittest.TestCase):
         self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
         self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)
 
+    #@unittest.skip('memory issues')
     def test_can_write_geom_table_mesh_two_lods(self):
         vmesh = meshes.LoadBF2Mesh(self.path_object_two_lods)
         vmesh._write_geom_table(self.path_object_clone)
@@ -498,11 +507,11 @@ class TestStdMeshWriting(unittest.TestCase):
 
     def test_can_write_vertex_attribute_table(self):
         vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_vertex_attribute_table(self.path_object_clone)
+        vmesh._write_vertattrib_table(self.path_object_clone)
 
         with open(self.path_object_clone, 'rb') as meshfile:
             vmesh2 = meshes.StdMesh()
-            vmesh2._read_vertext_attribute_table(meshfile)
+            vmesh2._read_vertattrib_table(meshfile)
 
         self.assertTrue(vmesh2.vertattrib[0] == vmesh.vertattrib[0])
         self.assertTrue(vmesh2.vertattrib[1] == vmesh.vertattrib[1])
@@ -592,11 +601,11 @@ class TestStdMeshWriting(unittest.TestCase):
             vmesh2 = meshes.StdMesh()
             vmesh2._read_nodes(meshfile)
 
-        self.assertTrue(vmesh2.geoms[0].lod[0].min == vmesh.geoms[0].lod[0].min)
-        self.assertTrue(vmesh2.geoms[0].lod[0].max == vmesh.geoms[0].lod[0].max)
-        #self.assertTrue(vmesh.geoms[0].lod[0].pivot == (0.5, 1.0, 0.5)) # some old bundleds?
-        self.assertTrue(vmesh2.geoms[0].lod[0].nodenum == vmesh.geoms[0].lod[0].nodenum)
-        self.assertTrue(vmesh2.geoms[0].lod[0].node == vmesh.geoms[0].lod[0].node)
+        self.assertTrue(vmesh2.geoms[0].lods[0].min == vmesh.geoms[0].lods[0].min)
+        self.assertTrue(vmesh2.geoms[0].lods[0].max == vmesh.geoms[0].lods[0].max)
+        #self.assertTrue(vmesh.geoms[0].lods[0].pivot == (0.5, 1.0, 0.5)) # some old bundleds?
+        self.assertTrue(vmesh2.geoms[0].lods[0].nodenum == vmesh.geoms[0].lods[0].nodenum)
+        self.assertTrue(vmesh2.geoms[0].lods[0].nodes == vmesh.geoms[0].lods[0].nodes)
 
     def test_can_write_materials(self):
         vmesh = meshes.LoadBF2Mesh(self.path_object_std)
@@ -606,9 +615,9 @@ class TestStdMeshWriting(unittest.TestCase):
             vmesh2 = meshes.StdMesh()
             vmesh2._read_materials(meshfile)
 
-        self.assertTrue(vmesh2.geoms[0].lod[0].matnum == vmesh2.geoms[0].lod[0].matnum)
-        self.assertTrue(vmesh2.geoms[0].lod[0].mat == vmesh2.geoms[0].lod[0].mat)
-        self.assertTrue(vmesh2.geoms[0].lod[0].polycount == vmesh2.geoms[0].lod[0].polycount)
+        self.assertTrue(vmesh2.geoms[0].lods[0].matnum == vmesh2.geoms[0].lods[0].matnum)
+        self.assertTrue(vmesh2.geoms[0].lods[0].materials == vmesh2.geoms[0].lods[0].materials)
+        self.assertTrue(vmesh2.geoms[0].lods[0].polycount == vmesh2.geoms[0].lods[0].polycount)
 
     def test_can_load_bf2_mesh_cloned(self):
         vmesh = meshes.LoadBF2Mesh(self.path_object_std)
@@ -658,6 +667,6 @@ class TestSamplesReading(unittest.TestCase):
     def test_can_load_bf2_mesh_with_samples(self):
         meshpath = self.path_object_std.replace('.samples', '.staticmesh')
         vmesh = meshes.LoadBF2Mesh(meshpath, loadSamples=True)
-        self.assertTrue(isinstance(vmesh.geoms[0].lod[0].sample, samples.StdSample))
+        self.assertTrue(isinstance(vmesh.geoms[0].lods[0].sample, samples.StdSample))
     
 

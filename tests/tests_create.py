@@ -4,16 +4,30 @@ import struct
 
 import bf2
 import meshes
+import modmath
 
-class Box:
+class Triangle:
 
     def __init__(self):
-        self.vmesh = mesher.StdMesh()
+        self.vmesh = meshes.StdMesh()
         self._create_header(self.vmesh)
         self._create_u1_bfp4f_version(self.vmesh)
+        self._create_geomnum(self.vmesh)
+        self._create_geomtable(self.vmesh)
+        self._create_vertattribnum(self.vmesh)
+        self._create_vertattrib_table(self.vmesh)
+        self._create_vertformat(self.vmesh)
+        self._create_vertstride(self.vmesh)
+        self._create_vertnum(self.vmesh)
+        self._create_vertices(self.vmesh)
+        self._create_index(self.vmesh)
+        self._create_u2(self.vmesh)
+        self._create_nodes(self.vmesh)
+        self._create_materials(self.vmesh)
+        
 
     def _create_header(self, vmesh):
-        vmesh.head = mesher.bf2head()
+        vmesh.head = meshes.bf2head()
         vmesh.head.u1 = 0
         vmesh.head.version = 11
         vmesh.head.u3 = 0
@@ -22,283 +36,186 @@ class Box:
 
     def _create_u1_bfp4f_version(self, vmesh):
         vmesh.u1 = 0
+    
+    def _create_geomnum(self, vmesh):
+        vmesh.geomnum = 1
+        
+    def _create_geomtable(self, vmesh):
+        vmesh.geoms = [meshes.bf2geom() for i in range(vmesh.geomnum)]
+        vmesh.geoms[0].lodnum = 1
+        for geom in vmesh.geoms:
+            for i in range(geom.lodnum):
+                geom.lods = [meshes.bf2lod() for i in range(geom.lodnum)]
 
-@unittest.skip('temporary disabled until finishing lm sizes script for outlawz')
-class TestStdMeshCreateBox(unittest.TestCase):
+    def _create_vertattribnum(self, vmesh):
+        vmesh.vertattribnum = 6 # +1 for unused? xD
+    
+    def _create_vertattrib_table(self, vmesh):
+        dumb_array = [
+            (0, 0, 2, 0), # used, offset=0, float3, position
+            (0, 12, 2, 3), # used, offset=12\4, float3, normal
+            (0, 24, 4, 2), # used, offset=24\4, d3dcolor, blend indice
+            (0, 28, 1, 5), # used, offset=28\4, float2, uv1
+            (0, 32, 2, 6), # used, offset=0, float3, tangent
+            (255, 0, 17, 0), # not used, offset=0, unused, unused
+            ]
+        vmesh.vertattrib = [meshes.vertattrib() for i in range(vmesh.vertattribnum)]
+        for i in range(vmesh.vertattribnum):
+            vmesh.vertattrib[i].flag = dumb_array[i][0]
+            vmesh.vertattrib[i].offset = dumb_array[i][1]
+            vmesh.vertattrib[i].vartype = dumb_array[i][2]
+            vmesh.vertattrib[i].usage = dumb_array[i][3]
+            #print('{}: \n{}'.format(i, vmesh.vertattrib[i]))
+    
+    def _create_vertformat(self, vmesh):
+        vmesh.vertformat = 4
+    
+    def _create_vertstride(self, vmesh):
+        vmesh.vertstride = sum([modmath.d3dtypes_lenght[attrib.vartype]*vmesh.vertformat for attrib in vmesh.vertattrib])
+    
+    def _create_vertnum(self, vmesh):
+        vmesh.vertnum = 3
+    
+    def _create_vertices(self, vmesh):
+            positions = [
+                (0.5, 0.0, 0.5), # right front
+                (-0.5, 0.0, -0.5), # left back
+                (-0.5, 0.0, 0.5), # left front
+                ]
+            normals = [
+                (0.0, 1.0, 0.0),
+                (0.0, 1.0, 0.0),
+                (0.0, 1.0, 0.0),
+                ]
+            blendices = [
+                (0.0,),
+                (0.0,),
+                (0.0,),
+                ]
+            uv1 = [
+                (1.0, 0.0),
+                (0.0, 1.0),
+                (0.0, 0.0)
+                ]
+            tangents = [
+                (1.0, 0.0, 0.0), # (0.9999999403953552, 0.0, 0.0)
+                (1.0, 0.0, 0.0), # (0.9999999403953552, 0.0, 0.0)
+                (1.0, 0.0, 0.0), # (0.9999999403953552, 0.0, 0.0)
+                ]
+            vertlist = []
+            for i in range(3):
+                vertlist.extend(positions[i])
+                vertlist.extend(normals[i])
+                vertlist.extend(blendices[i])
+                vertlist.extend(uv1[i])
+                vertlist.extend(tangents[i])
+            vmesh.vertices = tuple(vertlist) 
+    
+    def _create_index(self, vmesh):
+        vmesh.index = (0, 1, 2)
+        vmesh.indexnum = len(vmesh.index)
+
+    def _create_u2(self, vmesh):
+        vmesh.u2 = 8
+    
+    def _create_nodes(self, vmesh):
+        for geom in vmesh.geoms:
+            for lod in geom.lods:
+                lod.version = 11
+                lod.min = (-0.5, 0.0, -0.5)
+                lod.max = (0.5, 0.0, 0.5)
+                #lod.pivot = None # already assigned to None for new meshes
+                lod.nodenum = 1
+                lod.nodes = [
+                    1.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0] # no idea what is this shit in matrix4 ?
+                lod.polycount = 0
+                
+    def _create_materials(self, vmesh):
+        for geom in vmesh.geoms:
+            for lod in geom.lods:
+                lod.matnum = 1
+                lod.materials = [meshes.bf2mat() for i in range(lod.matnum)]
+                for material in lod.materials:
+                    material.alphamode = 0
+                    material.fxfile = b'StaticMesh.fx'
+                    material.technique = b'Base'
+                    material.mapnum = 1
+                    material.maps = []
+                    for i in range(material.mapnum):
+                        material.maps.insert(i, b'default.dds')
+                    material.vstart = 0
+                    material.istart = 0
+                    material.inum = 3
+                    material.vnum = 3
+                    material.u4 = 0
+                    material.u5 = 0
+                    material.nmin = (-0.5, 0.0, -0.5)
+                    material.nmax = (0.5, 0.0, 0.5)
+                    lod.polycount = lod.polycount + material.inum / 3
+
+#@unittest.skip('temporary disabled until refactor')
+class TestCreatePrimitive_Triangle(unittest.TestCase):
 
     def setUp(self):
-        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box.staticmesh'])
-        test_object_generated = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_generated', 'meshes', 'evil_box_created.staticmesh'])
+        test_object_generated = os.path.join(*['objects', 'staticobjects', 'test', 'generated', 'generated_tri', 'meshes', 'generated_tri.staticmesh'])
 
-        self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
         self.path_object_generated = os.path.join(bf2.Mod().root, test_object_generated)
         
-    def test_can_create_header(self):
-        box = Box()
+    def test_reading_reference_tri_meshfile(self):
+        vmesh_tri_path = os.path.join(bf2.Mod().root, (os.path.join(*['objects', 'staticobjects', 'test', 'evil_tri', 'meshes', 'evil_tri.staticmesh'])))
+        vmesh_tri = meshes.LoadBF2Mesh(vmesh_tri_path)
+        #print(vmesh_tri.vertices)
+        #for id, data in enumerate(vmesh_tri.vertices):
+        #    print('[{}] = {}'.format(id, data))
+        #print(len(vmesh_tri.vertices))
+        for i in range(vmesh_tri.vertnum):
+            #print('\nvertex {}'.format(i))
+            for attrib in vmesh_tri.vertattrib:
+                usage = modmath.d3dusage[attrib.usage]
+                offset = int(attrib.offset / vmesh_tri.vertformat) + int(i * vmesh_tri.vertstride / vmesh_tri.vertformat)
+                vartype = attrib.vartype
+                #print('{}({}) {}:'.format(usage, modmath.d3dtypes[vartype], str(attrib)))
 
-        self.assertTrue(box.vmesh.head.u1 == 0)
-        self.assertTrue(box.vmesh.head.version == 11)
-        self.assertTrue(box.vmesh.head.u3 is 0)
-        self.assertTrue(box.vmesh.head.u4 is 0)
-        self.assertTrue(box.vmesh.head.u5 is 0)
-    
+                data = vmesh_tri.vertices[offset:offset+modmath.d3dtypes_lenght[vartype]]
+                #print(' [{}+{}] {}'.format(offset, modmath.d3dtypes_lenght[vartype], data))
 
-    def test_can_create_u1_bfp4f_version(self):
-        box = Box()
+        for geomnum in range(vmesh_tri.geomnum):
+            print('geom {} lodnum = {}'.format(geomnum, vmesh_tri.geoms[geomnum].lodnum))
+            for lodnum in range(vmesh_tri.geoms[geomnum].lodnum):
+                lod = vmesh_tri.geoms[geomnum].lods[lodnum]
+                print('geom[{}].lod[{}].version = {}'.format(geomnum, lodnum, lod.version))
+                print('geom[{}].lod[{}].min = {}'.format(geomnum, lodnum, lod.min))
+                print('geom[{}].lod[{}].max = {}'.format(geomnum, lodnum, lod.max))
+                print('geom[{}].lod[{}].pivot = {}'.format(geomnum, lodnum, lod.pivot))
+                print('geom[{}].lod[{}].nodenum = {}'.format(geomnum, lodnum, lod.nodenum))
+                print('geom[{}].lod[{}].nodes = {}'.format(geomnum, lodnum, lod.nodes))
+                print('geom[{}].lod[{}].polycount = {}'.format(geomnum, lodnum, lod.polycount))
+                print('geom[{}].lod[{}].matnum = {}'.format(geomnum, lodnum, lod.matnum))
+                for matid, material in enumerate(lod.materials):
+                    print('geom[{}].lod[{}].materials[{}].alphamode = {}'.format(geomnum, lodnum, matid, material.alphamode))
+                    print('geom[{}].lod[{}].materials[{}].fxfile = {}'.format(geomnum, lodnum, matid, material.fxfile))
+                    print('geom[{}].lod[{}].materials[{}].technique = {}'.format(geomnum, lodnum, matid, material.technique))
+                    print('geom[{}].lod[{}].materials[{}].mapnum = {}'.format(geomnum, lodnum, matid, material.mapnum))
+                    for mapid, map in enumerate(material.maps):
+                        print('geom[{}].lod[{}].materials[{}].maps[{}] = {}'.format(geomnum, lodnum, matid, mapid, map))
+                    print('geom[{}].lod[{}].materials[{}].vstart = {}'.format(geomnum, lodnum, matid, material.vstart))
+                    print('geom[{}].lod[{}].materials[{}].istart = {}'.format(geomnum, lodnum, matid, material.istart))
+                    print('geom[{}].lod[{}].materials[{}].inum = {}'.format(geomnum, lodnum, matid, material.inum))
+                    print('geom[{}].lod[{}].materials[{}].vnum = {}'.format(geomnum, lodnum, matid, material.vnum))
+                    print('geom[{}].lod[{}].materials[{}].u4 = {}'.format(geomnum, lodnum, matid, material.u4))
+                    print('geom[{}].lod[{}].materials[{}].u5 = {}'.format(geomnum, lodnum, matid, material.u5))
+                    print('geom[{}].lod[{}].materials[{}].nmin = {}'.format(geomnum, lodnum, matid, material.nmin))
+                    print('geom[{}].lod[{}].materials[{}].nmax = {}'.format(geomnum, lodnum, matid, material.nmax))
 
-        self.assertTrue(box.vmesh.u1 == 0)
+        #raise
 
-    @unittest.skip('copypasta')
-    def test_can_write_geomnum_mesh_std(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_geomnum(self.path_object_clone)
+    def test_can_generate_valid_tri_meshfile(self):
+        tri = Triangle()
+        trimesh = tri.vmesh
+        trimesh.write_file_data(self.path_object_generated)
 
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_geomnum(meshfile)
-
-        self.assertTrue(vmesh2.geomnum == vmesh.geomnum)
-
-    @unittest.skip('copypasta')
-    def test_can_write_geomnum_mesh_dest(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_dest)
-        vmesh._write_geomnum(self.path_object_clone)
-    
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_geomnum(meshfile)
-            
-        self.assertTrue(vmesh2.geomnum == vmesh.geomnum)
-
-    @unittest.skip('copypasta')
-    def test_can_write_geom_table_mesh_std(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_geom_table(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_geoms(meshfile)
-
-        self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
-        self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)
-
-    @unittest.skip('copypasta')
-    def test_can_write_geom_table_mesh_two_lods(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_two_lods)
-        vmesh._write_geom_table(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_geoms(meshfile)
-
-        self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
-        self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)
-
-    @unittest.skip('copypasta')
-    def test_can_write_geom_table_mesh_dest(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_dest)
-        vmesh._write_geom_table(self.path_object_clone)
-        
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_geoms(meshfile)
-
-        self.assertTrue(len(vmesh2.geoms) == len(vmesh.geoms))
-        self.assertTrue(vmesh2.geoms[0].lodnum == vmesh.geoms[0].lodnum)
-        self.assertTrue(vmesh2.geoms[1].lodnum == vmesh.geoms[1].lodnum)
-
-    @unittest.skip('copypasta')
-    def test_can_write_vertattribnum_mesh_std(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_vertattribnum(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_vertattribnum(meshfile)
-
-        self.assertTrue(vmesh2.vertattribnum == vmesh.vertattribnum)
-
-    @unittest.skip('copypasta')
-    def test_can_write_vertattribnum_mesh_dest(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_dest)
-        vmesh._write_vertattribnum(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_vertattribnum(meshfile)
-
-        self.assertTrue(vmesh2.vertattribnum == vmesh.vertattribnum)
-
-    @unittest.skip('copypasta')
-    def test_can_write_vertex_attribute_table(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_vertex_attribute_table(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_vertext_attribute_table(meshfile)
-
-        self.assertTrue(vmesh2.vertattrib[0] == vmesh.vertattrib[0])
-        self.assertTrue(vmesh2.vertattrib[1] == vmesh.vertattrib[1])
-        self.assertTrue(vmesh2.vertattrib[2] == vmesh.vertattrib[2])
-        self.assertTrue(vmesh2.vertattrib[3] == vmesh.vertattrib[3])
-        self.assertTrue(vmesh2.vertattrib[4] == vmesh.vertattrib[4])
-        self.assertTrue(vmesh2.vertattrib[5] == vmesh.vertattrib[5])
-        self.assertTrue(vmesh2.vertattrib[6] == vmesh.vertattrib[6])
-        self.assertTrue(vmesh2.vertattrib[7] == vmesh.vertattrib[7])
-        self.assertTrue(vmesh2.vertattrib[8] == vmesh.vertattrib[8])
-
-    @unittest.skip('copypasta')
-    def test_can_write_vertformat(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_vertformat(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_vertformat(meshfile)
-
-        self.assertTrue(vmesh2.vertformat == vmesh.vertformat)
-
-    @unittest.skip('copypasta')
-    def test_can_write_vertstride(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_vertstride(self.path_object_clone)
-    
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_vertstride(meshfile)
-
-        self.assertTrue(vmesh2.vertstride == vmesh.vertstride)
-
-    @unittest.skip('copypasta')
-    def test_can_write_vertnum(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_vertnum(self.path_object_clone)
-    
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_vertnum(meshfile)
-
-        self.assertTrue(vmesh2.vertnum == vmesh.vertnum)
-
-    @unittest.skip('copypasta')
-    def test_can_write_vertex_block(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_vertex_block(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_vertex_block(meshfile)
-
-        self.assertTrue(len(vmesh2.vertices) == len(vmesh2.vertices))
-
-    @unittest.skip('copypasta')
-    def test_can_write_indexnum(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_indexnum(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_indexnum(meshfile)
-
-        self.assertTrue(vmesh2.indexnum == vmesh.indexnum)
-
-    @unittest.skip('copypasta')
-    def test_can_write_index_block(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_index_block(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_index_block(meshfile)
-
-        self.assertTrue(len(vmesh2.index) == len(vmesh2.index))
-
-    @unittest.skip('copypasta')
-    def test_can_write_u2(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_u2(self.path_object_clone)
-        
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_u2(meshfile)
-
-        self.assertTrue(vmesh2.u2 == vmesh.u2)
-
-    @unittest.skip('copypasta')
-    def test_can_write_nodes(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_nodes(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_nodes(meshfile)
-
-        self.assertTrue(vmesh2.geoms[0].lod[0].min == vmesh.geoms[0].lod[0].min)
-        self.assertTrue(vmesh2.geoms[0].lod[0].max == vmesh.geoms[0].lod[0].max)
-        #self.assertTrue(vmesh.geoms[0].lod[0].pivot == (0.5, 1.0, 0.5)) # some old bundleds?
-        self.assertTrue(vmesh2.geoms[0].lod[0].nodenum == vmesh.geoms[0].lod[0].nodenum)
-        self.assertTrue(vmesh2.geoms[0].lod[0].node == vmesh.geoms[0].lod[0].node)
-
-    @unittest.skip('copypasta')
-    def test_can_write_materials(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh._write_materials(self.path_object_clone)
-
-        with open(self.path_object_clone, 'rb') as meshfile:
-            vmesh2 = meshes.StdMesh()
-            vmesh2._read_materials(meshfile)
-
-        self.assertTrue(vmesh2.geoms[0].lod[0].matnum == vmesh2.geoms[0].lod[0].matnum)
-        self.assertTrue(vmesh2.geoms[0].lod[0].mat == vmesh2.geoms[0].lod[0].mat)
-        self.assertTrue(vmesh2.geoms[0].lod[0].polycount == vmesh2.geoms[0].lod[0].polycount)
-
-    @unittest.skip('copypasta')
-    def test_can_write_vertices_attiributes_to_vertices(self):
-        with open(self.path_object_std, 'rb') as meshfile:
-            vmesh = meshes.StdMesh()
-            vmesh._read_filedata(meshfile)
-            vmesh._generate_vertices_attributes()
-
-        vertices_new = []
-        for vertice in vmesh.vertices_attributes:
-            for axis in vertice['position']:
-                vertices_new.append(axis)
-            for axis in vertice['normal']:
-                vertices_new.append(axis)
-            vertices_new.append(vertice['blend_indices'])
-
-            vertices_new.append(vertice['uv1'][0])
-            vertices_new.append(vertice['uv1'][1])
-            
-            vertices_new.append(vertice['uv2'][0])
-            vertices_new.append(vertice['uv2'][1])
-            
-            vertices_new.append(vertice['uv3'][0])
-            vertices_new.append(vertice['uv3'][1])
-            
-            vertices_new.append(vertice['uv4'][0])
-            vertices_new.append(vertice['uv4'][1])
-            
-            if vmesh.vertstride == 80:
-                vertices_new.append(vertice['uv5'][0])
-                vertices_new.append(vertice['uv5'][1])
-            
-            for axis in vertice['tangent']:
-                vertices_new.append(axis)
-
-        # converting to tuple after generating
-        vertices_new = tuple(vertices_new)
-
-        self.assertTrue(len(vmesh.vertices) == len(vertices_new))
-        self.assertTrue(vmesh.vertices == vertices_new)
-
-    @unittest.skip('copypasta')
-    def test_can_load_bf2_mesh_cloned(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh.write_file_data(self.path_object_clone)
-        
-        vmesh2 = meshes.LoadBF2Mesh(self.path_object_clone)
-
-        self.assertTrue(vmesh2._tail == vmesh._tail)
+        vmesh = meshes.LoadBF2Mesh(self.path_object_generated)
     

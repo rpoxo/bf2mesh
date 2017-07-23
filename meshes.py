@@ -426,7 +426,7 @@ class StdMesh:
     def _write_vertex_block(self, filepath):
         self._write_vertnum(filepath)
         
-        print('writing {} vertices'.format(len(self.vertices)))
+        #print('writing {} vertices'.format(len(self.vertices)))
         with open(filepath, 'ab+') as fo:
             fmt = '{}f'.format(len(self.vertices))
             fo.write(struct.Struct(fmt).pack(*self.vertices))

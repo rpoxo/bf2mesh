@@ -221,31 +221,6 @@ class StdMesh:
         # materials read will read everything inb4
         self._write_materials(fo)
 
-    def offset_vertices(self, offset):
-        temp_vb = list(self.vertices)
-        vertex_attributes_slice = int(len(temp_vb)/self.vertnum)
-        counter = 0
-        while counter < self.vertnum:
-            array_offset = int(counter * (len(temp_vb) / self.vertnum))
-            temp_vb[array_offset] += offset[0]
-            temp_vb[array_offset+1] += offset[1]
-            temp_vb[array_offset+2] += offset[2]
-            print('[{}]{}'.format(counter, tuple(temp_vb[array_offset:array_offset+3])))
-            counter += 1
-        self.vertices = tuple(temp_vb)
-        
-    def offset_uv(self, offset, uvid):
-        temp_vb = list(self.vertices)
-        vertex_attributes_slice = int(len(temp_vb)/self.vertnum)
-        counter = 0
-        while counter < self.vertnum:
-            array_offset = int(counter * (len(temp_vb) / self.vertnum)) + 7 + int((uvid-1)*2)
-            temp_vb[array_offset] += offset[0]
-            temp_vb[array_offset+1] += offset[1]
-            print('[{}]{}'.format(counter, tuple(temp_vb[array_offset:array_offset+2])))
-            counter += 1
-        self.vertices = tuple(temp_vb)
-
     #-----------------------------
     # READING FILEDATA
     #-----------------------------

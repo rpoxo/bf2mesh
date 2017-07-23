@@ -649,7 +649,7 @@ class TestStdMeshWriting_Specials(unittest.TestCase):
     def test_can_clone_two_lods_mesh(self):
         vmesh = meshes.LoadBF2Mesh(self.path_object_two_lods)
         vmesh.write_file_data(self.path_object_two_lods_clone)
-        
+
         vmesh2 = meshes.LoadBF2Mesh(self.path_object_two_lods_clone)
     
     def test_can_clone_dest_mesh(self):

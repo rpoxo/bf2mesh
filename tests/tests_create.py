@@ -145,7 +145,7 @@ class Triangle:
                     material.mapnum = 1
                     material.maps = []
                     for i in range(material.mapnum):
-                        material.maps.insert(i, b'default.dds')
+                        material.maps.insert(i, b'objects/staticobjects/test/evil_box/textures/evil_box_c.dds')
                     material.vstart = 0
                     material.istart = 0
                     material.inum = 3

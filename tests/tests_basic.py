@@ -4,6 +4,7 @@ import tempfile
 import os
 import sys
 import struct
+import shutil
 
 import bf2
 import meshes
@@ -389,8 +390,7 @@ class TestStdMeshWriting(unittest.TestCase):
         test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_2_lod', 'meshes', 'evil_box_2_lod.staticmesh'])
         test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_destroyable', 'meshes', 'evil_box_destroyable.staticmesh'])
         
-        test_object_clone = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box_clone.staticmesh'])
-        test_object_clone2 = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box_clone2.staticmesh'])
+        test_object_clone = os.path.join(*['objects', 'staticobjects', 'test', 'generated', 'evil_box_generated', 'meshes', 'evil_box_generated.staticmesh'])
         
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
         self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
@@ -398,11 +398,12 @@ class TestStdMeshWriting(unittest.TestCase):
         self.path_object_dest = os.path.join(bf2.Mod().root, test_object_dest)
 
         self.path_object_clone = os.path.join(bf2.Mod().root, test_object_clone)
-        self.path_object_clone2 = os.path.join(bf2.Mod().root, test_object_clone)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         try:
-            os.remove(self.path_object_clone)
+            path_clear = os.path.join(bf2.Mod().root, os.path.join(*['objects', 'staticobjects', 'test', 'generated', 'evil_box_generated']))
+            shutil.rmtree(path_clear)
         except FileNotFoundError:
             print('Nothing to clean up')
 
@@ -619,11 +620,43 @@ class TestStdMeshWriting(unittest.TestCase):
         self.assertTrue(vmesh2.geoms[0].lods[0].materials == vmesh2.geoms[0].lods[0].materials)
         self.assertTrue(vmesh2.geoms[0].lods[0].polycount == vmesh2.geoms[0].lods[0].polycount)
 
-    def test_can_load_bf2_mesh_cloned(self):
-        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
-        vmesh.write_file_data(self.path_object_clone)
+class TestStdMeshWriting_Specials(unittest.TestCase):
+
+    def setUp(self):
+        # NOTE: THIS IS VERY SPECIFIC TESTS FOR TEST MODEL READ
+        test_object_std = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box', 'meshes', 'evil_box.staticmesh'])
+        test_object_two_lods = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_2_lod', 'meshes', 'evil_box_2_lod.staticmesh'])
+        test_object_dest = os.path.join(*['objects', 'staticobjects', 'test', 'evil_box_destroyable', 'meshes', 'evil_box_destroyable.staticmesh'])
         
-        vmesh2 = meshes.LoadBF2Mesh(self.path_object_clone)
+        test_object_std_clone = os.path.join(*['objects', 'staticobjects', 'test', 'generated', 'clone_evil_box', 'meshes', 'clone_evil_box.staticmesh'])
+        test_object_two_lods_clone = os.path.join(*['objects', 'staticobjects', 'test', 'generated', 'clone_evil_box_2_lod', 'meshes', 'clone_evil_box_2_lod.staticmesh'])
+        test_object_dest_clone = os.path.join(*['objects', 'staticobjects', 'test', 'generated', 'clone_evil_box_destroyable', 'meshes', 'clone_evil_box_destroyable.staticmesh'])
+        
+        self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
+        self.path_object_two_lods = os.path.join(bf2.Mod().root, test_object_two_lods)
+        self.path_object_dest = os.path.join(bf2.Mod().root, test_object_dest)
+
+        self.path_object_std_clone = os.path.join(bf2.Mod().root, test_object_std_clone)
+        self.path_object_two_lods_clone = os.path.join(bf2.Mod().root, test_object_two_lods_clone)
+        self.path_object_dest_clone = os.path.join(bf2.Mod().root, test_object_dest_clone)
+
+    def test_can_clone_std_mesh(self):
+        vmesh = meshes.LoadBF2Mesh(self.path_object_std)
+        vmesh.write_file_data(self.path_object_std_clone)
+        
+        vmesh2 = meshes.LoadBF2Mesh(self.path_object_std_clone)
+    
+    def test_can_clone_two_lods_mesh(self):
+        vmesh = meshes.LoadBF2Mesh(self.path_object_two_lods)
+        vmesh.write_file_data(self.path_object_two_lods_clone)
+        
+        vmesh2 = meshes.LoadBF2Mesh(self.path_object_two_lods_clone)
+    
+    def test_can_clone_dest_mesh(self):
+        vmesh = meshes.LoadBF2Mesh(self.path_object_dest)
+        vmesh.write_file_data(self.path_object_dest_clone)
+        
+        vmesh2 = meshes.LoadBF2Mesh(self.path_object_dest_clone)
 
 class TestSamplesReading(unittest.TestCase):
 

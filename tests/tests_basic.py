@@ -190,21 +190,19 @@ class TestStdMeshReading(unittest.TestCase):
         self.assertTrue(isinstance(vmesh, modmesh.StdMesh))
 
 
-@unittest.skip('testing failed mesh load')
+#@unittest.skip('testing failed mesh load')
 class TestBundleMeshReading(unittest.TestCase):
 
     def setUp(self):
         # test for vehicle depot
         # objects\common\vehicle_depot\modmesh
-        test_object_std = os.path.join(*['objects', 'common', 'vehicle_depot', 'modmesh', 'vehicle_depot.bundledmesh'])
-
-        self.path_object_std = os.path.join(bf2.Mod().root, test_object_std)
+        self.path_object_std = os.path.join(*['tests', 'samples', 'vehicle_depot', 'meshes', 'vehicle_depot.bundledmesh'])
 
     def test_can_read_header(self):
         with open(self.path_object_std, 'rb') as meshfile:
             vmesh = modmesh.StdMesh()
             vmesh._read_head(meshfile)
-            
+
         self.assertTrue(vmesh.head.u1 == 0)
         self.assertTrue(vmesh.head.version in [10, 6, 11])
         self.assertTrue(vmesh.head.u3 == 0)
@@ -245,6 +243,13 @@ class TestBundleMeshReading(unittest.TestCase):
             vmesh = modmesh.StdMesh()
             vmesh._read_vertattrib_table(meshfile)
 
+        # need to add attribs testing
+        # position
+        # normal
+        # blend index
+        # uv1
+        # tangent
+        # unused
         self.assertTrue(len(vmesh.vertattrib) == vmesh.vertattribnum)
 
     def test_can_read_vertformat(self):
@@ -269,9 +274,8 @@ class TestBundleMeshReading(unittest.TestCase):
         with open(self.path_object_std, 'rb') as meshfile:
             vmesh = modmesh.StdMesh()
             vmesh._read_vertex_block(meshfile)
-            
-        print(len(vmesh.vertices))
-        self.assertTrue(len(vmesh.vertices) == 1576596)
+
+        self.assertTrue(len(vmesh.vertices) == vmesh.vertnum * vmesh.vertstride / vmesh.vertformat == 1576596)
 
     def test_can_read_indexnum(self):
         with open(self.path_object_std, 'rb') as meshfile:
@@ -285,7 +289,7 @@ class TestBundleMeshReading(unittest.TestCase):
             vmesh = modmesh.StdMesh()
             vmesh._read_index_block(meshfile)
 
-        self.assertTrue(len(vmesh.index) == 278436)
+        self.assertTrue(len(vmesh.index) == vmesh.indexnum == 278436)
 
     def test_can_read_u2(self):
         with open(self.path_object_std, 'rb') as meshfile:
@@ -308,37 +312,33 @@ class TestBundleMeshReading(unittest.TestCase):
             vmesh.isBundledMesh = True
             vmesh._read_materials(meshfile)
 
+        # may need to add tests per each material
         self.assertTrue(vmesh.geoms[0].lods[0].matnum == 14)
         self.assertTrue(vmesh.geoms[0].lods[1].matnum == 13)
         self.assertTrue(vmesh.geoms[0].lods[2].matnum == 12)
         self.assertTrue(vmesh.geoms[0].lods[3].matnum == 12)
         self.assertTrue(vmesh.geoms[0].lods[4].matnum == 10)
         self.assertTrue(vmesh.geoms[0].lods[5].matnum == 8)
-        
 
     def test_can_load_bf2_bundled_mesh(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_std)
         self.assertTrue(vmesh.isBundledMesh)
         self.assertTrue(isinstance(vmesh, modmesh.StdMesh))
 
-@unittest.skip('testing failed mesh load')
+#@unittest.skip('testing failed mesh load')
 class TestMeshReading_Specials(unittest.TestCase):
 
     # objects\staticobjects\Bridges\EoD_Bridge_Big\modmesh\eod_bridge_big.staticmesh
     # it has version 4 and inum and vnum in material
     #@unittest.skip('memory issues')
     def test_can_read_not_skinned_mesh_version_4(self):
-        path_mesh = os.path.join(bf2.Mod().root, 'objects', 'staticobjects', 'Bridges', 'EoD_Bridge_Big', 'modmesh', 'eod_bridge_big.staticmesh')
+        path_mesh = os.path.join(*['tests', 'samples', 'EoD_Bridge_Big', 'meshes', 'eod_bridge_big.staticmesh'])
         #vmesh = modmesh.LoadBF2Mesh(path_mesh)
         with open(path_mesh, 'rb') as meshfile:
             vmesh = modmesh.StdMesh()
             vmesh._read_materials(meshfile)
             
-    def test_can_read_mesh_two_lods(self):
-        path_mesh = os.path.join(bf2.Mod().root, 'objects', 'staticobjects', 'test', 'evil_box_2_lod', 'modmesh', 'evil_box_2_lod.staticmesh')
-        vmesh = modmesh.LoadBF2Mesh(path_mesh)
-            
-    @unittest.skip('i\o intensive')
+    @unittest.skip('i\o intensive, depend on system')
     def test_can_read_PR_modmesh_REPO(self):
         counter = 0
         for dir, dirnames, filenames in os.walk(os.path.join(bf2.Mod().root, 'objects')):

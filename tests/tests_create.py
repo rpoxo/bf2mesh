@@ -5,10 +5,10 @@ import struct
 import mock_mesh
 
 import bf2
-import meshes
+import modmesh
 import modmath
 
-#@unittest.skip('temporary disabled until refactor')
+@unittest.skip('temporary disabled until refactor')
 class TestCreatePrimitive_Triangle(unittest.TestCase):
 
     def setUp(self):

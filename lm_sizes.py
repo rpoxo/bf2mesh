@@ -4,7 +4,7 @@ import multiprocessing
 import time
 
 import bf2
-import meshes
+import modmesh
 
 def worker(jobs, results, modroot):
     while 1:
@@ -15,13 +15,13 @@ def worker(jobs, results, modroot):
             break
         filepath = next_task
         try:
-            mesh = meshes.LoadBF2Mesh(filepath, loadSamples=True)
+            mesh = modmesh.LoadBF2Mesh(filepath, loadSamples=True)
             #answer = 'Success loaded samples for {}'.format(filepath)
             meshname = os.path.splitext(os.path.basename(filepath))[0]
             if len(mesh.geoms) == 2: # dest objects
                 meshname = ''.join(['DEST:', meshname])
             for geom in mesh.geoms:
-                for lod in geom.lod:
+                for lod in geom.lods:
                     if lod.sample == None:
                         continue
                     if lod.sample.width == lod.sample.height:

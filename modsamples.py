@@ -1,7 +1,6 @@
 import os
 import struct
 
-#import bf2 #dont need that
 import modmath
 
 

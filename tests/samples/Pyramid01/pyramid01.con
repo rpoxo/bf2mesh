@@ -1,0 +1,8 @@
+GeometryTemplate.create StaticMesh pyramid01
+
+ObjectTemplate.create SimpleObject pyramid01
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.creator DECENT-PC:Administrator
+ObjectTemplate.geometry pyramid01
+
+include pyramid01.tweak

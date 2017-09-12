@@ -1,0 +1,16 @@
+rem *** Generated with Bf2Editor.exe [created: 2005/8/2 9:59]
+GeometryTemplate.doNotGenerateLightmaps 0
+GeometryTemplate.lightmapOverride 0
+GeometryTemplate.compressVertexData 1
+GeometryTemplate.maxTextureRepeat 16
+ObjectTemplate.activeSafe SimpleObject eod_bridge_big
+ObjectTemplate.creator PHIL-EGWBKFTVB4:Phil
+ObjectTemplate.modifiedByUser "Phil"
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.geometry eod_bridge_big
+ObjectTemplate.setCollisionMesh eod_bridge_big
+ObjectTemplate.mapMaterial 0 Wood_solid 15
+ObjectTemplate.hasMobilePhysics 0
+ObjectTemplate.hasCollisionPhysics 1
+ObjectTemplate.physicsType Mesh
+

@@ -71,7 +71,7 @@ d3dusage = {
     6 : 'TANGENT',
     7 : 'BINORMAL',
     8 : 'TESSFACTOR',
-    9 : 'POSITIONT',
+    9 : 'POSITIONT', # wat
     10 : 'COLOR',
     11 : 'FOG',
     12 : 'DEPTH',

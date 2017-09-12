@@ -206,7 +206,6 @@ class StdMesh:
         self.vertstride = None  # bytes size for vertex attributes buffer
         self.vertnum = None  # number of vertices
         self.vertices = ()  # vertices array, actual geometry
-        self.vertices_attributes = None  # generated buffers for better reading
         self.indexnum = None  # number of indices
         self.index = None  # vertex indices
         self.u2 = None  # some another bfp4f garbage..

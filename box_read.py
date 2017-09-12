@@ -2,36 +2,34 @@ import os
 
 import modmesh
 
-vmesh = modmesh.LoadBF2Mesh(os.getcwd() + '\\evil_box\\Meshes\\evil_box.staticmesh')
-
-vmesh.vertices = list(vmesh.vertices)
-for attrib_id, attrib in enumerate(vmesh.vertattrib):
-    usage = modmesh.modmath.d3dusage[attrib.usage]
-    offset = int(attrib.offset / vmesh.vertformat)
-    vartype = modmesh.modmath.d3dtypes[attrib.vartype]
-    vnum = modmesh.modmath.d3dtypes_lenght[attrib.vartype]
-
-    if usage == 'POSITION' and vartype != 'UNUSED':
-        print('VERTICES')
+def display_mesh_data(vmesh):
+    for attrib in vmesh.vertattrib:
+        usage = modmesh.modmath.d3dusage[attrib.usage]
+        offset = int(attrib.offset / vmesh.vertformat)
+        vartype = modmesh.modmath.d3dtypes[attrib.vartype]
+        vnum = modmesh.modmath.d3dtypes_lenght[attrib.vartype]
+        
+        print('\n### {} {} ###'.format(usage, vartype))
         for i in range(vmesh.vertnum):
             vstart = offset + i * int(vmesh.vertstride / vmesh.vertformat)
             data = vmesh.vertices[vstart:vstart+vnum]
-            #print('[{}] [{}({})] = {}'.format(i, usage, vartype, data))
-            print('[{}] {},'.format(i, tuple(data)))
 
-    if usage == 'NORMAL' and vartype != 'UNUSED':
-        print('NORMALS')
-        for i in range(vmesh.vertnum):
-            vstart = offset + i * int(vmesh.vertstride / vmesh.vertformat)
-            data = vmesh.vertices[vstart:vstart+vnum]
-            #print('[{}] [{}({})] = {}'.format(i, usage, vartype, data))
-            print('{},'.format(tuple(data)))
+            print('[{}] [{}] {},'.format(i, vstart, tuple(data)))
 
-            #for id, item in enumerate(position_offset):
-            #    vmesh.vertices[vstart+id] += item
+    print('\n### INDICES ###\n')
+    face_vid = 0
+    for id_vertex in vmesh.index:
+        face_vid += 1
 
-            #data = vmesh.vertices[vstart:vstart+vnum]
-            #print('[{}] [{}({})] = {}'.format(i, usage, vartype, data))
+        vstart = id_vertex * int(vmesh.vertstride / vmesh.vertformat)
+        vdata = vmesh.vertices[vstart:vstart+3]
+        print('[{}] {},'.format(id_vertex, tuple(vdata)))
+        if face_vid == 3:
+            face_vid = 0
+            print('')
 
-for id_vertex in vmesh.index:
-    print('{},'.format(id_vertex))
+#vmesh = modmesh.LoadBF2Mesh(os.getcwd() + '\\tests\\samples\\evil_box\\Meshes\\evil_box.staticmesh')
+#vmesh = modmesh.LoadBF2Mesh(os.getcwd() + '/generated/generated_box/meshes/generated_box_edit.staticmesh')
+vmesh = modmesh.LoadBF2Mesh('C:\Program Files\Blender Foundation\Blender\generated\generated_box\meshes\generated_box.staticmesh')
+
+display_mesh_data(vmesh)

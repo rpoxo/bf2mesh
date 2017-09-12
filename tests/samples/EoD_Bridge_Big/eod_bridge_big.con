@@ -1,0 +1,15 @@
+GeometryTemplate.create StaticMesh eod_bridge_big
+CollisionManager.createTemplate eod_bridge_big
+
+ObjectTemplate.create SimpleObject eod_bridge_big
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.creator PHIL-EGWBKFTVB4:Phil
+ObjectTemplate.collisionMesh eod_bridge_big
+ObjectTemplate.mapMaterial 0 Wood_solid 0
+ObjectTemplate.hasCollisionPhysics 1
+ObjectTemplate.physicsType 3
+ObjectTemplate.geometry eod_bridge_big
+
+ObjectTemplate.create SimpleObject WoodenRoadSurface
+
+include eod_bridge_big.tweak

@@ -20,7 +20,7 @@ def LoadBF2Mesh(
         isStaticMesh = (file_extension == '.staticmesh')
 
         vmesh = StdMesh(isSkinnedMesh, isBundledMesh, isStaticMesh)
-        vmesh.load_file_data(meshfile)
+        vmesh.open(meshfile)
 
         if loadSamples:
             dir = os.path.dirname(filepath)
@@ -40,12 +40,6 @@ def LoadBF2Mesh(
                             geom].lods[
                             lod].sample = modsamples.LoadBF2Sample(filepath)
     return vmesh
-
-
-def chunks(l, n):
-    """Yield successive n-sized chunks from l."""
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
 
 
 class bf2lod:
@@ -168,7 +162,7 @@ class vertattrib:
     
     def read_vertattrib(self, fo):
         self.flag = modmath.short(fo) # some bool, never used
-        self.offset = modmath.short(fo) # offset from vertex data start 
+        self.offset = modmath.short(fo) # offset from vertex data start in bytes
         self.vartype = modmath.short(fo) # DX SDK 'Include/d3d9types.h' enum _D3DDECLTYPE
         self.usage = modmath.short(fo) # DX SDK 'Include/d3d9types.h' enum _D3DDECLUSAGE
 
@@ -189,7 +183,8 @@ class StdMesh:
             isSkinnedMesh=False,
             isBundledMesh=False,
             isStaticMesh=False):
-        # setting some internals
+        # setting some flags
+        # perhaps should at least one by default?
         self.isSkinnedMesh = isSkinnedMesh
         self.isBundledMesh = isBundledMesh
         self.isStaticMesh = isStaticMesh
@@ -198,24 +193,23 @@ class StdMesh:
         self.head = None  # header contains version and some bfp4f data
         self.u1 = None  # version flag for bfp4f
         self.geomnum = None  # amount of geoms
-        self.geoms = None  # geoms data struct, to be filled as we reading file
-        self.vertattribnum = None  # number of vertattributes xDDD
-        self.vertattrib = None  # vertattrib array, no idea what it does
-        # vert format? no idea hwta it does, perhaps bytes len(all floats)
-        self.vertformat = None
-        self.vertstride = None  # bytes size for vertex attributes buffer
+        self.geoms = None  # geometry struct, hold materials info etc
+        self.vertattribnum = None  # amount of vertex attributes
+        self.vertattrib = None  # vertex attributes table, struct info
+        self.vertformat = None  # bytes lenght? seems to be always 4
+        self.vertstride = None  # bytes len for vertex data chunk
         self.vertnum = None  # number of vertices
-        self.vertices = ()  # vertices array, actual geometry
+        self.vertices = None  # geom data, parse using attrib table
         self.indexnum = None  # number of indices
-        self.index = None  # vertex indices
+        self.index = None  # indices array
         self.u2 = None  # some another bfp4f garbage..
 
     # just a wrapper for better name
-    def load_file_data(self, fo):
+    def open(self, fo):
         # materials read will read everything inb4
         self._read_filedata(fo)
 
-    def write_file_data(self, fo):
+    def save(self, fo):
         # materials read will read everything inb4
         self._write_materials(fo)
 

@@ -9,10 +9,9 @@ class Mod(object):
         self.root = self.find_mod_root()
 
     def find_mod_root(self):
-        working_dir_parts = os.getcwd().split(os.sep)
+        workdir_parts = os.getcwd().split(os.sep)
         return os.sep.join(
-            working_dir_parts[
-                :working_dir_parts.index('mods') + 2])
+            workdir_parts[:workdir_parts.index('mods') + 2])
 
     def get_object_path(self, name):
         for dirname, dirnames, filenames in os.walk(
@@ -26,6 +25,9 @@ class Mod(object):
                         return filepath
 
 
+
+# ############################################### #
+# !!!untested shit leftover from materials parser #
 class TemplateParser:
     # regex from mats
     # ObjectTeamplate.(create|activeSafe) <?Type\S*> <?Object\S*>

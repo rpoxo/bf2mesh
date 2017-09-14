@@ -28,8 +28,9 @@ def display_mesh_data(vmesh):
             face_vid = 0
             print('')
 
-#vmesh = modmesh.LoadBF2Mesh(os.getcwd() + '\\tests\\samples\\evil_box\\Meshes\\evil_box.staticmesh')
+vmesh = modmesh.LoadBF2Mesh(os.getcwd() + '\\tests\\samples\\evil_box\\Meshes\\evil_box.staticmesh')
 #vmesh = modmesh.LoadBF2Mesh(os.getcwd() + '/generated/generated_box/meshes/generated_box_edit.staticmesh')
-vmesh = modmesh.LoadBF2Mesh('C:\Program Files\Blender Foundation\Blender\generated\generated_box\meshes\generated_box.staticmesh')
+#vmesh = modmesh.LoadBF2Mesh('C:\Program Files\Blender Foundation\Blender\generated\generated_box\meshes\generated_box.staticmesh')
+#vmesh = modmesh.LoadBF2Mesh(os.getcwd() + '\\..\\..\\..\\..\\..\\objects\\vehicles\\land\\us_tnk_m1a2\\Meshes\\us_tnk_m1a2.bundledmesh')
 
 display_mesh_data(vmesh)

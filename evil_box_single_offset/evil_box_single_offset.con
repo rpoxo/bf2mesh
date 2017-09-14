@@ -1,8 +1,0 @@
-GeometryTemplate.create StaticMesh evil_box_single_offset
-
-ObjectTemplate.create SimpleObject evil_box_single_offset
-ObjectTemplate.saveInSeparateFile 1
-ObjectTemplate.creator DECENT-PC:Administrator
-ObjectTemplate.geometry evil_box_single_offset
-
-include evil_box_single_offset.tweak

@@ -1,8 +1,0 @@
-<mesh0>
-
-MAT 1 "UNDEFINED"
-FX "StaticMesh.fx"
-Technique "Base"
-Texture "default.dds"
-Texture "Common\Textures\SpecularLUT_pow36.dds"
-

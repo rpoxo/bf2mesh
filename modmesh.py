@@ -1,8 +1,7 @@
 import os
 import struct
 
-import modmath
-import modsamples
+import modmath as BIN
 
 # https://github.com/ByteHazard/BfMeshView/blob/master/source/modStdMesh.bas
 
@@ -32,14 +31,21 @@ def LoadBF2Mesh(
                     if ext == '.samples':
                         vmesh.geoms[
                             0].lods[
-                            0].sample = modsamples.LoadBF2Sample(filepath)
+                            0].sample = LoadBF2Sample(filepath)
                     else:
                         geom = int(ext.split('_')[1][0])
                         lod = int(ext.split('_')[1][1])
                         vmesh.geoms[
                             geom].lods[
-                            lod].sample = modsamples.LoadBF2Sample(filepath)
+                            lod].sample = LoadBF2Sample(filepath)
     return vmesh
+
+
+def LoadBF2Sample(filepath):
+    with open(filepath, 'rb') as samplefile:
+        sample = StdSample()
+        sample.open(samplefile)
+    return sample
 
 
 class bf2lod:
@@ -78,8 +84,8 @@ class bf2mat:
         self.nmax = None
 
     def __get_string(self, fo):
-        string_len = modmath.long(fo)
-        return modmath.string(fo, string_len)
+        string_len = BIN.long(fo)
+        return BIN.string(fo, string_len)
 
     def __get_maps(self, fo):
         mapnames = []
@@ -90,20 +96,20 @@ class bf2mat:
     
     def read(self, fo, isSkinnedMesh, version):
         #print('>> starting reading material at {}'.format(fo.tell()))
-        self.alphamode = modmath.long(fo)
+        self.alphamode = BIN.long(fo)
         self.fxfile = self.__get_string(fo)
         self.technique = self.__get_string(fo)
-        self.mapnum = modmath.long(fo)
+        self.mapnum = BIN.long(fo)
         self.maps = self.__get_maps(fo)
-        self.vstart = modmath.long(fo)
-        self.istart = modmath.long(fo)
-        self.inum = modmath.long(fo)
-        self.vnum = modmath.long(fo)
-        self.u4 = modmath.long(fo)
-        self.u5 = modmath.long(fo)
+        self.vstart = BIN.long(fo)
+        self.istart = BIN.long(fo)
+        self.inum = BIN.long(fo)
+        self.vnum = BIN.long(fo)
+        self.u4 = BIN.long(fo)
+        self.u5 = BIN.long(fo)
         if not isSkinnedMesh and version == 11:
-            self.nmin = modmath.float3(fo)
-            self.nmax = modmath.float3(fo)
+            self.nmin = BIN.float3(fo)
+            self.nmax = BIN.float3(fo)
 
 
 class bf2head:
@@ -122,11 +128,11 @@ class bf2head:
         self.u5 = None
 
     def read(self, fo):
-        self.u1 = modmath.long(fo)
-        self.version = modmath.long(fo)
-        self.u3 = modmath.long(fo)
-        self.u4 = modmath.long(fo)
-        self.u5 = modmath.long(fo)
+        self.u1 = BIN.long(fo)
+        self.version = BIN.long(fo)
+        self.u3 = BIN.long(fo)
+        self.u4 = BIN.long(fo)
+        self.u5 = BIN.long(fo)
 
     def __eq__(self, other):
         if self.u1 != other.u1:
@@ -149,7 +155,7 @@ class bf2geom:
         self.lods = []
     
     def read_lodnum(self, fo):
-        self.lodnum = modmath.long(fo)
+        self.lodnum = BIN.long(fo)
 
 
 class vertattrib:
@@ -161,10 +167,10 @@ class vertattrib:
         self.usage = None
     
     def read_vertattrib(self, fo):
-        self.flag = modmath.short(fo) # some bool, never used
-        self.offset = modmath.short(fo) # offset from vertex data start in bytes
-        self.vartype = modmath.short(fo) # DX SDK 'Include/d3d9types.h' enum _D3DDECLTYPE
-        self.usage = modmath.short(fo) # DX SDK 'Include/d3d9types.h' enum _D3DDECLUSAGE
+        self.flag = BIN.short(fo) # some bool, never used
+        self.offset = BIN.short(fo) # offset from vertex data start in bytes
+        self.vartype = BIN.short(fo) # DX SDK 'Include/d3d9types.h' enum _D3DDECLTYPE
+        self.usage = BIN.short(fo) # DX SDK 'Include/d3d9types.h' enum _D3DDECLUSAGE
 
     def __str__(self):
         return str((self.flag, self.offset, self.vartype, self.usage))
@@ -225,12 +231,12 @@ class StdMesh:
     def _read_u1_bfp4f_version(self, fo):
         self._read_head(fo)
 
-        self.u1 = modmath.byte(fo)
+        self.u1 = BIN.byte(fo)
 
     def _read_geomnum(self, fo):
         self._read_u1_bfp4f_version(fo)
 
-        self.geomnum = modmath.long(fo)
+        self.geomnum = BIN.long(fo)
     
     def _read_geom_table(self, fo):
         self._read_geomnum(fo)
@@ -242,7 +248,7 @@ class StdMesh:
     def _read_vertattribnum(self, fo):
         self._read_geom_table(fo)
 
-        self.vertattribnum = modmath.long(fo)
+        self.vertattribnum = BIN.long(fo)
         #print('.vertattribnum = {}'.format(self.vertattribnum))
 
     def _read_vertattrib_table(self, fo):
@@ -256,19 +262,19 @@ class StdMesh:
     def _read_vertformat(self, fo):
         self._read_vertattrib_table(fo)
 
-        self.vertformat = modmath.long(fo)
+        self.vertformat = BIN.long(fo)
 
     def _read_vertstride(self, fo):
         self._read_vertformat(fo)
         #print('>> {}'.format(fo.tell()))
 
-        self.vertstride = modmath.long(fo)
+        self.vertstride = BIN.long(fo)
 
     def _read_vertnum(self, fo):
         self._read_vertstride(fo)
         #print('>> {}'.format(fo.tell()))
 
-        self.vertnum = modmath.long(fo)
+        self.vertnum = BIN.long(fo)
 
     def _read_vertex_block(self, fo):
         self._read_vertnum(fo)
@@ -288,7 +294,7 @@ class StdMesh:
         self._read_vertex_block(fo)
         #print('>> vertex block end at {}'.format(fo.tell()))
 
-        self.indexnum = modmath.long(fo)
+        self.indexnum = BIN.long(fo)
         #print('self.indexnum = {}'.format(self.indexnum))
 
     def _read_index_block(self, fo):
@@ -304,7 +310,7 @@ class StdMesh:
         self._read_index_block(fo)
 
         if not self.isSkinnedMesh:
-            self.u2 = modmath.long(fo)
+            self.u2 = BIN.long(fo)
 
     def _read_nodes(self, fo):
         self._read_u2(fo)
@@ -313,23 +319,23 @@ class StdMesh:
             geom.lods = [bf2lod() for i in range(geom.lodnum)]
             for lod in geom.lods:
                 lod.version = self.head.version
-                lod.min = modmath.float3(fo)
-                lod.max = modmath.float3(fo)
+                lod.min = BIN.float3(fo)
+                lod.max = BIN.float3(fo)
                 if lod.version <= 6:
-                    lod.pivot = modmath.float3(fo)
-                lod.nodenum = modmath.long(fo)
+                    lod.pivot = BIN.float3(fo)
+                lod.nodenum = BIN.long(fo)
                 # reading nodes matrix
                 if not self.isBundledMesh:
                     for i in range(lod.nodenum):
                         for j in range(16):
-                            lod.nodes.append(modmath.float(fo))
+                            lod.nodes.append(BIN.float(fo))
 
     def _read_materials(self, fo):
         self._read_nodes(fo)
 
         for geom in self.geoms:
             for lod in geom.lods:
-                lod.matnum = modmath.long(fo)
+                lod.matnum = BIN.long(fo)
                 lod.materials = [bf2mat() for i in range(lod.matnum)]
                 for material in lod.materials:
                     material.read(fo, self.isSkinnedMesh, self.head.version)
@@ -490,3 +496,92 @@ class StdMesh:
                             fo.write(struct.Struct('3f').pack(*material.nmin))
                             fo.write(struct.Struct('3f').pack(*material.nmax))
     
+
+class smp_sample:
+
+    def __init__(self):
+        self.position = None
+        self.rotation = None
+        self.face = None
+
+    def read(self, fo):
+        self.position = BIN.float3(fo)
+        self.rotation = BIN.float3(fo)
+        self.face = BIN.long(fo)
+
+
+class smp_face:
+
+    def __init__(self):
+        '''
+            v1 As float3
+            n1 As float3
+
+            v2 As float3
+            n2 As float3
+
+            v3 As float3
+            n3 As float3
+        '''
+        self.v1 = None
+        self.n1 = None
+
+        self.v2 = None
+        self.n2 = None
+
+        self.v3 = None
+        self.n3 = None
+
+    def read(self, fo):
+        self.v1 = BIN.float3(fo)
+        self.n1 = BIN.float3(fo)
+
+        self.v2 = BIN.float3(fo)
+        self.n2 = BIN.float3(fo)
+
+        self.v3 = BIN.float3(fo)
+        self.n3 = BIN.float3(fo)
+
+
+class StdSample:
+
+    def __init__(self):
+        # header
+        self.fourcc = None
+        self.width = None
+        self.height = None
+
+        self.datanum = None
+        self.data = []
+
+        self.facenum = None
+        self.faces = []
+
+    def open(self, fo):
+        self._read_faces(fo)
+
+    def _read_head(self, fo):
+        self.fourcc = BIN.string(fo, lenght=4)
+        self.width = BIN.long(fo)
+        self.height = BIN.long(fo)
+
+    def _read_data(self, fo):
+        self._read_head(fo)
+
+        self.datanum = self.width * self.height
+        for i in range(self.datanum):
+            sample = smp_sample()
+            sample.read(fo)
+            self.data.append(sample)
+
+    def _read_faces(self, fo):
+        self._read_data(fo)
+
+        self.facenum = BIN.long(fo)
+        for i in range(self.facenum):
+            face = smp_face()
+            face.read(fo)
+            self.faces.append(face)
+
+
+

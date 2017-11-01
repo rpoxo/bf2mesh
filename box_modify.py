@@ -4,10 +4,10 @@ import modmesh
 
 def print_vertex_data(vmesh, vid, vattribute):
     for attrib_id, attrib in enumerate(vmesh.vertattrib):
-        usage = modmesh.modmath.d3dusage[attrib.usage]
+        usage = modmesh.D3DDECLUSAGE(attrib.usage).name
         offset = int(attrib.offset / vmesh.vertformat)
-        vartype = modmesh.modmath.d3dtypes[attrib.vartype]
-        vlen = modmesh.modmath.d3dtypes_lenght[attrib.vartype]
+        vartype = modmesh.D3DDECLTYPE(attrib.vartype).name
+        vlen = len(modmesh.D3DDECLTYPE(attrib.vartype))
         
         if usage == vattribute:
             vstart = offset + vid * int(vmesh.vertstride / vmesh.vertformat)
@@ -45,10 +45,10 @@ def remove_attribute(vmesh, attrib_to_remove):
     total_data_removed = 0
 
     for attrib_id, attrib in enumerate(vmesh.vertattrib):
-        usage = modmesh.modmath.d3dusage[attrib.usage]
+        usage = modmesh.D3DDECLUSAGE(attrib.usage).name
         offset = int(attrib.offset / vmesh.vertformat)
-        vartype = modmesh.modmath.d3dtypes[attrib.vartype]
-        vlen = modmesh.modmath.d3dtypes_lenght[attrib.vartype]
+        vartype = modmesh.D3DDECLTYPE(attrib.vartype).name
+        vlen = len(modmesh.D3DDECLTYPE(attrib.vartype))
         
         if usage == attrib_to_remove:
             print('REMOVING DATA for {}'.format(usage))
@@ -70,7 +70,7 @@ def remove_attribute(vmesh, attrib_to_remove):
     # remove attribute from table
     if attrib_id_to_remove !=0:
         # fix vertstride
-        reduce_stride_by = modmesh.modmath.d3dtypes_lenght[vmesh.vertattrib[attrib_id_to_remove].vartype] * vmesh.vertformat
+        reduce_stride_by = len(modmesh.D3DDECLTYPE(vmesh.vertattrib[attrib_id_to_remove].vartype)) * vmesh.vertformat
         print('REDUCING STRIDE from {} to {} by {} bytes'.format(vmesh.vertstride, vmesh.vertstride - reduce_stride_by, reduce_stride_by))
         vmesh.vertstride = vmesh.vertstride - reduce_stride_by
         
@@ -89,10 +89,10 @@ def rename_texture(vmesh, geom, lod, material, map, path):
 
 def edit_vertex(vmesh, vid, vattribute, vdata):
     for attrib_id, attrib in enumerate(vmesh.vertattrib):
-        usage = modmesh.modmath.d3dusage[attrib.usage]
+        usage = modmesh.D3DDECLUSAGE(attrib.usage).name
         offset = int(attrib.offset / vmesh.vertformat)
-        vartype = modmesh.modmath.d3dtypes[attrib.vartype]
-        vlen = modmesh.modmath.d3dtypes_lenght[attrib.vartype]
+        vartype = modmesh.D3DDECLTYPE(attrib.vartype).name
+        vlen = len(modmesh.D3DDECLTYPE(attrib.vartype))
         
         if usage == vattribute:
             print('SETTING DATA for v[{}] {}'.format(vid, vattribute))

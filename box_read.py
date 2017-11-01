@@ -4,15 +4,15 @@ import modmesh
 
 def display_mesh_data(vmesh):
     for attrib in vmesh.vertattrib:
-        usage = modmesh.modmath.d3dusage[attrib.usage]
+        usage = modmesh.D3DDECLUSAGE(attrib.usage).name
         offset = int(attrib.offset / vmesh.vertformat)
-        vartype = modmesh.modmath.d3dtypes[attrib.vartype]
-        vnum = modmesh.modmath.d3dtypes_lenght[attrib.vartype]
+        vartype = modmesh.D3DDECLTYPE(attrib.vartype).name
+        vlen = len(modmesh.D3DDECLTYPE(attrib.vartype))
         
         print('\n### {} {} ###'.format(usage, vartype))
         for i in range(vmesh.vertnum):
             vstart = offset + i * int(vmesh.vertstride / vmesh.vertformat)
-            data = vmesh.vertices[vstart:vstart+vnum]
+            data = vmesh.vertices[vstart:vstart+vlen]
 
             print('[{}] [{}] {},'.format(i, vstart, tuple(data)))
 

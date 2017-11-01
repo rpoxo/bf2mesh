@@ -1,5 +1,4 @@
 import modmesh
-import modmath
 
 class Triangle:
 
@@ -66,7 +65,7 @@ class Triangle:
         vmesh.vertformat = 4
     
     def _create_vertstride(self, vmesh):
-        vmesh.vertstride = sum([modmath.d3dtypes_lenght[attrib.vartype]*vmesh.vertformat for attrib in vmesh.vertattrib])
+        vmesh.vertstride = sum([len(modmesh.D3DDECLTYPE(attrib.vartype))*vmesh.vertformat for attrib in vmesh.vertattrib])
     
     def _create_vertnum(self, vmesh):
         vmesh.vertnum = 3
@@ -216,7 +215,7 @@ class Box:
         vmesh.vertformat = 4
     
     def _create_vertstride(self, vmesh):
-        vmesh.vertstride = sum([modmath.d3dtypes_lenght[attrib.vartype]*vmesh.vertformat for attrib in vmesh.vertattrib])
+        vmesh.vertstride = sum([len(modmesh.D3DDECLTYPE(attrib.vartype))*vmesh.vertformat for attrib in vmesh.vertattrib])
 
     def _create_vertices(self, vmesh):
         positions = [

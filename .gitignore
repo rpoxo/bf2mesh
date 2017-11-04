@@ -1,2 +1,3 @@
 *.pyc
 /generated/
+/tests/generated/

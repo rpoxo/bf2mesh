@@ -1,52 +1,57 @@
 import os
-import enum # python 3.4+
+import enum  # python 3.4+
 import struct
 
-# https://github.com/ByteHazard/BfMeshView/blob/master/source/modStdMesh.bas
+# reference for mesh struct:
+# https://github.com/ByteHazard/BfMeshView/blob/master/source/modVisMeshLoad.bas
 
-# copypasta from DX SDK 'Include/d3d9types.h' enum _D3DDECLTYPE to address vert attribute vartype variable
+# copypasta from DX SDK 'Include/d3d9types.h' enum _D3DDECLTYPE to address
+# vert attribute vartype variable
+
+
 class D3DDECLTYPE(enum.IntEnum):
-    FLOAT1    = 0  # 1D float expanded to (value, 0., 0., 1.)
-    FLOAT2    = 1  # 2D float expanded to (value, value, 0., 1.)
-    FLOAT3    = 2  # 3D float expanded to (value, value, value, 1.)
-    FLOAT4    = 3  # 4D float
-    D3DCOLOR  = 4  # 4D packed unsigned bytes mapped to 0. to 1. range
-                                 # Input is in D3DCOLOR format (ARGB) expanded to (R, G, B, A)
-    UBYTE4    = 5  # 4D unsigned byte
-    UNUSED    = 17, # When the type field in a decl is unused.
-    
+    FLOAT1 = 0  # 1D float expanded to (value, 0., 0., 1.)
+    FLOAT2 = 1  # 2D float expanded to (value, value, 0., 1.)
+    FLOAT3 = 2  # 3D float expanded to (value, value, value, 1.)
+    FLOAT4 = 3  # 4D float
+    D3DCOLOR = 4  # 4D packed unsigned bytes mapped to 0. to 1. range
+    # Input is in D3DCOLOR format (ARGB) expanded to (R, G, B, A)
+    UBYTE4 = 5  # 4D unsigned byte
+    UNUSED = 17,  # When the type field in a decl is unused.
+
     def __len__(d3dtype):
         return {
-            0 : 1, # D3DDECLTYPE_FLOAT1
-            1 : 2, # D3DDECLTYPE_FLOAT2
-            2 : 3, # D3DDECLTYPE_FLOAT3
-            4 : 1, # D3DDECLTYPE_D3DCOLOR
-            5 : 3, # D3DDECLTYPE_UBYTE4
-            17 : 0, # D3DDECLTYPE_UNUSED
-            }[d3dtype]
+            0: 1,  # D3DDECLTYPE_FLOAT1
+            1: 2,  # D3DDECLTYPE_FLOAT2
+            2: 3,  # D3DDECLTYPE_FLOAT3
+            4: 1,  # D3DDECLTYPE_D3DCOLOR
+            5: 3,  # D3DDECLTYPE_UBYTE4
+            17: 0,  # D3DDECLTYPE_UNUSED
+        }[d3dtype]
 
 
-# copypasta from DX SDK 'Include/d3d9types.h' enum _D3DDECLUSAGE to address vert attribute usage variable
+# copypasta from DX SDK 'Include/d3d9types.h' enum _D3DDECLUSAGE to
+# address vert attribute usage variable
 class D3DDECLUSAGE(enum.IntEnum):
-    POSITION        = 0
-    BLENDWEIGHT     = 1
-    BLENDINDICES    = 2
-    NORMAL          = 3
-    PSIZE           = 4
-    UV1             = 5 # TEXCOORD in d3d9 enums
-    TANGENT         = 6
-    BINORMAL        = 7
-    TESSFACTOR      = 8
-    POSITIONT       = 9
-    COLOR           = 10
-    FOG             = 11
-    DEPTH           = 12
-    SAMPLE          = 13
+    POSITION = 0
+    BLENDWEIGHT = 1
+    BLENDINDICES = 2
+    NORMAL = 3
+    PSIZE = 4
+    UV1 = 5  # TEXCOORD in d3d9 enums
+    TANGENT = 6
+    BINORMAL = 7
+    TESSFACTOR = 8
+    POSITIONT = 9
+    COLOR = 10
+    FOG = 11
+    DEPTH = 12
+    SAMPLE = 13
     # bf2 enums much larger than dx to avoid collisions?
-    UV2             = 261
-    UV3             = 517
-    UV4             = 773
-    UV5             = 1029
+    UV2 = 261
+    UV3 = 517
+    UV4 = 773
+    UV5 = 1029
 
 
 def LoadBF2Mesh(
@@ -178,7 +183,7 @@ class bf2mat:
             mapname = self.__get_string(fo)
             mapnames.append(mapname)
         return mapnames
-    
+
     def read(self, fo, isSkinnedMesh, version):
         #print('>> starting reading material at {}'.format(fo.tell()))
         self.alphamode = read_long(fo)
@@ -200,7 +205,7 @@ class bf2mat:
 class bf2head:
 
     def __init__(self):
-        #some internals
+        # some internals
         self.fmt = '5l'
         self.size = struct.calcsize(self.fmt)
 
@@ -238,7 +243,7 @@ class bf2geom:
     def __init__(self):
         self.lodnum = None
         self.lods = []
-    
+
     def read_lodnum(self, fo):
         self.lodnum = read_long(fo)
 
@@ -250,12 +255,14 @@ class vertattrib:
         self.offset = None
         self.vartype = None
         self.usage = None
-    
+
     def read_vertattrib(self, fo):
-        self.flag = read_short(fo) # some bool, never used
-        self.offset = read_short(fo) # offset from vertex data start in bytes
-        self.vartype = read_short(fo) # DX SDK 'Include/d3d9types.h' enum _D3DDECLTYPE
-        self.usage = read_short(fo) # DX SDK 'Include/d3d9types.h' enum _D3DDECLUSAGE
+        self.flag = read_short(fo)  # some bool, never used
+        self.offset = read_short(fo)  # offset from vertex data start in bytes
+        # DX SDK 'Include/d3d9types.h' enum _D3DDECLTYPE
+        self.vartype = read_short(fo)
+        # DX SDK 'Include/d3d9types.h' enum _D3DDECLUSAGE
+        self.usage = read_short(fo)
 
     def __str__(self):
         return str((self.flag, self.offset, self.vartype, self.usage))
@@ -295,6 +302,10 @@ class StdMesh:
         self.index = None  # indices array
         self.u2 = None  # some another bfp4f garbage..
 
+    def rename_texture(self, geom, lod, material, map, path):
+        self.geoms[geom].lods[lod].materials[
+            material].maps[map] = bytes(path, 'ascii')
+
     # just a wrapper for better name
     def open(self, fo):
         # materials read will read everything inb4
@@ -322,10 +333,10 @@ class StdMesh:
         self._read_u1_bfp4f_version(fo)
 
         self.geomnum = read_long(fo)
-    
+
     def _read_geom_table(self, fo):
         self._read_geomnum(fo)
-        
+
         self.geoms = [bf2geom() for i in range(self.geomnum)]
         for i in range(self.geomnum):
             self.geoms[i].read_lodnum(fo)
@@ -446,21 +457,21 @@ class StdMesh:
 
     def _write_u1_bfp4f_version(self, filepath):
         self._write_header(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             fmt = 'b'
             fo.write(struct.Struct(fmt).pack(self.u1))
 
     def _write_geomnum(self, filepath):
         self._write_u1_bfp4f_version(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             fmt = 'l'
             fo.write(struct.Struct(fmt).pack(self.geomnum))
 
     def _write_geom_table(self, filepath):
         self._write_geomnum(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             for geomnum in range(self.geomnum):
                 fmt = 'l'
@@ -468,14 +479,14 @@ class StdMesh:
 
     def _write_vertattribnum(self, filepath):
         self._write_geom_table(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             fmt = 'l'
             fo.write(struct.Struct(fmt).pack(self.vertattribnum))
 
     def _write_vertattrib_table(self, filepath):
         self._write_vertattribnum(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             for vertattribnum in range(self.vertattribnum):
                 fmt = '4h'
@@ -487,28 +498,28 @@ class StdMesh:
 
     def _write_vertformat(self, filepath):
         self._write_vertattrib_table(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             fmt = 'l'
             fo.write(struct.Struct(fmt).pack(self.vertformat))
 
     def _write_vertstride(self, filepath):
         self._write_vertformat(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             fmt = 'l'
             fo.write(struct.Struct(fmt).pack(self.vertstride))
 
     def _write_vertnum(self, filepath):
         self._write_vertstride(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             fmt = 'l'
             fo.write(struct.Struct(fmt).pack(self.vertnum))
 
     def _write_vertex_block(self, filepath):
         self._write_vertnum(filepath)
-        
+
         #print('writing {} vertices'.format(len(self.vertices)))
         with open(filepath, 'ab+') as fo:
             fmt = '{}f'.format(len(self.vertices))
@@ -516,21 +527,21 @@ class StdMesh:
 
     def _write_indexnum(self, filepath):
         self._write_vertex_block(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             fmt = 'l'
             fo.write(struct.Struct(fmt).pack(self.indexnum))
 
     def _write_index_block(self, filepath):
         self._write_indexnum(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             fmt = '{}h'.format(len(self.index))
             fo.write(struct.Struct(fmt).pack(*self.index))
 
     def _write_u2(self, filepath):
         self._write_index_block(filepath)
-        
+
         if not self.isSkinnedMesh:
             with open(filepath, 'ab+') as fo:
                 fmt = 'l'
@@ -538,7 +549,7 @@ class StdMesh:
 
     def _write_nodes(self, filepath):
         self._write_u2(filepath)
-        
+
         with open(filepath, 'ab+') as fo:
             for geom in self.geoms:
                 for lod in geom.lods:
@@ -555,22 +566,22 @@ class StdMesh:
 
     def _write_materials(self, filepath):
         self._write_nodes(filepath)
-        
-        def write_bin_string(fo, bstring):
+
+        def __write_bin_string(fo, bstring):
             fo.write(struct.Struct('l').pack(len(bstring)))
             fo.write(struct.Struct('{}s'.format(len(bstring))).pack(bstring))
-        
+
         with open(filepath, 'ab+') as fo:
             for geom in self.geoms:
                 for lod in geom.lods:
                     fo.write(struct.Struct('l').pack(lod.matnum))
                     for material in lod.materials:
                         fo.write(struct.Struct('l').pack(material.alphamode))
-                        write_bin_string(fo, material.fxfile)
-                        write_bin_string(fo, material.technique)
+                        __write_bin_string(fo, material.fxfile)
+                        __write_bin_string(fo, material.technique)
                         fo.write(struct.Struct('l').pack(material.mapnum))
                         for map in material.maps:
-                            write_bin_string(fo, map)
+                            __write_bin_string(fo, map)
                         fo.write(struct.Struct('l').pack(material.vstart))
                         fo.write(struct.Struct('l').pack(material.istart))
                         fo.write(struct.Struct('l').pack(material.inum))
@@ -580,7 +591,7 @@ class StdMesh:
                         if not self.isSkinnedMesh and self.head.version == 11:
                             fo.write(struct.Struct('3f').pack(*material.nmin))
                             fo.write(struct.Struct('3f').pack(*material.nmax))
-    
+
 
 class smp_sample:
 
@@ -667,6 +678,3 @@ class StdSample:
             face = smp_face()
             face.read(fo)
             self.faces.append(face)
-
-
-

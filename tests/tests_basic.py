@@ -1,5 +1,4 @@
 import unittest
-import unittest.mock as mock
 import tempfile
 import os
 import sys
@@ -350,6 +349,7 @@ class TestStdMeshWriting(unittest.TestCase):
 
         self.path_object_clone = os.path.join(*['tests', 'generated', 'evil_box_clone', 'meshes', 'evil_box_clone.staticmesh'])
 
+    # disable when investigating results
     @classmethod
     def tearDownClass(cls):
         try:

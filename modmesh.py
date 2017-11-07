@@ -305,6 +305,67 @@ class StdMesh:
     def rename_texture(self, geom, lod, material, map, path):
         self.geoms[geom].lods[lod].materials[
             material].maps[map] = bytes(path, 'ascii')
+            
+    def get_vertex_data(self, vid, vattribute):
+        for attrib_id, attrib in enumerate(self.vertattrib):
+            usage = D3DDECLUSAGE(attrib.usage).name
+            offset = int(attrib.offset / self.vertformat)
+            vartype = D3DDECLTYPE(attrib.vartype).name
+            vlen = len(D3DDECLTYPE(attrib.vartype))
+
+            if usage == vattribute and vartype != 'UNUSED':
+                vstart = offset + vid * int(self.vertstride / self.vertformat)
+                vdata = self.vertices[vstart:vstart + vlen]
+        return vdata
+        
+    def edit_vertex(self, vid, vattribute, vdata):
+        self.vertices = list(self.vertices)  # need to convert before working
+
+        for attrib_id, attrib in enumerate(self.vertattrib):
+            usage = D3DDECLUSAGE(attrib.usage).name
+            offset = int(attrib.offset / self.vertformat)
+            vartype = D3DDECLTYPE(attrib.vartype).name
+            vlen = len(D3DDECLTYPE(attrib.vartype))
+
+            if usage == vattribute:
+                #print('SETTING DATA for v[{}] {}'.format(vid, vattribute))
+                for vertid in range(self.vertnum - 1, -1, -1):
+                    vstart = offset + vertid * \
+                        int(self.vertstride / self.vertformat)
+                    if vertid == vid:
+                        for i, data in enumerate(vdata):
+                            self.vertices[vstart + i] = data
+
+        self.vertices = tuple(self.vertices) # converting to tuple back
+        
+    def offset_mesh(self, offset):
+        for vid in range(self.vertnum):
+            position_old = self.get_vertex_data(vid, 'POSITION')
+            position_new = tuple(sum(i) for i in zip(position_old, offset))
+            self.edit_vertex(vid, 'POSITION', position_new)
+    
+    def merge_geometry(self, other):
+        # need to correct index before vertices due to vertnum adjustment
+        self.index = list(self.index)
+        for idx in other.index:
+            self.index.append(idx+self.vertnum)
+        self.index = tuple(self.index) # convert back
+        self.indexnum += other.indexnum
+
+        self.vertnum += other.vertnum
+        self.vertices = list(self.vertices)
+        self.vertices.extend(other.vertices)
+        self.vertices = tuple(self.vertices)
+        
+        for i, geom in enumerate(self.geoms):
+            for j, lod in enumerate(self.geoms[i].lods):
+                for k, material in enumerate(self.geoms[i].lods[j].materials):
+                    self.geoms[i].lods[j].materials[k].vnum += other.geoms[i].lods[j].materials[k].vnum
+                    self.geoms[i].lods[j].materials[k].inum += other.geoms[i].lods[j].materials[k].inum
+                    self.geoms[i].lods[j].materials[k].nmin = tuple(sum(i) for i in zip(self.geoms[i].lods[j].materials[k].nmin, other.geoms[i].lods[j].materials[k].nmin))
+                    self.geoms[i].lods[j].materials[k].nmax = tuple(sum(i) for i in zip(self.geoms[i].lods[j].materials[k].nmax, other.geoms[i].lods[j].materials[k].nmax))
+        
+
 
     # just a wrapper for better name
     def open(self, fo):

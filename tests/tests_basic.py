@@ -347,14 +347,14 @@ class TestStdMeshWriting(unittest.TestCase):
         self.path_object_std = os.path.join(*['tests', 'samples', 'evil_box', 'meshes', 'evil_box.staticmesh'])
         self.path_object_dest = os.path.join(*['tests', 'samples', 'evil_box_destroyable', 'meshes', 'evil_box_destroyable.staticmesh'])
 
-        self.path_object_clone = os.path.join(*['tests', 'generated', 'evil_box_clone', 'meshes', 'evil_box_clone.staticmesh'])
+        self.path_object_clone = os.path.join(*['tests', 'generated', 'write', 'evil_box_clone', 'meshes', 'evil_box_clone.staticmesh'])
 
     # disable when investigating results
     @classmethod
     def tearDownClass(cls):
         try:
-            path_clear = os.path.join(*['tests', 'generated', 'evil_box_clone'])
-            shutil.rmtree(path_clear)
+            path_clear = os.path.join(*['tests', 'generated', 'write'])
+            shutil.rmtree(path_clear, ignore_errors=True)
         except FileNotFoundError:
             print('Nothing to clean up')
 

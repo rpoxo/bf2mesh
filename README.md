@@ -7,6 +7,6 @@ same internal layout. These files typically have the extension ".StaticMesh",
 
 The code does not include rendering code or otherwise convert or output the data
 to file.
-Examples at unittests(use ``nose``), and in ``box_*.py`` files.
+Examples at unittests(use ``nosetests`` for running tests).
 
 For more information, see: http://www.bytehazard.com

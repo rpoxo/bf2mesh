@@ -4,6 +4,7 @@ import os
 import sys
 import struct
 import shutil
+import filecmp
 
 import bf2
 import modmesh
@@ -176,6 +177,7 @@ class TestStdMeshReading(unittest.TestCase):
     def test_can_load_bf2_mesh(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_std)
         self.assertTrue(isinstance(vmesh, modmesh.StdMesh))
+        self.assertTrue(vmesh.isStaticMesh)
 
 
 #@unittest.skip('testing failed mesh load')
@@ -309,8 +311,185 @@ class TestBundleMeshReading(unittest.TestCase):
 
     def test_can_load_bf2_bundled_mesh(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_std)
-        self.assertTrue(vmesh.isBundledMesh)
         self.assertTrue(isinstance(vmesh, modmesh.StdMesh))
+        self.assertTrue(vmesh.isBundledMesh)
+        
+        
+#@unittest.skip('testing failed mesh load')
+class TestSkinnedMeshReading(unittest.TestCase):
+
+    def setUp(self):
+        # test for vehicle depot
+        # objects\kits\Mec
+        # \tests\samples\kits\mec\Meshes
+        self.path_object_std = os.path.join(*['tests', 'samples', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
+
+    def test_can_read_header(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_head(meshfile)
+
+        self.assertTrue(vmesh.head.u1 == 0)
+        self.assertTrue(vmesh.head.version in [10, 6, 11])
+        self.assertTrue(vmesh.head.u3 == 0)
+        self.assertTrue(vmesh.head.u4 == 0)
+        self.assertTrue(vmesh.head.u5 == 0)
+
+    def test_can_read_u1_bfp4f_version(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_u1_bfp4f_version(meshfile)
+            
+        self.assertTrue(vmesh.u1 == 0)
+
+    def test_can_read_geomnum_mesh_std(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_geomnum(meshfile)
+
+        self.assertTrue(vmesh.geomnum == 20)
+
+    def test_can_read_geom_table_mesh_std(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_geom_table(meshfile)
+
+        self.assertTrue(len(vmesh.geoms) == 20)
+        
+        # for some reason mec kits have only 2 lods for 2? dropkits
+        for id_geom in range(0,17):
+            self.assertTrue(vmesh.geoms[id_geom].lodnum == 3)
+        for id_geom in [17, 18]:
+            self.assertTrue(vmesh.geoms[id_geom].lodnum == 2)
+        self.assertTrue(vmesh.geoms[19].lodnum == 3)
+
+    def test_can_read_vertattribnum_mesh_std(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_vertattribnum(meshfile)
+
+        self.assertTrue(vmesh.vertattribnum == 7)
+
+    def test_can_read_vertex_attribute_table(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_vertattrib_table(meshfile)
+
+        self.assertTrue(vmesh.vertattrib[0] == (0,
+                                                0,
+                                                modmesh.D3DDECLTYPE.FLOAT3,
+                                                modmesh.D3DDECLUSAGE.POSITION))
+        self.assertTrue(vmesh.vertattrib[1] == (0,
+                                                12,
+                                                modmesh.D3DDECLTYPE.FLOAT3,
+                                                modmesh.D3DDECLUSAGE.NORMAL))
+        self.assertTrue(vmesh.vertattrib[2] == (0,
+                                                24,
+                                                modmesh.D3DDECLTYPE.FLOAT1,
+                                                modmesh.D3DDECLUSAGE.BLENDWEIGHT))
+        self.assertTrue(vmesh.vertattrib[3] == (0,
+                                                28,
+                                                modmesh.D3DDECLTYPE.D3DCOLOR,
+                                                modmesh.D3DDECLUSAGE.BLENDINDICES))
+        self.assertTrue(vmesh.vertattrib[4] == (0,
+                                                32,
+                                                modmesh.D3DDECLTYPE.FLOAT2,
+                                                modmesh.D3DDECLUSAGE.UV1))
+        self.assertTrue(vmesh.vertattrib[5] == (0,
+                                                40,
+                                                modmesh.D3DDECLTYPE.FLOAT3,
+                                                modmesh.D3DDECLUSAGE.TANGENT))
+        self.assertTrue(vmesh.vertattrib[6] == (255,
+                                                0,
+                                                modmesh.D3DDECLTYPE.UNUSED,
+                                                modmesh.D3DDECLUSAGE.POSITION))
+        self.assertTrue(len(vmesh.vertattrib) == vmesh.vertattribnum)
+
+    def test_can_read_vertformat(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_vertformat(meshfile)
+
+        self.assertTrue(vmesh.vertformat == 4)
+
+    def test_can_read_vertstride(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_vertstride(meshfile)
+        
+        vertstride = 0
+        for attrib in vmesh.vertattrib:
+            vertstride += len(modmesh.D3DDECLTYPE(attrib.vartype))*4
+        self.assertTrue(vmesh.vertstride == (vertstride))
+
+    def test_can_read_vertnum(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_vertnum(meshfile)
+
+        self.assertTrue(vmesh.vertnum == 118168)
+
+    def test_can_read_vertex_block(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_vertex_block(meshfile)
+
+        self.assertTrue(len(vmesh.vertices) == vmesh.vertnum * vmesh.vertstride / vmesh.vertformat == 1536184) # vertices buffer array
+
+    def test_can_read_indexnum(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_indexnum(meshfile)
+
+        print(vmesh.indexnum )
+        self.assertTrue(vmesh.indexnum == 249279)
+
+    def test_can_read_index_block(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh._read_index_block(meshfile)
+
+        self.assertTrue(len(vmesh.index) == vmesh.indexnum)
+
+    def test_can_read_nodes(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh.isSkinnedMesh = True
+            vmesh._read_nodes(meshfile)
+            
+        for geom in vmesh.geoms:
+            for lod in geom.lods:
+                self.assertTrue(lod.rignum == 1)
+
+        # debugging
+        '''
+        for id_geom in range(vmesh.geomnum):
+            print('\ngeom{}'.format(id_geom))
+            for id_lod in range(vmesh.geoms[id_geom].lodnum):
+                print('  lod{}'.format(id_lod))
+                for id_rig in range(vmesh.geoms[id_geom].lods[id_lod].rignum):
+                    print('    rig{}'.format(id_rig))
+                    for id_bone in range(vmesh.geoms[id_geom].lods[id_lod].rigs[id_rig].bonenum):
+                        print('      bone{}'.format(id_bone))
+                        print('        id = {}'.format(vmesh.geoms[id_geom].lods[id_lod].rigs[id_rig].bones[id_bone].id))
+        '''
+
+    def test_can_read_materials(self):
+        with open(self.path_object_std, 'rb') as meshfile:
+            vmesh = modmesh.StdMesh()
+            vmesh.isSkinnedMesh = True
+            vmesh._read_materials(meshfile)
+
+        for geom in vmesh.geoms:
+            for lod in geom.lods:
+                lod.matnum = 1
+                for material in lod.materials:
+                    self.assertTrue(material.maps[0] == b'objects/kits/mec/textures/mec_kits_c.dds')
+
+    def test_can_load_bf2_skinned_mesh(self):
+        vmesh = modmesh.LoadBF2Mesh(self.path_object_std)
+        self.assertTrue(isinstance(vmesh, modmesh.StdMesh))
+        self.assertTrue(vmesh.isSkinnedMesh)
 
 #@unittest.skip('testing failed mesh load')
 class TestMeshReading_Specials(unittest.TestCase):
@@ -548,6 +727,12 @@ class TestStdMeshWriting(unittest.TestCase):
                     #    print('"{:.10}" : {}'.format(key, value))
                     #self.assertTrue(material == vmesh2.geoms[geom_id].lods[lod_id].materials[material_id])
                 self.assertTrue(lod.polycount == vmesh2.geoms[geom_id].lods[lod_id].polycount)
+    
+    def test_verify_filedata_to_be_identical(self):
+        vmesh = modmesh.LoadBF2Mesh(self.path_object_std)
+        vmesh._write_materials(self.path_object_clone)
+        
+        self.assertTrue(filecmp.cmp(self.path_object_std, self.path_object_clone))
 
 #@unittest.skip('testing failed mesh load')
 class TestSamplesReading(unittest.TestCase):

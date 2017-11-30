@@ -15,7 +15,7 @@ class D3DDECLTYPE(enum.IntEnum):
     FLOAT3 = 2  # 3D float expanded to (value, value, value, 1.)
     FLOAT4 = 3  # 4D float
     D3DCOLOR = 4  # 4D packed unsigned bytes mapped to 0. to 1. range
-    # Input is in D3DCOLOR format (ARGB) expanded to (R, G, B, A)
+                # Input is in D3DCOLOR format (ARGB) expanded to (R, G, B, A)
     UBYTE4 = 5  # 4D unsigned byte
     UNUSED = 17,  # When the type field in a decl is unused.
 
@@ -136,6 +136,11 @@ def read_byte(fo):
     fmt = 'b'
     size = struct.calcsize(fmt)
     return struct.Struct(fmt).unpack(fo.read(size))[0]
+    
+def read_matrix4(fo):
+    fmt = '16f'
+    size = struct.calcsize(fmt)
+    return struct.Struct(fmt).unpack(fo.read(size))
 
 
 class bf2lod:
@@ -145,16 +150,37 @@ class bf2lod:
 
         self.min = None
         self.max = None
-        self.pivot = None
-        self.nodenum = None
+        self.pivot = None # just some unknown float3 for .version <=6
 
-        self.nodes = []
-        self.polycount = 0
+        # rigs, only for skinned meshes
+        self.rignum = None
+        self.rigs = []
+        
+        # nodes for bundled and staticmeshes
+        self.nodenum = None
+        self.nodes = [] # matrix4
+        
         self.matnum = None
         self.materials = []
-
+        
+        # internal for calculating total lod tris(yes, that weird)
+        self.polycount = 0
+        # StdSample object for LMing statics
         self.sample = None
 
+class bf2rig:
+    
+    def __init__(self):
+        self.bonenum = None
+        self.bones = []
+
+class bf2bone:
+    
+    def __init__(self):
+        self.id = None
+        self.matrix = []
+        
+        self.skinmat = []
 
 class bf2mat:
 
@@ -186,7 +212,8 @@ class bf2mat:
 
     def read(self, fo, isSkinnedMesh, version):
         #print('>> starting reading material at {}'.format(fo.tell()))
-        self.alphamode = read_long(fo)
+        if not isSkinnedMesh:
+            self.alphamode = read_long(fo)
         self.fxfile = self.__get_string(fo)
         self.technique = self.__get_string(fo)
         self.mapnum = read_long(fo)
@@ -246,7 +273,6 @@ class bf2geom:
 
     def read_lodnum(self, fo):
         self.lodnum = read_long(fo)
-
 
 class vertattrib:
 
@@ -480,12 +506,23 @@ class StdMesh:
                 lod.max = read_float3(fo)
                 if lod.version <= 6:
                     lod.pivot = read_float3(fo)
-                lod.nodenum = read_long(fo)
-                # reading nodes matrix
-                if not self.isBundledMesh:
-                    for i in range(lod.nodenum):
-                        for j in range(16):
-                            lod.nodes.append(read_float(fo))
+                if self.isSkinnedMesh:
+                    lod.rignum = read_long(fo)
+                    if lod.rignum > 0:
+                        lod.rigs = [bf2rig() for i in range(lod.rignum)]
+                        for rig in lod.rigs:
+                            rig.bonenum = read_long(fo)
+                            if rig.bonenum > 0:
+                                rig.bones = [bf2bone() for i in range(rig.bonenum)]
+                                for bone in rig.bones:
+                                    bone.id = read_long(fo)
+                                    bone.matrix = read_matrix4(fo)
+                else:
+                    lod.nodenum = read_long(fo)
+                    # reading nodes matrix
+                    if not self.isBundledMesh:
+                        for i in range(lod.nodenum):
+                            lod.nodes = read_matrix4(fo)
 
     def _read_materials(self, fo):
         self._read_nodes(fo)

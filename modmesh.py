@@ -400,6 +400,8 @@ class StdMesh:
 
     def save(self, fo):
         # materials read will read everything inb4
+        if self.isSkinnedMesh or self.isBundledMesh:
+            raise NotImplementedError
         self._write_materials(fo)
 
     #-----------------------------

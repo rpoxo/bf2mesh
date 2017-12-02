@@ -232,12 +232,6 @@ class bf2mat:
 class bf2head:
 
     def __init__(self):
-        # some internals
-        self.fmt = '5l'
-        self.size = struct.calcsize(self.fmt)
-
-        # reading bin
-        data = None
         self.u1 = None
         self.version = None
         self.u3 = None
@@ -393,15 +387,12 @@ class VisMesh:
         
 
 
-    # just a wrapper for better name
+    # just a wrappers for better function name
     def open(self, fo):
         # materials read will read everything inb4
         self._read_filedata(fo)
 
     def save(self, fo):
-        # materials read will read everything inb4
-        if self.isSkinnedMesh or self.isBundledMesh:
-            raise NotImplementedError
         self._write_materials(fo)
 
     #-----------------------------
@@ -548,12 +539,13 @@ class VisMesh:
         if not os.path.exists(directory):
             os.makedirs(directory)
         with open(filepath, 'wb+') as fo:
-            dataset = (self.head.u1,
+            fmt = '5l'
+            head = (self.head.u1,
                        self.head.version,
                        self.head.u3,
                        self.head.u4,
                        self.head.u5)
-            fo.write(struct.Struct(self.head.fmt).pack(*dataset))
+            fo.write(struct.Struct(fmt).pack(*head))
 
     def _write_u1_bfp4f_version(self, filepath):
         self._write_header(filepath)
@@ -657,12 +649,19 @@ class VisMesh:
                     fo.write(struct.Struct('3f').pack(*lod.max))
                     if lod.version <= 6:
                         fo.write(struct.Struct('3f').pack(*lod.pivot))
-                    fo.write(struct.Struct('l').pack(lod.nodenum))
-                    # writing nodes matrix
-                    if not self.isBundledMesh:
-                        for i in range(lod.nodenum):
-                            for j in range(16):
-                                fo.write(struct.Struct('f').pack(lod.nodes[j]))
+                    if self.isSkinnedMesh:
+                        fo.write(struct.Struct('l').pack(lod.rignum))
+                        for rig in lod.rigs:
+                            fo.write(struct.Struct('l').pack(rig.bonenum))
+                            for bone in rig.bones:
+                                fo.write(struct.Struct('l').pack(bone.id))
+                                fo.write(struct.Struct('16f').pack(*bone.matrix))
+                    else:
+                        fo.write(struct.Struct('l').pack(lod.nodenum))
+                        # writing nodes matrix
+                        if not self.isBundledMesh:
+                            for i in range(lod.nodenum):
+                                fo.write(struct.Struct('16f').pack(*lod.nodes))
 
     def _write_materials(self, filepath):
         self._write_nodes(filepath)
@@ -676,7 +675,8 @@ class VisMesh:
                 for lod in geom.lods:
                     fo.write(struct.Struct('l').pack(lod.matnum))
                     for material in lod.materials:
-                        fo.write(struct.Struct('l').pack(material.alphamode))
+                        if not self.isSkinnedMesh:
+                            fo.write(struct.Struct('l').pack(material.alphamode))
                         __write_bin_string(fo, material.fxfile)
                         __write_bin_string(fo, material.technique)
                         fo.write(struct.Struct('l').pack(material.mapnum))

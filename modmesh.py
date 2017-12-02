@@ -295,6 +295,16 @@ class vertattrib:
             return False
 
 
+class VisMeshTransform:
+
+    def __init__(self, vmesh):
+        self.vmesh = vmesh
+
+    def copy_geom_id(self, id_copy, id_new):
+        self.vmesh.geomnum += 1
+        self.vmesh.geoms.insert(id_new, self.vmesh.geoms[id_copy])
+
+
 class VisMesh:
 
     def __init__(
@@ -494,10 +504,10 @@ class VisMesh:
 
         for geom in self.geoms:
             for lod in geom.lods:
-                lod.version = self.head.version
+                #lod.version = self.head.version
                 lod.min = read_float3(fo)
                 lod.max = read_float3(fo)
-                if lod.version <= 6:
+                if self.head.version <= 6:
                     lod.pivot = read_float3(fo)
                 if self.isSkinnedMesh:
                     lod.rignum = read_long(fo)
@@ -647,7 +657,7 @@ class VisMesh:
                 for lod in geom.lods:
                     fo.write(struct.Struct('3f').pack(*lod.min))
                     fo.write(struct.Struct('3f').pack(*lod.max))
-                    if lod.version <= 6:
+                    if self.head.version <= 6:
                         fo.write(struct.Struct('3f').pack(*lod.pivot))
                     if self.isSkinnedMesh:
                         fo.write(struct.Struct('l').pack(lod.rignum))

@@ -273,8 +273,8 @@ class TestVisMeshReading(unittest.TestCase):
         self.assertTrue(vmesh.geoms[0].lods[0].materials[0].vnum == 25)
         self.assertTrue(vmesh.geoms[0].lods[0].materials[0].u4 == 8064) # no idea what this shit is
         self.assertTrue(vmesh.geoms[0].lods[0].materials[0].u5 == 65535)
-        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].nmin == (-0.5, 0.0, -0.5))
-        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].nmax == (0.5, 1.0, 0.5))
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].mmin == (-0.5, 0.0, -0.5))
+        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].mmax == (0.5, 1.0, 0.5))
         self.assertTrue(vmesh.geoms[0].lods[0].polycount == 12)
     
     def test_can_read_materials_skinnedmesh(self):
@@ -585,5 +585,24 @@ class TestSamplesReading(unittest.TestCase):
         meshpath = self.path_object_samples.replace('.samples', '.staticmesh')
         vmesh = modmesh.LoadBF2Mesh(meshpath, loadSamples=True)
         self.assertTrue(isinstance(vmesh.geoms[0].lods[0].sample, modmesh.StdSample))
-    
 
+class TestVisMeshOps(unittest.TestCase):
+
+    def setUp(self):
+        # test for simple static box - static&destoryable
+        self.path_object_static = os.path.join(*['tests', 'samples', 'evil_box', 'meshes', 'evil_box.staticmesh'])
+        self.path_object_dest = os.path.join(*['tests', 'samples', 'evil_box_destroyable', 'meshes', 'evil_box_destroyable.staticmesh'])
+        self.path_object_static_clone = os.path.join(*['tests', 'generated', 'write', 'evil_box', 'meshes', 'evil_box.staticmesh'])
+
+        # test for vehicle depot - bundledmesh
+        # objects\common\vehicle_depot\meshes
+        self.path_object_bundled = os.path.join(*['tests', 'samples', 'vehicle_depot', 'meshes', 'vehicle_depot.bundledmesh'])
+        self.path_object_bundled_clone = os.path.join(*['tests', 'generated', 'write', 'vehicle_depot', 'meshes', 'vehicle_depot.staticmesh'])
+        
+        # test for mec kits - skinnedmesh
+        # objects\kits\Mec
+        self.path_object_skinned = os.path.join(*['tests', 'samples', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
+        self.path_object_skinned_clone = os.path.join(*['tests', 'generated', 'write', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
+    
+if __name__ == '__main__':
+    unittest.main()

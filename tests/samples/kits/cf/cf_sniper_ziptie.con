@@ -1,0 +1,36 @@
+ObjectTemplate.create Kit cf_sniper_ziptie
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.networkableInfo KitInfo
+ObjectTemplate.kitType Sniper
+ObjectTemplate.aiTemplate Sniper
+ObjectTemplate.geometry cf_kits1
+ObjectTemplate.geometry.kit 0
+ObjectTemplate.geometry.dropGeom 9
+ObjectTemplate.setHasCollisionPhysics 1
+ObjectTemplate.setCollisionMesh kitcol
+ObjectTemplate.cullRadiusScale 100000
+ObjectTemplate.timeToLiveAfterDeath 300
+
+rem -------------------------------------
+ObjectTemplate.addTemplate ziptie
+ObjectTemplate.addTemplate GBPIS_L9
+ObjectTemplate.addTemplate cfsni_c14
+ObjectTemplate.addTemplate tripflare
+ObjectTemplate.addTemplate hgr_smoke_signalpurple
+ObjectTemplate.addTemplate binocular
+ObjectTemplate.addTemplate medikit_dressing
+rem -------------------------------------
+
+ObjectTemplate.createComponent AbilityHud
+ObjectTemplate.abilityHud.ammoSound S_Resupply
+ObjectTemplate.abilityHud.healingSound S_Heal
+ObjectTemplate.abilityHud.repairingSound S_Repair
+
+ObjectTemplate.createComponent VehicleHud
+ObjectTemplate.vehicleHud.hudName			"HUD_TEXT_MENU_SPAWN_KIT_SNIPER_CF"
+ObjectTemplate.vehicleHud.miniMapIcon		"Ingame\Kits\Icons\kit_Sniper_outline.tga"
+ObjectTemplate.vehicleHud.vehicleIcon		"Ingame\Kits\Icons\kit_Sniper.tga"
+ObjectTemplate.vehicleHud.spottedIcon 		"Ingame\GeneralIcons\empty.tga"
+ObjectTemplate.vehicleHud.pantingSound		S_SprintBreath
+ObjectTemplate.vehicleHud.injurySound		S_Injury
+ObjectTemplate.vehicleHud.vehicleType 		7

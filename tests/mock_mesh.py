@@ -236,14 +236,14 @@ class Box:
             (0.5, 0.0, 0.0),
             (1.0, 0.0, 0.0),
             ]
-        vertlist = []
+        verts = []
         for i in range(len(positions)):
-            vertlist.extend(positions[i])
-            vertlist.extend(normals[i])
-            vertlist.extend(blend_indices[i])
-            vertlist.extend(uv1[i])
-            vertlist.extend(tangents[i])
-        vmesh.vertices = tuple(vertlist)
+            verts.extend(positions[i])
+            verts.extend(normals[i])
+            verts.extend(blend_indices[i])
+            verts.extend(uv1[i])
+            verts.extend(tangents[i])
+        vmesh.vertices = verts
         vmesh.vertnum = len(positions)
     
     def _create_index(self, vmesh):
@@ -329,8 +329,8 @@ class Box:
                     material.vnum = 24
                     material.u4 = 0
                     material.u5 = 0
-                    material.nmin = (-1.0, -1.0, -1.0)
-                    material.nmax = (1.0, 1.0, 1.0)
+                    material.mmin = (-1.0, -1.0, -1.0)
+                    material.mmax = (1.0, 1.0, 1.0)
                     lod.polycount = lod.polycount + material.inum / 3
 
 

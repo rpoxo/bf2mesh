@@ -1,14 +1,19 @@
 import os
 import enum  # python 3.4+
 import struct
+import math
 
 # reference for mesh struct:
 # https://github.com/ByteHazard/BfMeshView/blob/master/source/modVisMeshLoad.bas
 
+
+PI = math.pi
+RADTODEG = (180 / PI)
+DEGTORAD = (PI / 180)
+
+
 # copypasta from DX SDK 'Include/d3d9types.h' enum _D3DDECLTYPE to address
 # vert attribute vartype variable
-
-
 class D3DDECLTYPE(enum.IntEnum):
     FLOAT1 = 0  # 1D float expanded to (value, 0., 0., 1.)
     FLOAT2 = 1  # 2D float expanded to (value, value, 0., 1.)
@@ -52,8 +57,22 @@ class D3DDECLUSAGE(enum.IntEnum):
     UV3 = 517
     UV4 = 773
     UV5 = 1029
+    
 
-
+class Vec3:
+    
+    def __init__(self, float3=(0.0, 0.0, 0.0)):
+        self.x = float3[0]
+        self.y = float3[1]
+        self.z = float3[2]
+    
+    def __str__(self):
+        return ', '.join([str(value) for value in [self.x, self.y, self.z]])
+    
+    def __iter__(self):
+        for value in [self.x, self.y, self.z]:
+            yield value
+        
 def LoadBF2Mesh(
         filepath,
         loadTextures=False,
@@ -157,6 +176,7 @@ class bf2lod:
         self.rigs = []
         
         # nodes for bundled and staticmeshes
+        # apparently those a geomPart objects for animating sprints\rotbundles etc
         self.nodenum = None
         self.nodes = [] # matrix4
         
@@ -168,11 +188,13 @@ class bf2lod:
         # StdSample object for LMing statics
         self.sample = None
 
+
 class bf2rig:
     
     def __init__(self):
         self.bonenum = None
         self.bones = []
+    
 
 class bf2bone:
     
@@ -181,6 +203,7 @@ class bf2bone:
         self.matrix = []
         
         self.skinmat = []
+
 
 class bf2mat:
 
@@ -196,8 +219,8 @@ class bf2mat:
         self.vnum = None
         self.u4 = None
         self.u5 = None
-        self.nmin = None
-        self.nmax = None
+        self.mmin = None
+        self.mmax = None
 
     def __get_string(self, fo):
         string_len = read_long(fo)
@@ -225,8 +248,8 @@ class bf2mat:
         self.u4 = read_long(fo)
         self.u5 = read_long(fo)
         if not isSkinnedMesh and version == 11:
-            self.nmin = read_float3(fo)
-            self.nmax = read_float3(fo)
+            self.mmin = read_float3(fo)
+            self.mmax = read_float3(fo)
 
 
 class bf2head:
@@ -269,6 +292,7 @@ class bf2geom:
         self.lodnum = read_long(fo)
         self.lods = [bf2lod() for i in range(self.lodnum)]
 
+
 class vertattrib:
 
     def __init__(self):
@@ -305,12 +329,133 @@ class VisMeshTransform:
         self.vmesh.geoms.insert(id_new, self.vmesh.geoms[id_copy])
     
     def delete_geom_id(self, id_delete):
+        geom_vnum = sum([sum([material.vnum for material in lod.materials]) for lod in self.vmesh.geoms[id_delete].lods])
+        geom_inum = sum([sum([material.inum for material in lod.materials]) for lod in self.vmesh.geoms[id_delete].lods])
+
+        # remove vertex data
+        vstart = int(self.vmesh.vertstride / self.vmesh.vertformat * self.vmesh.geoms[id_delete].lods[0].materials[0].vstart)
+        vnum = int(self.vmesh.vertstride / self.vmesh.vertformat * geom_vnum)
+        del self.vmesh.vertices[vstart:vstart+vnum]
+        self.vmesh.vertnum -= geom_vnum
+        
+        # remove index data
+        istart = self.vmesh.geoms[id_delete].lods[0].materials[0].istart
+        #print('old index len = {}, deleting {} from {}'.format(
+        #    len(self.vmesh.index),
+        #    geom_inum,
+        #    istart))
+        del self.vmesh.index[istart:istart+geom_inum]
+        self.vmesh.indexnum -= geom_inum
+        #print('new index len = {}'.format(len(self.vmesh.index)))
+        
+        # remove geom from geom table
+        for id_geom, geom in enumerate(self.vmesh.geoms):
+            if id_geom > id_delete:
+                for lod in geom.lods:
+                    for material in lod.materials:
+                        material.vstart -= geom_vnum
+                        material.istart -= geom_inum
+
         self.vmesh.geomnum -= 1
         del self.vmesh.geoms[id_delete]
     
     def edit_geoms_order(self, order):
-        self.vmesh.geoms = [ self.vmesh.geoms[id_geom] for id_geom in order]
+        raise NotImplementedError
+        self.vmesh.geoms = [self.vmesh.geoms[id_geom] for id_geom in order]
+    
+    def edit_vertex(self, id_vertex, vattribute, vdata):
+        for attrib_id, attrib in enumerate(self.vmesh.vertattrib):
+            usage = D3DDECLUSAGE(attrib.usage).name
+            offset = int(attrib.offset / self.vmesh.vertformat)
+            vartype = D3DDECLTYPE(attrib.vartype).name
+            vlen = len(D3DDECLTYPE(attrib.vartype))
 
+            if usage == vattribute:
+                #print('SETTING DATA for v[{}] {}'.format(id_vertex, vattribute))
+                for vertid in range(self.vmesh.vertnum - 1, -1, -1):
+                    vstart = offset + vertid * \
+                        int(self.vmesh.vertstride / self.vmesh.vertformat)
+                    if vertid == id_vertex:
+                        for i, data in enumerate(vdata):
+                            self.vmesh.vertices[vstart + i] = data
+    
+    def offset_mesh_vertices(self, offset):
+        for id_vertex in range(self.vmesh.vertnum):
+            position_old = self.vmesh.get_vertex_data(id_vertex, 'POSITION')
+            position_new = tuple(sum(i) for i in zip(position_old, offset))
+            self.edit_vertex(id_vertex, 'POSITION', position_new)
+    
+    def merge_mesh(self, other):
+        # need to correct index before vertices due to vertnum adjustment
+        index = list(self.vmesh.index)
+        for idx in other.index:
+            index.append(idx+self.vmesh.vertnum)
+        self.vmesh.index = tuple(index) # convert back
+        self.vmesh.indexnum += other.indexnum
+
+        self.vmesh.vertnum += other.vertnum
+        self.vmesh.vertices.extend(other.vertices)
+        
+        for i, geom in enumerate(self.vmesh.geoms):
+            for j, lod in enumerate(self.vmesh.geoms[i].lods):
+                for k, material in enumerate(self.vmesh.geoms[i].lods[j].materials):
+                    self.vmesh.geoms[i].lods[j].materials[k].vnum += other.geoms[i].lods[j].materials[k].vnum
+                    self.vmesh.geoms[i].lods[j].materials[k].inum += other.geoms[i].lods[j].materials[k].inum
+                    self.vmesh.geoms[i].lods[j].materials[k].mmin = tuple(sum(i) for i in zip(self.vmesh.geoms[i].lods[j].materials[k].mmin, other.geoms[i].lods[j].materials[k].mmin))
+                    self.vmesh.geoms[i].lods[j].materials[k].mmax = tuple(sum(i) for i in zip(self.vmesh.geoms[i].lods[j].materials[k].mmax, other.geoms[i].lods[j].materials[k].mmax))
+    
+    def rename_texture(self, geom, lod, material, map, path):
+        self.vmesh.geoms[geom].lods[lod].materials[material].maps[map] = bytes(path, 'ascii')
+    
+    def rotate_mesh(self, rotation_euler):
+        
+        def rotate_vertex(position, rotation, center):
+            yaw = rotation[0]
+            pitch = rotation[1]
+            roll = rotation[2]
+            
+            sx = math.sin(yaw)
+            cx = math.cos(yaw)
+            sy = math.sin(pitch)
+            cy = math.cos(pitch)
+            sz = math.sin(roll)
+            cz = math.cos(roll)
+
+            x1 =  position.x * cz +  position.y * sz
+            y1 =  position.y * cz -  position.x * sz
+            z1 =  position.z
+
+            x2 = x1 * cy + z1 * sy
+            y2 = z1
+            z2 = z1 * cy - x1 * sy
+
+            x3 = x2
+            y3 = y2 * cx + z1 * sx
+            z3 = z2 * cx - x1 * sx
+
+            xr = x3 + center.x
+            yr = y3 + center.y
+            zr = z3 + center.z
+            
+            return (xr, yr, zr)
+            
+        vattribute = 'POSITION'
+        for vid in range(self.vmesh.vertnum):
+            for attrib_id, attrib in enumerate(self.vmesh.vertattrib):
+                usage = D3DDECLUSAGE(attrib.usage).name
+                offset = int(attrib.offset / self.vmesh.vertformat)
+                vartype = D3DDECLTYPE(attrib.vartype).name
+                vlen = len(D3DDECLTYPE(attrib.vartype))
+
+                if usage == vattribute and vartype != 'UNUSED':
+                    vstart = offset + vid * int(self.vmesh.vertstride / self.vmesh.vertformat)
+                    vdata = self.vmesh.vertices[vstart:vstart + vlen]
+
+                    rotated_vertex = rotate_vertex(Vec3(vdata), rotation_euler, Vec3((0.0, 0.0, 0.0)))
+                    for i, value in enumerate(rotated_vertex):
+                        self.vmesh.vertices[vstart + i] = value
+        
+        
 
 class VisMesh:
 
@@ -337,13 +482,11 @@ class VisMesh:
         self.vertnum = None  # number of vertices
         self.vertices = None  # geom data, parse using attrib table
         self.indexnum = None  # number of indices
+        # !!! indices aligned per material !!!
         self.index = None  # indices array
         self.u2 = None  # some another bfp4f garbage..
 
-    def rename_texture(self, geom, lod, material, map, path):
-        self.geoms[geom].lods[lod].materials[
-            material].maps[map] = bytes(path, 'ascii')
-            
+    # TODO: Move to seperate class
     def get_vertex_data(self, vid, vattribute):
         for attrib_id, attrib in enumerate(self.vertattrib):
             usage = D3DDECLUSAGE(attrib.usage).name
@@ -354,56 +497,7 @@ class VisMesh:
             if usage == vattribute and vartype != 'UNUSED':
                 vstart = offset + vid * int(self.vertstride / self.vertformat)
                 vdata = self.vertices[vstart:vstart + vlen]
-        return vdata
-        
-    def edit_vertex(self, vid, vattribute, vdata):
-        self.vertices = list(self.vertices)  # need to convert before working
-
-        for attrib_id, attrib in enumerate(self.vertattrib):
-            usage = D3DDECLUSAGE(attrib.usage).name
-            offset = int(attrib.offset / self.vertformat)
-            vartype = D3DDECLTYPE(attrib.vartype).name
-            vlen = len(D3DDECLTYPE(attrib.vartype))
-
-            if usage == vattribute:
-                #print('SETTING DATA for v[{}] {}'.format(vid, vattribute))
-                for vertid in range(self.vertnum - 1, -1, -1):
-                    vstart = offset + vertid * \
-                        int(self.vertstride / self.vertformat)
-                    if vertid == vid:
-                        for i, data in enumerate(vdata):
-                            self.vertices[vstart + i] = data
-
-        self.vertices = tuple(self.vertices) # converting to tuple back
-        
-    def offset_mesh(self, offset):
-        for vid in range(self.vertnum):
-            position_old = self.get_vertex_data(vid, 'POSITION')
-            position_new = tuple(sum(i) for i in zip(position_old, offset))
-            self.edit_vertex(vid, 'POSITION', position_new)
-    
-    def merge_geometry(self, other):
-        # need to correct index before vertices due to vertnum adjustment
-        self.index = list(self.index)
-        for idx in other.index:
-            self.index.append(idx+self.vertnum)
-        self.index = tuple(self.index) # convert back
-        self.indexnum += other.indexnum
-
-        self.vertnum += other.vertnum
-        self.vertices = list(self.vertices)
-        self.vertices.extend(other.vertices)
-        self.vertices = tuple(self.vertices)
-        
-        for i, geom in enumerate(self.geoms):
-            for j, lod in enumerate(self.geoms[i].lods):
-                for k, material in enumerate(self.geoms[i].lods[j].materials):
-                    self.geoms[i].lods[j].materials[k].vnum += other.geoms[i].lods[j].materials[k].vnum
-                    self.geoms[i].lods[j].materials[k].inum += other.geoms[i].lods[j].materials[k].inum
-                    self.geoms[i].lods[j].materials[k].nmin = tuple(sum(i) for i in zip(self.geoms[i].lods[j].materials[k].nmin, other.geoms[i].lods[j].materials[k].nmin))
-                    self.geoms[i].lods[j].materials[k].nmax = tuple(sum(i) for i in zip(self.geoms[i].lods[j].materials[k].nmax, other.geoms[i].lods[j].materials[k].nmax))
-        
-
+        return tuple(vdata)
 
     # just a wrappers for better function name
     def open(self, fo):
@@ -481,7 +575,7 @@ class VisMesh:
         fmt = '{}f'.format(vertices_num)
         size = struct.calcsize(fmt)
 
-        self.vertices = struct.Struct(fmt).unpack(fo.read(size))
+        self.vertices = list(struct.Struct(fmt).unpack(fo.read(size))) # TODO: remove conversions everywhere
         #print('>> {}'.format(fo.tell()))
 
     def _read_indexnum(self, fo):
@@ -495,10 +589,10 @@ class VisMesh:
         self._read_indexnum(fo)
 
         # TODO: refactor
-        fmt = '{}h'.format(self.indexnum)
+        fmt = '{}H'.format(self.indexnum)
         size = struct.calcsize(fmt)
 
-        self.index = struct.Struct(fmt).unpack(fo.read(size))
+        self.index = list(struct.Struct(fmt).unpack(fo.read(size))) # TODO: remove conversions everywhere
 
     def _read_u2(self, fo):
         self._read_index_block(fo)
@@ -645,7 +739,7 @@ class VisMesh:
         self._write_indexnum(filepath)
 
         with open(filepath, 'ab+') as fo:
-            fmt = '{}h'.format(len(self.index))
+            fmt = '{}H'.format(len(self.index))
             fo.write(struct.Struct(fmt).pack(*self.index))
 
     def _write_u2(self, filepath):
@@ -706,8 +800,8 @@ class VisMesh:
                         fo.write(struct.Struct('l').pack(material.u4))
                         fo.write(struct.Struct('l').pack(material.u5))
                         if not self.isSkinnedMesh and self.head.version == 11:
-                            fo.write(struct.Struct('3f').pack(*material.nmin))
-                            fo.write(struct.Struct('3f').pack(*material.nmax))
+                            fo.write(struct.Struct('3f').pack(*material.mmin))
+                            fo.write(struct.Struct('3f').pack(*material.mmax))
 
 
 class smp_sample:

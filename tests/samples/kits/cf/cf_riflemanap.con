@@ -1,0 +1,44 @@
+ObjectTemplate.create Kit cf_riflemanap
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.networkableInfo KitInfo
+ObjectTemplate.kitType Assault
+ObjectTemplate.aiTemplate Support
+ObjectTemplate.geometry cf_kits2
+ObjectTemplate.geometry.kit 6
+ObjectTemplate.geometry.dropGeom 9
+ObjectTemplate.setHasCollisionPhysics 1
+ObjectTemplate.setCollisionMesh kitcol
+ObjectTemplate.abilityRestoreRate 0.15
+ObjectTemplate.abilityInVehicleRadius 0
+ObjectTemplate.abilityInVehicleStrength 0.0
+ObjectTemplate.abilityInVehicleMaterial 84
+ObjectTemplate.cullRadiusScale 100000
+ObjectTemplate.timeToLiveAfterDeath 300
+
+rem -------------------------------------
+ObjectTemplate.addTemplate kni_knife_green
+ObjectTemplate.addTemplate klappspaten
+ObjectTemplate.addTemplate cfrif_c7scope
+ObjectTemplate.addTemplate tripflare_idx4
+ObjectTemplate.addTemplate cfhgr_c13
+ObjectTemplate.addTemplate usmin_claymore
+ObjectTemplate.addTemplate usmin_claymore_sec
+ObjectTemplate.addTemplate medikit_dressing
+rem -------------------------------------
+
+ObjectTemplate.createComponent Ability
+ObjectTemplate.ability.hasRepairingAbility 1
+
+ObjectTemplate.createComponent AbilityHud
+ObjectTemplate.abilityHud.ammoSound S_Resupply
+ObjectTemplate.abilityHud.healingSound S_Heal
+ObjectTemplate.abilityHud.repairingSound S_Repair
+
+ObjectTemplate.createComponent VehicleHud
+ObjectTemplate.vehicleHud.hudName			"HUD_TEXT_MENU_SPAWN_KIT_RIFLEMANAP_CF"
+ObjectTemplate.vehicleHud.miniMapIcon		"Ingame\Kits\Icons\kit_Claymore_outline.tga"
+ObjectTemplate.vehicleHud.vehicleIcon		"Ingame\Kits\Icons\kit_Claymore.tga"
+ObjectTemplate.vehicleHud.spottedIcon 		"Ingame\GeneralIcons\empty.tga"
+ObjectTemplate.vehicleHud.pantingSound		S_SprintBreath
+ObjectTemplate.vehicleHud.injurySound		S_Injury
+ObjectTemplate.vehicleHud.vehicleType 		7

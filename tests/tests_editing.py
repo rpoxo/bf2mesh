@@ -13,13 +13,12 @@ class TestVisMeshSingleLod(unittest.TestCase):
     def setUp(self):
         # NOTE: THIS IS VERY SPECIFIC TESTS AGAINST PREPARED OBJECT
         self.path_object_std = os.path.join(*['tests', 'samples', 'evil_box', 'meshes', 'evil_box.staticmesh'])
-        
-    # disable when investigating results
+
     @classmethod
     def tearDownClass(cls):
         try:
             path_clear = os.path.join(*['tests', 'generated', 'edit'])
-            #shutil.rmtree(path_clear)
+            shutil.rmtree(path_clear)
         except FileNotFoundError:
             print('Nothing to clean up')
 

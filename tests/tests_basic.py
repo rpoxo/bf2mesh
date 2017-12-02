@@ -28,13 +28,11 @@ class TestVisMeshReading(unittest.TestCase):
         self.path_object_skinned = os.path.join(*['tests', 'samples', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
         self.path_object_skinned_clone = os.path.join(*['tests', 'generated', 'write', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
 
-        
-    # disable when investigating results
     @classmethod
     def tearDownClass(cls):
         try:
             path_clear = os.path.join(*['tests', 'generated', 'write'])
-            shutil.rmtree(path_clear, ignore_errors=True)
+            shutil.rmtree(path_clear)
         except FileNotFoundError:
             print('Nothing to clean up')
 

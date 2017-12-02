@@ -26,7 +26,7 @@ class TestVisMeshReading(unittest.TestCase):
         # test for mec kits - skinnedmesh
         # objects\kits\Mec
         self.path_object_skinned = os.path.join(*['tests', 'samples', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
-        self.path_object_skinned_clone = os.path.join(*['tests', 'generated', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
+        self.path_object_skinned_clone = os.path.join(*['tests', 'generated', 'write', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
 
         
     # disable when investigating results

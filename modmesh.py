@@ -303,6 +303,10 @@ class VisMeshTransform:
     def copy_geom_id(self, id_copy, id_new):
         self.vmesh.geomnum += 1
         self.vmesh.geoms.insert(id_new, self.vmesh.geoms[id_copy])
+    
+    def delete_geom_id(self, id_delete):
+        self.vmesh.geomnum -= 1
+        del self.vmesh.geoms[id_delete]
 
 
 class VisMesh:

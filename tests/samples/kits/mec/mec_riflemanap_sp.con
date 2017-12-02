@@ -1,0 +1,44 @@
+ObjectTemplate.create Kit mec_riflemanap_sp
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.networkableInfo KitInfo
+ObjectTemplate.kitType Assault
+ObjectTemplate.aiTemplate Assault
+ObjectTemplate.geometry mec_kits
+ObjectTemplate.geometry.kit 12
+ObjectTemplate.geometry.dropGeom 18
+ObjectTemplate.sethasCollisionPhysics 1
+ObjectTemplate.setCollisionMesh kitcol
+ObjectTemplate.abilityRestoreRate 0.15
+ObjectTemplate.abilityInVehicleRadius 0
+ObjectTemplate.abilityInVehicleStrength 0.0
+ObjectTemplate.abilityInVehicleMaterial 84
+ObjectTemplate.cullRadiusScale 100000
+ObjectTemplate.timeToLiveAfterDeath 300
+
+rem -------------------------------------
+ObjectTemplate.addTemplate meckni_g3scopebayonet
+ObjectTemplate.addTemplate klappspaten
+ObjectTemplate.addTemplate mecrif_g3scope
+ObjectTemplate.addTemplate tripflare_idx4
+ObjectTemplate.addTemplate ruhgr_rgd5
+ObjectTemplate.addTemplate usmin_claymore
+ObjectTemplate.addTemplate usmin_claymore_sec
+ObjectTemplate.addTemplate medikit_dressing_arab
+rem -------------------------------------
+
+ObjectTemplate.createComponent Ability
+ObjectTemplate.ability.hasRepairingAbility 1
+
+ObjectTemplate.createComponent AbilityHud
+ObjectTemplate.abilityHud.ammoSound S_Resupply
+ObjectTemplate.abilityHud.healingSound S_Heal
+ObjectTemplate.abilityHud.repairingSound S_Repair
+
+ObjectTemplate.createComponent VehicleHud
+ObjectTemplate.vehicleHud.hudName 			"HUD_TEXT_MENU_SPAWN_KIT_RIFLEMANAP_MEC"
+ObjectTemplate.vehicleHud.miniMapIcon		"Ingame\Kits\Icons\kit_Claymore_outline.tga"
+ObjectTemplate.vehicleHud.vehicleIcon		"Ingame\Kits\Icons\kit_Claymore.tga"
+ObjectTemplate.vehicleHud.spottedIcon 		"Ingame\GeneralIcons\empty.tga"
+ObjectTemplate.vehicleHud.pantingSound		S_SprintBreath
+ObjectTemplate.vehicleHud.injurySound		S_Injury
+ObjectTemplate.vehicleHud.vehicleType 		7

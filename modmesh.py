@@ -66,7 +66,7 @@ def LoadBF2Mesh(
         isBundledMesh = (file_extension == '.bundledmesh')
         isStaticMesh = (file_extension == '.staticmesh')
 
-        vmesh = StdMesh(isSkinnedMesh, isBundledMesh, isStaticMesh)
+        vmesh = VisMesh(isSkinnedMesh, isBundledMesh, isStaticMesh)
         vmesh.open(meshfile)
 
         if loadSamples:
@@ -300,7 +300,7 @@ class vertattrib:
             return False
 
 
-class StdMesh:
+class VisMesh:
 
     def __init__(
             self,

@@ -1,0 +1,40 @@
+ObjectTemplate.create Kit mec_unarmed
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.networkableInfo KitInfo
+ObjectTemplate.kitType Assault
+ObjectTemplate.aiTemplate Assault
+ObjectTemplate.geometry meinsurgent_kits_civilian
+ObjectTemplate.geometry.kit 0
+ObjectTemplate.geometry.dropGeom 0
+ObjectTemplate.hasCollisionPhysics 1
+ObjectTemplate.setCollisionMesh kitcol
+ObjectTemplate.abilityRestoreRate 0.15
+ObjectTemplate.abilityInVehicleRadius 0
+ObjectTemplate.abilityInVehicleStrength 0.1
+ObjectTemplate.abilityInVehicleMaterial 73
+ObjectTemplate.cullRadiusScale 100000
+ObjectTemplate.timeToLiveAfterDeath 300
+
+rem -------------------------------------
+ObjectTemplate.addTemplate unarmed_melee
+ObjectTemplate.addTemplate surrender
+ObjectTemplate.addTemplate uksalute
+ObjectTemplate.addTemplate wave_idx4
+rem -------------------------------------
+
+ObjectTemplate.createComponent Ability
+ObjectTemplate.ability.hasRepairingAbility 1
+
+ObjectTemplate.createComponent AbilityHud
+ObjectTemplate.abilityHud.ammoSound S_Resupply
+ObjectTemplate.abilityHud.healingSound S_Heal
+ObjectTemplate.abilityHud.repairingSound S_Repair
+
+ObjectTemplate.createComponent VehicleHud
+ObjectTemplate.vehicleHud.hudName 			"HUD_TEXT_MENU_SPAWN_KIT_UNARMED_MEC"
+ObjectTemplate.vehicleHud.miniMapIcon 		"Ingame\Kits\Icons\kit_Civilian_outline.tga"
+ObjectTemplate.vehicleHud.vehicleIcon 		"Ingame\Kits\Icons\kit_Civilian.tga"
+ObjectTemplate.vehicleHud.spottedIcon 		"Ingame\GeneralIcons\empty.tga"
+ObjectTemplate.vehicleHud.pantingSound		S_SprintBreath
+ObjectTemplate.vehicleHud.injurySound		S_Injury
+ObjectTemplate.vehicleHud.vehicleType 		7

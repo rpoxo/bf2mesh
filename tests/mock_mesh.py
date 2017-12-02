@@ -4,7 +4,7 @@ import modmesh
 class Box:
 
     def __init__(self):
-        self.vmesh = modmesh.StdMesh()
+        self.vmesh = modmesh.VisMesh()
         self._create_header(self.vmesh)
         self._create_u1_bfp4f_version(self.vmesh)
         self._create_geomnum(self.vmesh)

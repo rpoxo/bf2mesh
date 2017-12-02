@@ -8,7 +8,7 @@ import modmesh
 
 import tests.mock_mesh as mocks
 
-class TestStdMeshSingleLod(unittest.TestCase):
+class TestVisMeshSingleLod(unittest.TestCase):
 
     def setUp(self):
         # NOTE: THIS IS VERY SPECIFIC TESTS AGAINST PREPARED OBJECT

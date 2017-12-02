@@ -1,0 +1,8 @@
+GeometryTemplate.create SkinnedMesh mec_kits
+
+ObjectTemplate.create SimpleObject mec_kits
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.creator CHUC-PASOCON:Main
+ObjectTemplate.geometry mec_kits
+
+

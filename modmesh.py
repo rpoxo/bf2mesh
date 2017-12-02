@@ -307,6 +307,9 @@ class VisMeshTransform:
     def delete_geom_id(self, id_delete):
         self.vmesh.geomnum -= 1
         del self.vmesh.geoms[id_delete]
+    
+    def edit_geoms_order(self, order):
+        self.vmesh.geoms = [ self.vmesh.geoms[id_geom] for id_geom in order]
 
 
 class VisMesh:

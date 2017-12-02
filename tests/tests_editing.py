@@ -132,7 +132,7 @@ class TestVisMesh_SkinnedMesh(unittest.TestCase):
     def setUp(self):
         self.path_object_skinned = os.path.join(*['tests', 'samples', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
 
-    def test_can_copy_geom_in_skinnedmesh(self):
+    def test_can_copy_geom(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_skinned)
         vmesh_old = modmesh.LoadBF2Mesh(self.path_object_skinned)
         if not vmesh.isSkinnedMesh:
@@ -171,7 +171,7 @@ class TestVisMesh_SkinnedMesh(unittest.TestCase):
                 self.assertTrue(material.inum == vmesh_old.geoms[geomToCopy].lods[id_lod].materials[id_mat].inum)
                 self.assertTrue(material.istart == vmesh_old.geoms[geomToCopy].lods[id_lod].materials[id_mat].istart)
 
-    def test_can_delete_geom_in_skinnedmesh(self):
+    def test_can_delete_geom(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_skinned)
         vmesh_old = modmesh.LoadBF2Mesh(self.path_object_skinned)
         if not vmesh.isSkinnedMesh:
@@ -202,6 +202,38 @@ class TestVisMesh_SkinnedMesh(unittest.TestCase):
                     self.assertTrue(material.vstart == vmesh_old.geoms[geomToDelete+1].lods[id_lod].materials[id_mat].vstart)
                     self.assertTrue(material.inum == vmesh_old.geoms[geomToDelete+1].lods[id_lod].materials[id_mat].inum)
                     self.assertTrue(material.istart == vmesh_old.geoms[geomToDelete+1].lods[id_lod].materials[id_mat].istart)
+    
+    def test_can_edit_geoms_order(self):
+        vmesh = modmesh.LoadBF2Mesh(self.path_object_skinned)
+        vmesh_old = modmesh.LoadBF2Mesh(self.path_object_skinned)
+        if not vmesh.isSkinnedMesh:
+            raise
+        path_object_skinned_clone = os.path.join(*['tests', 'generated', 'edit', 'kits', 'mec_geoms_ordered', 'Meshes', 'mec_kits_geoms_ordered.skinnedMesh'])
+
+        # new geomes
+        newGeomsList = tuple([i for i in range(vmesh.geomnum-1, -1, -1)]) # revert geoms order
+
+        modmesh.VisMeshTransform(vmesh).edit_geoms_order(newGeomsList)
+        vmesh.save(path_object_skinned_clone)
+
+        self.assertTrue(vmesh.geomnum == vmesh_old.geomnum)
+        self.assertTrue(len(vmesh.geoms) == len(vmesh_old.geoms))
+        
+        for id_geom, geom in enumerate(vmesh.geoms):
+            id_geom_old = vmesh_old.geomnum - 1 - id_geom
+            self.assertTrue(geom.lodnum == vmesh_old.geoms[id_geom_old].lodnum)
+            for id_lod, lod in enumerate(geom.lods):
+                self.assertTrue(lod.rignum == vmesh_old.geoms[id_geom_old].lods[id_lod].rignum)
+                for id_rig, rig in enumerate(lod.rigs):
+                    self.assertTrue(rig.bonenum == vmesh_old.geoms[id_geom_old].lods[id_lod].rigs[id_rig].bonenum)
+                    for id_bone, bone in enumerate(rig.bones):
+                        self.assertTrue(bone.id == vmesh_old.geoms[id_geom_old].lods[id_lod].rigs[id_rig].bones[id_bone].id)
+                        self.assertTrue(bone.matrix == vmesh_old.geoms[id_geom_old].lods[id_lod].rigs[id_rig].bones[id_bone].matrix)
+                for id_mat, material in enumerate(lod.materials):
+                    self.assertTrue(material.vnum == vmesh_old.geoms[id_geom_old].lods[id_lod].materials[id_mat].vnum)
+                    self.assertTrue(material.vstart == vmesh_old.geoms[id_geom_old].lods[id_lod].materials[id_mat].vstart)
+                    self.assertTrue(material.inum == vmesh_old.geoms[id_geom_old].lods[id_lod].materials[id_mat].inum)
+                    self.assertTrue(material.istart == vmesh_old.geoms[id_geom_old].lods[id_lod].materials[id_mat].istart)
 
 
 

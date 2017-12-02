@@ -267,6 +267,7 @@ class bf2geom:
 
     def read_lodnum(self, fo):
         self.lodnum = read_long(fo)
+        self.lods = [bf2lod() for i in range(self.lodnum)]
 
 class vertattrib:
 
@@ -492,7 +493,6 @@ class VisMesh:
         self._read_u2(fo)
 
         for geom in self.geoms:
-            geom.lods = [bf2lod() for i in range(geom.lodnum)]
             for lod in geom.lods:
                 lod.version = self.head.version
                 lod.min = read_float3(fo)

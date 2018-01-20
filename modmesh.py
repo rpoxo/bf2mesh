@@ -329,8 +329,11 @@ class VisMeshTransform:
         self.vmesh.geoms.insert(id_new, self.vmesh.geoms[id_copy])
     
     def delete_geom_id(self, id_delete):
-        geom_vnum = sum([sum([material.vnum for material in lod.materials]) for lod in self.vmesh.geoms[id_delete].lods])
-        geom_inum = sum([sum([material.inum for material in lod.materials]) for lod in self.vmesh.geoms[id_delete].lods])
+        geom = [sum(x) for x in zip(*[(material.vnum,
+                                        material.inum) for lod in self.vmesh.geoms[id_delete].lods for material in lod.materials])]
+        geom_vnum = geom[0]
+        geom_inum = geom[1]
+        
 
         # remove vertex data
         vstart = int(self.vmesh.vertstride / self.vmesh.vertformat * self.vmesh.geoms[id_delete].lods[0].materials[0].vstart)

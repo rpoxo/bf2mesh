@@ -610,7 +610,13 @@ class VisMesh:
                 lod.max = read_float3(fo)
                 if self.head.version <= 6:
                     lod.pivot = read_float3(fo)
-                if self.isSkinnedMesh:
+                if not self.isSkinnedMesh:
+                    lod.nodenum = read_long(fo)
+                    # reading nodes matrix
+                    if not self.isBundledMesh:
+                        for i in range(lod.nodenum):
+                            lod.nodes = read_matrix4(fo)
+                else:
                     lod.rignum = read_long(fo)
                     if lod.rignum > 0:
                         lod.rigs = [bf2rig() for i in range(lod.rignum)]
@@ -621,12 +627,6 @@ class VisMesh:
                                 for bone in rig.bones:
                                     bone.id = read_long(fo)
                                     bone.matrix = read_matrix4(fo)
-                else:
-                    lod.nodenum = read_long(fo)
-                    # reading nodes matrix
-                    if not self.isBundledMesh:
-                        for i in range(lod.nodenum):
-                            lod.nodes = read_matrix4(fo)
 
     def _read_materials(self, fo):
         self._read_nodes(fo)

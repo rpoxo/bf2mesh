@@ -243,12 +243,12 @@ class TestVisMesh_SkinnedMesh(unittest.TestCase):
                     vstart = int(vmesh.vertstride / vmesh.vertformat * material.vstart)
                     vstart_old = int(vmesh.vertstride / vmesh.vertformat * geoms_old[id_geom_old].lods[id_lod].materials[id_mat].vstart)
                     vnum = int(vmesh.vertstride / vmesh.vertformat * material.vnum)
-                    for id_data, data in enumerate(vmesh.vertices[vstart:vstart+vnum]):
+                    for id_data, vdata in enumerate(vmesh.vertices[vstart:vstart+vnum]):
                         # Apparently pr skinnedmeshes containing nan data in vertices array
                         #  test fails as nan != nan even through rest of data are same
-                        if math.isnan(data) and math.isnan(vertices_old[vstart_old+id_data]):
+                        if math.isnan(vdata) and math.isnan(vertices_old[vstart_old+id_data]):
                             continue
-                        self.assertAlmostEqual(data, vertices_old[vstart_old+id_data],
+                        self.assertEqual(vdata, vertices_old[vstart_old+id_data],
                             msg='id {}:{} after {},\nvnum_to_delete = {},\nat geom{} lod{} material{}'.format(vstart+id_data, vstart_old+id_data,
                                 id_data,
                                 vnum_to_delete,
@@ -264,38 +264,66 @@ class TestVisMesh_SkinnedMesh(unittest.TestCase):
                         self.assertEqual(index, indices_old[istart_old+id_index])
             id_geom += 1
     
-    @unittest.skip('TODO: make sure to rebuild vertices and indices')
+    #@unittest.skip('TODO: make sure to rebuild vertices and indices')
     def test_can_edit_geoms_order(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_skinned)
-        vmesh_old = copy.deepcopy(vmesh)
         if not vmesh.isSkinnedMesh:
             raise
         path_object_skinned_clone = os.path.join(*['tests', 'generated', 'edit', 'kits', 'mec_geoms_ordered', 'Meshes', 'mec_kits_geoms_ordered.skinnedMesh'])
 
-        # new geomes
-        newGeomsList = tuple([i for i in range(vmesh.geomnum-1, -1, -1)]) # revert geoms order
+        # for simplicity we'll just reverse geoms list
+        order_old = [i for i in range(vmesh.geomnum)]
+        order_new = list(reversed(order_old))
 
-        modmesh.VisMeshTransform(vmesh).edit_geoms_order(newGeomsList)
-        vmesh.save(path_object_skinned_clone)
-
-        self.assertTrue(vmesh.geomnum == vmesh_old.geomnum)
-        self.assertTrue(len(vmesh.geoms) == len(vmesh_old.geoms))
+        geoms_old = copy.deepcopy(vmesh.geoms)
+        vertices_old = copy.deepcopy(vmesh.vertices)
+        indices_old = copy.deepcopy(vmesh.index)
         
+        modmesh.VisMeshTransform(vmesh).order_geoms_by(order_new)
+        vmesh.save(path_object_skinned_clone)
+        
+        # verify geomtable reversed properly
         for id_geom, geom in enumerate(vmesh.geoms):
-            id_geom_old = vmesh_old.geomnum - 1 - id_geom
-            self.assertTrue(geom.lodnum == vmesh_old.geoms[id_geom_old].lodnum)
+            id_geom_old = len(vmesh.geoms) - id_geom - 1 # idk, numering start from 0?
+            geom_old = geoms_old[id_geom_old]
+            self.assertTrue(geom.lodnum == geom_old.lodnum)
+            self.assertTrue(len(geom.lods) == len(geom_old.lods))
             for id_lod, lod in enumerate(geom.lods):
-                self.assertTrue(lod.rignum == vmesh_old.geoms[id_geom_old].lods[id_lod].rignum)
+                lod_old = geom_old.lods[id_lod]
+                self.assertTrue(lod.rignum == lod_old.rignum)
+                self.assertTrue(len(lod.rigs) == len(lod_old.rigs))
                 for id_rig, rig in enumerate(lod.rigs):
-                    self.assertTrue(rig.bonenum == vmesh_old.geoms[id_geom_old].lods[id_lod].rigs[id_rig].bonenum)
+                    rig_old = lod_old.rigs[id_rig]
+                    self.assertTrue(rig.bonenum == rig_old.bonenum)
+                    self.assertTrue(rig.bonenum == rig_old.bonenum)
                     for id_bone, bone in enumerate(rig.bones):
-                        self.assertTrue(bone.id == vmesh_old.geoms[id_geom_old].lods[id_lod].rigs[id_rig].bones[id_bone].id)
-                        self.assertTrue(bone.matrix == vmesh_old.geoms[id_geom_old].lods[id_lod].rigs[id_rig].bones[id_bone].matrix)
+                        bone_old = rig_old.bones[id_bone]
+                        self.assertTrue(bone.id == bone_old.id)
+                        self.assertTrue(bone.matrix == bone_old.matrix)
                 for id_mat, material in enumerate(lod.materials):
-                    self.assertTrue(material.vnum == vmesh_old.geoms[id_geom_old].lods[id_lod].materials[id_mat].vnum)
-                    self.assertTrue(material.vstart == vmesh_old.geoms[id_geom_old].lods[id_lod].materials[id_mat].vstart)
-                    self.assertTrue(material.inum == vmesh_old.geoms[id_geom_old].lods[id_lod].materials[id_mat].inum)
-                    self.assertTrue(material.istart == vmesh_old.geoms[id_geom_old].lods[id_lod].materials[id_mat].istart)
+                    material_old = lod_old.materials[id_mat]
+                    self.assertTrue(material.vnum == material_old.vnum)
+                    self.assertTrue(material.inum == material_old.inum)
+                    self.assertTrue(material.vstart == material_old.vstart)
+                    self.assertTrue(material.istart == material_old.istart)
+
+                    # verify that we have same geom data packed properly
+                    vstart = int(vmesh.vertstride / vmesh.vertformat * material.vstart)
+                    vstart_old = int(vmesh.vertstride / vmesh.vertformat * geoms_old[id_geom_old].lods[id_lod].materials[id_mat].vstart)
+                    vnum = int(vmesh.vertstride / vmesh.vertformat * material.vnum)
+                    for id_vdata, vdata in enumerate(vmesh.vertices[vstart:vstart+vnum]):
+                        # Apparently pr skinnedmeshes containing nan data in vertices array
+                        #  test fails as nan != nan even through rest of data are same
+                        if math.isnan(vdata) and math.isnan(vertices_old[vstart_old+id_vdata]):
+                            continue
+                        self.assertEqual(vdata, vertices_old[vstart_old+id_vdata])
+                    
+                    # and proper indices
+                    inum = material.inum
+                    istart = material.istart
+                    istart_old = geoms_old[id_geom_old].lods[id_lod].materials[id_mat].istart
+                    for id_index, index in enumerate(vmesh.index[istart:istart+inum]):
+                        self.assertEqual(index, indices_old[istart_old+id_index])
 
 
 

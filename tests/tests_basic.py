@@ -603,6 +603,7 @@ class TestVisMeshOps(unittest.TestCase):
         # objects\kits\Mec
         self.path_object_skinned = os.path.join(*['tests', 'samples', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
         self.path_object_skinned_clone = os.path.join(*['tests', 'generated', 'write', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
+        
     
 if __name__ == '__main__':
     unittest.main()

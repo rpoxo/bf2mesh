@@ -359,8 +359,7 @@ class VisMeshTransform:
         self.vmesh.geomnum -= 1
         del self.vmesh.geoms[id_delete]
     
-    def edit_geoms_order(self, order):
-        raise NotImplementedError
+    def order_geoms_by(self, order):
         self.vmesh.geoms = [self.vmesh.geoms[id_geom] for id_geom in order]
     
     def edit_vertex(self, id_vertex, vattribute, vdata):

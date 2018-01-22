@@ -34,7 +34,7 @@ def main():
     vmesh = modmesh.LoadBF2Mesh('tests\\samples\\kits\\cf\\Meshes\\cf_kits1.skinnedMesh')
     vmesh2 = modmesh.LoadBF2Mesh('tests\\samples\\kits\\cf\\Meshes\\cf_kits2.skinnedMesh')
     
-    copy_geom_table(vmesh, vmesh2)
+    modmesh.VisMeshTransform(vmesh).merge_mesh(vmesh2)
     # cleanup
     #print(vmesh.geoms[24].lods[0].materials[0].vstart)
     modmesh.VisMeshTransform(vmesh).delete_geom_id(24)

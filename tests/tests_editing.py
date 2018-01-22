@@ -87,46 +87,6 @@ class TestVisMeshBoxEdit(unittest.TestCase):
             
             self.assertTrue(position_new == sum(i) for i in zip(position_old, offset))
 
-    def test_can_merge_geometry_with_offset(self):
-        vmesh = mocks.Box().vmesh
-        vmesh_old = copy.deepcopy(vmesh)
-        vmesh2 = mocks.Box().vmesh
-        offset = (1.0, 0.0, 0.0)
-        modmesh.VisMeshTransform(vmesh2).offset_mesh_vertices(offset)
-        path_object_clone = os.path.join(*['tests', 'generated', 'edit', 'evil_box_merge_geometry', 'meshes', 'evil_box_merge_geometry.staticmesh'])
-        
-        modmesh.VisMeshTransform(vmesh).merge_mesh(vmesh2)
-        vmesh.save(path_object_clone)
-        
-        self.assertTrue(vmesh.vertnum == vmesh_old.vertnum + vmesh2.vertnum)
-        self.assertTrue(vmesh.indexnum == vmesh_old.indexnum + vmesh2.indexnum)
-        self.assertTrue(len(vmesh.index) == len(vmesh_old.index) + len(vmesh2.index))
-        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].vnum == vmesh_old.geoms[0].lods[0].materials[0].vnum + vmesh2.geoms[0].lods[0].materials[0].vnum)
-        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].inum == vmesh_old.geoms[0].lods[0].materials[0].inum + vmesh2.geoms[0].lods[0].materials[0].inum)
-        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].mmin == sum(i) for i in zip(vmesh_old.geoms[0].lods[0].materials[0].mmin, vmesh2.geoms[0].lods[0].materials[0].mmin))
-        self.assertTrue(vmesh.geoms[0].lods[0].materials[0].mmax == sum(i) for i in zip(vmesh_old.geoms[0].lods[0].materials[0].mmax, vmesh2.geoms[0].lods[0].materials[0].mmax))
-        
-        for vertid in range(vmesh.vertnum):
-            if vertid < vmesh_old.vertnum:
-                #print('vmesh.get_vertex_data({}, "POSITION") = {}'.format(vertid, vmesh.get_vertex_data(vertid, 'POSITION')))
-                #print('vmesh_old.get_vertex_data({}, "POSITION") = {}'.format(vertid, vmesh_old.get_vertex_data(vertid, 'POSITION')))
-                self.assertTrue(vmesh.get_vertex_data(vertid, 'POSITION') == vmesh_old.get_vertex_data(vertid, 'POSITION'))
-            else:
-                position_old = vmesh_old.get_vertex_data(vertid - vmesh_old.vertnum, 'POSITION')
-                #print('[{}]position_old + offset = {}'.format(vertid, tuple(sum(i) for i in zip(position_old, offset))))
-                #print('[{}]vmesh.get_vertex_data({}, "POSITION") = {}'.format(vertid, vertid, vmesh.get_vertex_data(vertid, 'POSITION')))
-                self.assertTrue(vmesh.get_vertex_data(vertid, 'POSITION') == sum(i) for i in zip(position_old, offset))
-        
-        for idxid in range(vmesh.indexnum):
-            if idxid < vmesh_old.indexnum:
-                self.assertTrue(vmesh.index[idxid] == vmesh_old.index[idxid])
-            else:
-                print('vmesh.index[0] = {}'.format(vmesh.index[0]))
-                print('vmesh.index[{}] = {}'.format(idxid, vmesh.index[idxid]))
-                print('vmesh2.index[{}-->{}] = {}'.format(idxid, idxid-vmesh2.indexnum, vmesh2.index[idxid-vmesh2.indexnum]))
-                #print('vmesh2.index[{}-{}] + vmesh_old.indexnum({}) = {}'.format(vmesh2.index[idxid-vmesh2.indexnum] + vmesh_old.indexnum))
-                self.assertTrue(vmesh.index[idxid] == vmesh2.index[idxid-vmesh2.indexnum] + vmesh_old.vertnum)
-
     @unittest.skip('not working')
     def test_can_rotate_mesh(self):
         vmesh = mocks.Box().vmesh
@@ -151,7 +111,7 @@ class TestVisMesh_SkinnedMesh(unittest.TestCase):
         self.path_object_skinned = os.path.join(*['tests', 'samples', 'kits', 'mec', 'Meshes', 'mec_kits.skinnedMesh'])
 
     @unittest.skip('slow, refactor to copy vertex data')
-    def test_can_copy_geom(self):
+    def test_can_copy_geom_by_ref(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_skinned)
         vmesh_old = copy.deepcopy(vmesh)
         if not vmesh.isSkinnedMesh:

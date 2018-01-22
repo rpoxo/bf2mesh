@@ -247,7 +247,7 @@ class Box:
         vmesh.vertnum = len(positions)
     
     def _create_index(self, vmesh):
-        vmesh.index = (
+        vmesh.index = [
             22,
             23,
             20,
@@ -289,7 +289,7 @@ class Box:
             0,
             1,
             2,
-            )
+            ]
         vmesh.indexnum = len(vmesh.index)
 
     def _create_u2(self, vmesh):

@@ -360,7 +360,24 @@ class VisMeshTransform:
         del self.vmesh.geoms[id_delete]
     
     def order_geoms_by(self, order):
+        # would be better to implement actual geom data reordering instead of geom swap...
         self.vmesh.geoms = [self.vmesh.geoms[id_geom] for id_geom in order]
+    
+    def merge_mesh(self, other):
+        for id_geom, geom in enumerate(other.geoms):
+            self.vmesh.geoms.append(geom)
+            for id_lod, lod in enumerate(self.vmesh.geoms[id_geom+self.vmesh.geomnum].lods):
+                for id_mat, material in enumerate(lod.materials):
+                    vstart = int(material.vstart * (self.vmesh.vertstride / self.vmesh.vertformat))
+                    vnum = int(material.vnum * (self.vmesh.vertstride / self.vmesh.vertformat))
+                    self.vmesh.vertices.extend(other.vertices[vstart:vstart+vnum])
+                    material.vstart += int(self.vmesh.vertnum)
+                    for index in other.index[material.istart:material.istart+material.inum]:
+                        self.vmesh.index.append(index)
+                    material.istart += self.vmesh.indexnum
+        self.vmesh.geomnum = len(self.vmesh.geoms)
+        self.vmesh.vertnum = int(len(self.vmesh.vertices) / (self.vmesh.vertstride / self.vmesh.vertformat))
+        self.vmesh.indexnum = len(self.vmesh.index)
     
     def edit_vertex(self, id_vertex, vattribute, vdata):
         for attrib_id, attrib in enumerate(self.vmesh.vertattrib):
@@ -383,25 +400,6 @@ class VisMeshTransform:
             position_old = self.vmesh.get_vertex_data(id_vertex, 'POSITION')
             position_new = tuple(sum(i) for i in zip(position_old, offset))
             self.edit_vertex(id_vertex, 'POSITION', position_new)
-    
-    def merge_mesh(self, other):
-        # need to correct index before vertices due to vertnum adjustment
-        index = list(self.vmesh.index)
-        for idx in other.index:
-            index.append(idx+self.vmesh.vertnum)
-        self.vmesh.index = tuple(index) # convert back
-        self.vmesh.indexnum += other.indexnum
-
-        self.vmesh.vertnum += other.vertnum
-        self.vmesh.vertices.extend(other.vertices)
-        
-        for i, geom in enumerate(self.vmesh.geoms):
-            for j, lod in enumerate(self.vmesh.geoms[i].lods):
-                for k, material in enumerate(self.vmesh.geoms[i].lods[j].materials):
-                    self.vmesh.geoms[i].lods[j].materials[k].vnum += other.geoms[i].lods[j].materials[k].vnum
-                    self.vmesh.geoms[i].lods[j].materials[k].inum += other.geoms[i].lods[j].materials[k].inum
-                    self.vmesh.geoms[i].lods[j].materials[k].mmin = tuple(sum(i) for i in zip(self.vmesh.geoms[i].lods[j].materials[k].mmin, other.geoms[i].lods[j].materials[k].mmin))
-                    self.vmesh.geoms[i].lods[j].materials[k].mmax = tuple(sum(i) for i in zip(self.vmesh.geoms[i].lods[j].materials[k].mmax, other.geoms[i].lods[j].materials[k].mmax))
     
     def rename_texture(self, geom, lod, material, map, path):
         self.vmesh.geoms[geom].lods[lod].materials[material].maps[map] = bytes(path, 'ascii')

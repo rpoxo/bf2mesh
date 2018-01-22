@@ -25,6 +25,7 @@ modmesh.VisMeshTransform(kits1).merge_mesh(kits2)
 
 # save changes made in first mesh
 kits1.save('cf_kits3.skinnedMesh')
+```
 
 
 ## How to delete unnecessary geoms from mesh
@@ -40,3 +41,4 @@ modmesh.VisMeshTransform(vmesh).delete_geom_id(3)
 
 # save changes
 kits1.save('cf_kits4.skinnedMesh')
+```

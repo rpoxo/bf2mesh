@@ -1,4 +1,4 @@
-BF2Mesh - Battlefield 2 mesh file parser
+BF2Mesh - Battlefield 2 mesh file parser, written in python3
 
 This code documents how to parse mesh files of the DICE/EA games Battlefield 2,
 Battlefield 2142, Battlefield Heroes, Battlefield Play4Free, which share the

@@ -8,10 +8,11 @@ import math
 import modmesh
 from modmesh import D3DDECLTYPE
 from modmesh import D3DDECLUSAGE
+from modmesh import Vec3
 
 import tests.mock_mesh as mocks
 
-class TestVisMeshBoxEdit(unittest.TestCase):
+class TestVisMeshStatic(unittest.TestCase):
 
     def setUp(self):
         self.path_object_std = os.path.join(*['tests', 'samples', 'evil_box', 'meshes', 'evil_box.staticmesh'])
@@ -25,6 +26,7 @@ class TestVisMeshBoxEdit(unittest.TestCase):
         except FileNotFoundError:
             print('Nothing to clean up')
 
+    @unittest.skip('TODO: refactor')
     def test_can_rename_texture(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_std)
         path_object_clone = os.path.join(*['tests', 'generated', 'edit', 'evil_box_rename_texture', 'meshes', 'evil_box_rename_texture.staticmesh'])
@@ -54,57 +56,99 @@ class TestVisMeshBoxEdit(unittest.TestCase):
                         lods[lod].
                         materials[material].
                         maps[map] == b'readme/assets/apps/python3/mesher/tests/samples/evil_box/textures/evil_box_c.dds')
-    
 
-    def test_can_get_vertex_data_position(self):
-        vmesh = mocks.Box().vmesh
+    def test_can_translate_mesh(self):
+        vmesh = mocks.Box()
+        vmesh_clone = mocks.Box()
+        path_object_clone = os.path.join(*['tests', 'generated', 'edit', 'evil_box_translate_mesh', 'meshes', 'evil_box_translate_mesh.staticmesh'])
         
-        position = vmesh.get_vertex_data(0, 'POSITION')
-        self.assertTrue(position == (0.5, 1.0, -0.5))
-
-    def test_can_edit_vertex_data_position(self):
-        vmesh = mocks.Box().vmesh
-        path_object_clone = os.path.join(*['tests', 'generated', 'edit', 'evil_box_vertex_position', 'meshes', 'evil_box_vertex_position.staticmesh'])
-        
-        position = (0.5, 2.0, -0.5)
-        modmesh.VisMeshTransform(vmesh).edit_vertex(0, 'POSITION', position)
-        vmesh.save(path_object_clone)
-
-        self.assertTrue(vmesh.get_vertex_data(0, 'POSITION') == position)
-
-    def test_can_offset_mesh(self):
-        vmesh = mocks.Box().vmesh
-        vmesh2 = copy.deepcopy(vmesh)
-        path_object_clone = os.path.join(*['tests', 'generated', 'edit', 'evil_box_offset_mesh', 'meshes', 'evil_box_offset_mesh.staticmesh'])
-        
+        # using bf2 axis
+        # x, y, z = red, green, blue lines in bfmeshview
         offset = (1.0, 0.0, 0.0)
-        modmesh.VisMeshTransform(vmesh).offset_mesh_vertices(offset)
-        vmesh.save(path_object_clone)
+        vmesh.translate(offset)
         
-        for id_vertex in range(vmesh2.vertnum):
-            position_old = vmesh2.get_vertex_data(id_vertex, 'POSITION')
-            position_new = vmesh.get_vertex_data(id_vertex, 'POSITION')
+        vertices = [vertex for vertex in vmesh.get_vertices()]
+        vertices_old = [vertex for vertex in vmesh_clone.get_vertices()]
+        for id_vertex, vertex in enumerate(vertices):
+            position = getattr(vertex, D3DDECLUSAGE.POSITION.name)
+            position_old = getattr(vertices_old[id_vertex], D3DDECLUSAGE.POSITION.name)
             
-            self.assertTrue(position_new == sum(i) for i in zip(position_old, offset))
+            self.assertTrue(position == sum(i) for i in zip(position_old, offset))
+        
+        # save for manual check
+        vmesh.save(path_object_clone)
 
-    @unittest.skip('not working')
     def test_can_rotate_mesh(self):
-        vmesh = mocks.Box().vmesh
-        vmesh2 = copy.deepcopy(vmesh)
+        vmesh = mocks.Box()
+        vmesh_clone = mocks.Box()
         path_object_clone = os.path.join(*['tests', 'generated', 'edit', 'evil_box_rotate_mesh', 'meshes', 'evil_box_rotate_mesh.staticmesh'])
         
-        rotation = (0.0, 0.0, 0.0)
-        modmesh.VisMeshTransform(vmesh).rotate_mesh(rotation)
+        rotation = (45.0, 0.0, 0.0)
+        vmesh.rotate(rotation)
         vmesh.save(path_object_clone)
-        
-        id_vertex = 0
-        position_old = vmesh2.get_vertex_data(id_vertex, 'POSITION')
-        position_new = vmesh.get_vertex_data(id_vertex, 'POSITION')
-        
-        self.assertTrue(position_old == (0.5, 1.0, -0.5))
-        self.assertTrue(position_new == (0.0, 1.0, 0.0))
-        
 
+    def test_can_rotate_mesh_pavement(self):
+        path_pavement = os.path.join(*['tests', 'samples', 'pavement', '24m_1', 'meshes', '24m_1.staticmesh'])
+        path_pavement_clone = os.path.join(*['tests', 'generated', 'edit', 'pavement', '24m_1_rotate', 'meshes', '24m_1_rotate.staticmesh'])
+        vmesh = modmesh.LoadBF2Mesh(path_pavement)
+
+        rotation = (45.0, 0.0, 0.0)
+        vmesh.rotate(rotation)
+        vmesh.save(path_pavement_clone)
+
+    def test_can_merge_simple_mesh(self):
+        vmesh = mocks.Box()
+        vmesh2 = mocks.Box()
+        vmesh.isStaticMesh = True
+        vmesh2.isStaticMesh = True
+        path_object_clone = os.path.join(*['tests', 'generated', 'edit', 'evil_box_merge_mesh', 'meshes', 'evil_box_merge_mesh.staticmesh'])
+        
+        offset = (1.0, 0.0, 0.0)
+        vmesh2.translate(offset)
+
+        vmesh.merge(vmesh2)
+        vmesh.save(path_object_clone)
+
+    def test_can_merge_statics_from_GPO(self):
+        path_pavement = os.path.join(*['tests', 'samples', 'pavement', '24m_1', 'meshes', '24m_1.staticmesh'])
+        path_pavement_clone = os.path.join(*['tests', 'generated', 'edit', 'pavement', '24m_1_merge', 'meshes', '24m_1_merge.staticmesh'])
+        
+        # from fallujah
+        position1 = Vec3(491.567, 24.653, 495.454)
+        rotation1 = (0.2, 0.0, 0.0)
+
+        position2 = Vec3(491.416, 24.653, 443.974)
+        rotation2 = (0.2, 0.0, 0.0)
+        
+        diff = position2 - position1
+        
+        vmesh1 = modmesh.LoadBF2Mesh(path_pavement)
+        vmesh2 = modmesh.LoadBF2Mesh(path_pavement)
+        
+        vmesh1.rotate(rotation1)
+        vmesh2.rotate(rotation2)
+        vmesh2.translate(diff)
+        vmesh1.merge(vmesh2)
+        
+        # translating to center
+        min = Vec3(*vmesh1.geoms[0].lods[0].min)
+        max = Vec3(*vmesh1.geoms[0].lods[0].max)
+        center_offset = (min + max) / 2
+        #print(min)
+        #print(max)
+        #print(center_offset)
+        #print(position1 + center_offset)
+        vmesh1.translate(-center_offset)
+        
+        #vmesh1.geoms[0].lods[0].materials.
+        
+        vmesh1.save(path_pavement_clone)
+        #raise
+        
+        #vmesh_test = modmesh.LoadBF2Mesh(path_pavement_clone)
+
+        
+@unittest.skip('rewriting')
 class TestVisMesh_SkinnedMesh(unittest.TestCase):
 
     def setUp(self):
@@ -152,8 +196,9 @@ class TestVisMesh_SkinnedMesh(unittest.TestCase):
 
     def test_can_delete_geom(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_skinned)
+        vmesh_old = modmesh.LoadBF2Mesh(self.path_object_skinned) # faster than deepcopy
         if not vmesh.isSkinnedMesh:
-            raise
+            self.fail("Source mesh not skinned")
         path_object_skinned_clone = os.path.join(*['tests', 'generated', 'edit', 'kits', 'mec_geom_delete', 'Meshes', 'mec_kits_geom_delete.skinnedMesh'])
 
         # delete from "middle"
@@ -163,15 +208,17 @@ class TestVisMesh_SkinnedMesh(unittest.TestCase):
         vnum_to_delete = sum([sum([material.vnum for material in lod.materials]) for lod in vmesh.geoms[id_geom_delete].lods])
         inum_to_delete = sum([sum([material.inum for material in lod.materials]) for lod in vmesh.geoms[id_geom_delete].lods])
         geomnum_before = vmesh.geomnum
-        geoms_old = copy.deepcopy(vmesh.geoms)
-        vertices_old = copy.deepcopy(vmesh.vertices)
-        indices_old = copy.deepcopy(vmesh.index)
+        geoms_old = vmesh_old.geoms
+        vertices_old = vmesh_old.vertices
+        indices_old = vmesh_old.index
         vnum_before = vmesh.vertnum
         inum_before = vmesh.indexnum
         
+        # transforming
         modmesh.VisMeshTransform(vmesh).delete_geom_id(id_geom_delete)
         vmesh.save(path_object_skinned_clone)
-
+        
+        # checking geoms arr
         self.assertTrue(vmesh.geomnum == geomnum_before - 1)
         self.assertTrue(len(vmesh.geoms) == geomnum_before - 1)
         # verify that we cleaned up unnecessary vertex data
@@ -227,17 +274,18 @@ class TestVisMesh_SkinnedMesh(unittest.TestCase):
     #@unittest.skip('TODO: make sure to rebuild vertices and indices')
     def test_can_edit_geoms_order(self):
         vmesh = modmesh.LoadBF2Mesh(self.path_object_skinned)
+        vmesh_old = modmesh.LoadBF2Mesh(self.path_object_skinned) # faster than deepcopy
         if not vmesh.isSkinnedMesh:
-            raise
+            self.fail("Source mesh not skinned")
         path_object_skinned_clone = os.path.join(*['tests', 'generated', 'edit', 'kits', 'mec_geoms_ordered', 'Meshes', 'mec_kits_geoms_ordered.skinnedMesh'])
 
         # for simplicity we'll just reverse geoms list
         order_old = [i for i in range(vmesh.geomnum)]
         order_new = list(reversed(order_old))
 
-        geoms_old = copy.deepcopy(vmesh.geoms)
-        vertices_old = copy.deepcopy(vmesh.vertices)
-        indices_old = copy.deepcopy(vmesh.index)
+        geoms_old = vmesh_old.geoms
+        vertices_old = vmesh_old.vertices
+        indices_old = vmesh_old.index
         
         modmesh.VisMeshTransform(vmesh).order_geoms_by(order_new)
         vmesh.save(path_object_skinned_clone)

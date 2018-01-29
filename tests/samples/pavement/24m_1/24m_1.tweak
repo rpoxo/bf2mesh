@@ -1,0 +1,20 @@
+rem *** Generated with Bf2Editor.exe [created: 2007/12/1 23:23]
+GeometryTemplate.doNotGenerateLightmaps 0
+GeometryTemplate.lightmapOverride 0
+GeometryTemplate.compressVertexData 1
+GeometryTemplate.maxTextureRepeat 16
+GeometryTemplate.glowing 0
+GeometryTemplate.noLighting 0
+ObjectTemplate.activeSafe SimpleObject 24m_1
+ObjectTemplate.creator LAPTOP:Sam
+ObjectTemplate.modifiedByUser "Sam"
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.cullRadiusScale 6
+ObjectTemplate.geometry 24m_1
+ObjectTemplate.setCollisionMesh 24m_1
+ObjectTemplate.mapMaterial 0 concrete 78
+ObjectTemplate.mapMaterial 1 stairs 34
+ObjectTemplate.hasMobilePhysics 0
+ObjectTemplate.hasCollisionPhysics 1
+ObjectTemplate.physicsType Mesh
+

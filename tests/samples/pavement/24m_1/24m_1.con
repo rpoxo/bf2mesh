@@ -1,0 +1,14 @@
+GeometryTemplate.create StaticMesh 24m_1
+CollisionManager.createTemplate 24m_1
+
+ObjectTemplate.create SimpleObject 24m_1
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.creator LAPTOP:Sam
+ObjectTemplate.collisionMesh 24m_1
+ObjectTemplate.mapMaterial 0 concrete 0
+ObjectTemplate.mapMaterial 1 stairs 0
+ObjectTemplate.hasCollisionPhysics 1
+ObjectTemplate.physicsType 3
+ObjectTemplate.geometry 24m_1
+
+include 24m_1.tweak

@@ -1,3 +1,5 @@
+import enum  # python 3.4+
+
 import modIO
 from modIO import read_int
 from modIO import read_float
@@ -11,6 +13,11 @@ from modIO import read_matrix4
 import modVec3
 from modVec3 import Vec3
 
+class coltype(enum.IntEnum):
+    projectile = 0
+    vehicle = 1
+    soldier = 2
+    ai = 3
 
 class ystruct(object):
 
@@ -75,7 +82,7 @@ class bf2collod(object):
 
     def _read(self, fo, version):
         if version >= 9:
-            self.coltype = read_long(fo)
+            self.coltype = coltype(read_long(fo))
 
         self.__read_faces(fo)
         self.__read_vertices(fo)

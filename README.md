@@ -8,37 +8,86 @@ same internal layout. These files typically have the extension ".StaticMesh",
 The code does not include rendering code or otherwise convert or output the data
 to file.
 
-For more information from original developer, see: http://www.bytehazard.com
+For more information from original bfmesh parser developer, visit: http://www.bytehazard.com
 
-## Simple Demo for skinned mesh merging
+## How to offset mesh geometry
+```python
+import modmesh
+from modVec3 import Vec3
+
+# First read mesh files into memory
+vmesh = modmesh.LoadBF2Mesh('24m_1.staticmesh')
+
+# calculate offset
+# Example from fallujah_west GPO
+#
+#rem *** 24m_1 ***
+#Object.create 24m_1
+#Object.absolutePosition 491.567/24.653/495.454
+
+offset = Vec3(491.567, 24.653, 495.454)
+
+# translate mesh geometry
+vmesh.translate(offset)
+
+# save changes as new mesh
+vmesh.save('24m_1_merged.staticmesh')
+```
+
+## How to rotate mesh
+```python
+import modmesh
+from modVec3 import Vec3
+
+# First read mesh files into memory
+vmesh = modmesh.LoadBF2Mesh('evil_box.staticmesh')
+
+# define rotation
+rotation = (90.0, 0.0, 0.0)
+
+# rotate mesh geometry
+vmesh.rotate(rotation)
+
+# save changes as new mesh
+vmesh.save('evil_box_rotated.staticmesh')
+```
+
+## How to merge meshes  
+* Only same objects now - i'm not taking diffirences in materials, geomtable for now...
 
 ```python
 import modmesh
+from modVec3 import Vec3
 
 # First read mesh files into memory
-kits1 = modmesh.LoadBF2Mesh('cf_kits1.skinnedMesh')
-kits2 = modmesh.LoadBF2Mesh('cf_kits2.skinnedMesh')
+vmesh1 = modmesh.LoadBF2Mesh('24m_1.staticmesh')
+vmesh2 = modmesh.LoadBF2Mesh('24m_1.staticmesh')
 
-# then use merge_mesh method from VisMeshTransform class
-# to append kits2 data into kits1
-modmesh.VisMeshTransform(kits1).merge_mesh(kits2)
+# calculate offset
+# Example from fallujah_west GPO
+# ###
+#rem *** 24m_1 ***
+#Object.create 24m_1
+#Object.absolutePosition 491.567/24.653/495.454
+#Object.rotation 0.2/0.0/0.0
+#
+#rem *** 24m_1 ***
+#Object.create 24m_1
+#Object.absolutePosition 491.416/24.653/443.952
+#Object.rotation 0.2/0.0/0.0
+# ###
+
+position1 = Vec3(491.567, 24.653, 495.454)
+rotation1 = (0.2, 0.0, 0.0)
+
+position2 = Vec3(491.416, 24.653, 443.974)
+rotation2 = (0.2, 0.0, 0.0)
+
+vmesh1.rotate(rotation1)
+vmesh2.rotate(rotation2)
+vmesh2.translate(diff)
+vmesh1.merge(vmesh2)
 
 # save changes made in first mesh
 kits1.save('cf_kits3.skinnedMesh')
-```
-
-
-## How to delete unnecessary geoms from mesh
-
-```python
-import modmesh
-
-# load mesh file
-kits = modmesh.LoadBF2Mesh('cf_kits1.skinnedMesh')
-
-# specify geom id you need to delete
-modmesh.VisMeshTransform(vmesh).delete_geom_id(3)
-
-# save changes
-kits1.save('cf_kits4.skinnedMesh')
 ```

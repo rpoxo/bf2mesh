@@ -29,11 +29,19 @@ class ystruct(object):
         self.u5 = 0
 
     def _read(self, fo):
-        self.u1 = read_int(fo)
+        self.u1 = read_float(fo)
         self.u2 = read_short(fo)
         self.u3 = read_short(fo)
         self.u4 = read_long(fo)
         self.u5 = read_long(fo)
+    
+    def __str__(self):
+        return 'ydata\n' + 'u1:{}\nu2:{}\nu3:{}\nu4:{}\nu5:{}\n'.format(
+                                                        self.u1,
+                                                        self.u2,
+                                                        self.u3,
+                                                        self.u4,
+                                                        self.u5)
 
 
 class bf2colface(object):

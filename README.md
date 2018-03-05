@@ -83,9 +83,12 @@ rotation1 = (0.2, 0.0, 0.0)
 position2 = Vec3(491.416, 24.653, 443.974)
 rotation2 = (0.2, 0.0, 0.0)
 
+# apply rotations
 vmesh1.rotate(rotation1)
 vmesh2.rotate(rotation2)
+# translate second mesh
 vmesh2.translate(diff)
+# merge with parent mesh
 vmesh1.merge(vmesh2)
 
 # save changes made in first mesh

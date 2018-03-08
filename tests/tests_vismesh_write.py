@@ -34,7 +34,7 @@ class TestVisMeshRead(unittest.TestCase):
     def tearDownClass(cls):
         try:
             path_clear = os.path.join(*['tests', 'generated', 'write'])
-            shutil.rmtree(path_clear)
+            #shutil.rmtree(path_clear)
         except FileNotFoundError:
             print('Nothing to clean up')
 

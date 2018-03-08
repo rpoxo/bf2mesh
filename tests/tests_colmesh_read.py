@@ -3,8 +3,6 @@ import os
 
 import modcolmesh
 
-import tests.mock_mesh as mocks
-
 class TestColMeshRead(unittest.TestCase):
 
     def setUp(self):
@@ -40,3 +38,6 @@ class TestColMeshRead(unittest.TestCase):
         self.assertTrue(lod0.znum == 12)
         self.assertTrue(lod0.anum == 36)
 
+    def test_can_read_colmesh(self):
+        colmesh = modcolmesh.ColMesh()
+        colmesh.load(self.path_colmesh)

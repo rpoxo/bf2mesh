@@ -1,5 +1,119 @@
+import modcolmesh
+from modcolmesh import coltype
 import modmesh
 from modmesh import D3DDECLTYPE, D3DDECLUSAGE
+import modVec3
+from modVec3 import Vec3
+
+class ColBox(modcolmesh.ColMesh):
+    
+    def __init__(self):
+        modcolmesh.ColMesh.__init__(self)
+        self._create_header()
+        self._create_geoms()
+    
+    def _create_header(self):
+        self.u1 = 0
+        self.version = 10
+    
+    def _create_geoms(self):
+        self.geomnum = 1
+        self.geoms = [modcolmesh.bf2colgeom() for i in range(self.geomnum)]
+        for geom in self.geoms:
+            self.__create_geom(geom)
+
+    def __create_geom(self, geom):
+        geom.subgeomnum = 1
+        geom.subgeoms = [modcolmesh.bf2colsubgeom() for i in range(geom.subgeomnum)]
+        for subgeom in geom.subgeoms:
+            self.__create_subgeom(subgeom)
+    
+    def __create_subgeom(self, subgeom):
+        subgeom.lodnum = 1
+        subgeom.lods = [modcolmesh.bf2collod() for i in range(subgeom.lodnum)]
+        for lod in subgeom.lods:
+            self.__create_lod(lod)
+    
+    def __create_lod(self, lod):
+        lod.coltype = coltype.projectile
+        # some unknown
+        lod.u7 = 49
+        
+        self.__create_faces(lod)
+        self.__create_vertices(lod)
+        self.__create_bounds(lod)
+        self.__create_unknowns(lod)
+    
+    def __create_faces(self, lod):
+        data = [
+            # v1, v2, v3, m
+            (0, 1, 2, 0),
+            (2, 3, 0, 0),
+            (1, 4, 5, 0),
+            (5, 2, 1, 0),
+            (4, 6, 7, 0),
+            (7, 5, 4, 0),
+            (6, 0, 3, 0),
+            (3, 7, 6, 0),
+            (4, 1, 0, 0),
+            (0, 6, 4, 0),
+            (5, 7, 3, 0),
+            (3, 2, 5, 0)
+            ]
+        
+        lod.faces = [modcolmesh.bf2colface(*values) for values in data]
+        lod.facenum = len(lod.faces)
+    
+    def __create_face(self, face):
+        face.v1 = 0
+        face.v2 = 0
+        face.v3 = 0
+        face.m = 0
+    
+    def __create_bounds(self, lod):
+        min = (-0.5, 0.0, -0.5)
+        max = (0.5, 1.0, 0.5)
+        
+        lod.min = Vec3(*min)
+        lod.max = Vec3(*max)
+        
+        bmin = (-0.5, 0.0, -0.5)
+        bmax = (0.5, 1.0, 0.5)
+        
+        lod.bmin = Vec3(*bmin)
+        lod.bmax = Vec3(*bmax)
+    
+    def __create_vertices(self, lod):
+        data = [
+            (-0.5, 1.0, -0.5),
+            (-0.5, 1.0, 0.5),
+            (-0.5, 0.0, 0.5),
+            (-0.5, 0.0, -0.5),
+            (0.5, 1.0, 0.5),
+            (0.5, 0.0, 0.5),
+            (0.5, 1.0, -0.5),
+            (0.5, 0.0, -0.5)
+            ]
+        lod.vertices = [Vec3(*values) for values in data]
+        lod.vertnum = len(lod.vertices)
+        lod.vertids = [0 for i in range(lod.vertnum)]
+    
+    def __create_unknowns(self, lod):
+        ydata = [
+            (-0.5, 4, 2, 0, 1),
+            (0.5, 8, 512, 2, 2),
+            (0.0, 13, 1538, 4, 6),
+            ]
+        lod.ydata = [modcolmesh.ystruct(*values) for values in ydata]
+        lod.ynum = len(lod.ydata)
+        
+        lod.zdata = [0, 1, 4, 5, 10, 11, 6, 7, 8, 9, 2, 3]
+        lod.znum = len(lod.zdata)
+        
+        lod.adata = [8, 3, 1, 11, 6, 0, 8, 5, 3, 11, 0, 2, 9, 7, 5, 10, 2, 4, 9, 1, 7, 10, 4, 6, 2, 0, 9, 6, 4, 8, 5, 7, 11, 1, 3, 10]
+        lod.anum = len(lod.adata)
+
+        
 
 
 class Box(modmesh.VisMesh):
@@ -18,7 +132,6 @@ class Box(modmesh.VisMesh):
         self._create_u2()
         self._create_nodes()
         self._create_materials()
-        
 
     def _create_header(self):
         self.head = modmesh.bf2head()

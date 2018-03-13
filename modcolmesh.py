@@ -25,12 +25,12 @@ class coltype(enum.IntEnum):
 
 class ystruct(object):
 
-    def __init__(self):
-        self.u1 = 0
-        self.u2 = 0
-        self.u3 = 0
-        self.u4 = 0
-        self.u5 = 0
+    def __init__(self, u1=0, u2=0, u3=0, u4=0, u5=0,):
+        self.u1 = u1
+        self.u2 = u2
+        self.u3 = u3
+        self.u4 = u4
+        self.u5 = u5
 
     def _read(self, fo):
         self.u1 = read_float(fo)
@@ -54,21 +54,20 @@ class ystruct(object):
                 self.u5 == other.u5)
     
     def __str__(self):
-        return 'ydata\n' + 'u1:{}\nu2:{}\nu3:{}\nu4:{}\nu5:{}\n'.format(
-                                                        self.u1,
-                                                        self.u2,
-                                                        self.u3,
-                                                        self.u4,
-                                                        self.u5)
+        return '{}, {}, {}, {}, {}'.format(self.u1,
+                                            self.u2,
+                                            self.u3,
+                                            self.u4,
+                                            self.u5)
 
 
 class bf2colface(object):
 
-    def __init__(self):
-        self.v1 = 0
-        self.v2 = 0
-        self.v3 = 0
-        self.m = 0
+    def __init__(self, v1=0, v2=0, v3=0, m=0):
+        self.v1 = v1
+        self.v2 = v2
+        self.v3 = v3
+        self.m = m
         
     def __eq__(self, other):
         return (self.v1 == other.v1 and
@@ -87,6 +86,13 @@ class bf2colface(object):
         write_short(fo, self.v2)
         write_short(fo, self.v3)
         write_short(fo, self.m)
+    
+    def __str__(self):
+        return '({}, {}, {}, {})'.format(*self)
+    
+    def __iter__(self):
+        for value in [self.v1, self.v2, self.v3, self.m]:
+            yield value
 
 
 class bf2collod(object):
@@ -98,7 +104,7 @@ class bf2collod(object):
         self.faces = [bf2colface() for i in range(self.facenum)]
 
         self.vertnum = 0
-        self.vertices = []  # make list comprehension instead
+        self.vertices = [] # list of Vec3
         self.vertids = []  # some unknown 2 bytes ints
 
         self.min = Vec3(0.0, 0.0, 0.0)
@@ -232,7 +238,7 @@ class bf2collod(object):
 
         for vertex in self.vertices:
             write_float3(fo, *vertex)
-        
+
         for vertid in self.vertids:
             write_short(fo, vertid)
 
@@ -262,7 +268,7 @@ class bf2collod(object):
     
     def __write_ydata(self, fo):
         write_long(fo, self.ynum)
-
+        
         for ydata in self.ydata:
             ydata._write(fo)
     
@@ -340,6 +346,7 @@ class bf2colgeom(object):
         if self.subgeoms != other.subgeoms:
             equal = False
         return equal
+
 
 class ColMesh(object):
 

@@ -46,3 +46,17 @@ class TestColMeshWrite(unittest.TestCase):
             self.assertEqual(colmesh2.geomnum, colmesh.geomnum)
             self.assertEqual(colmesh2.geoms, colmesh.geoms)
         
+    def test_can_create_colmesh_from_mock(self):
+        path_write = os.path.join(*['tests', 'generated', 'write', 'evil_box', 'meshes', 'evil_box_mock.collisionmesh'])
+        
+        colmesh = mocks.ColBox()
+        colmesh.save(path_write)
+        
+        colmesh = modcolmesh.ColMesh()
+        colmesh.load(path_write)
+
+
+
+
+if __name__ == '__main__':
+    unittest.main()

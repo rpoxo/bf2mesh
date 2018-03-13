@@ -41,3 +41,6 @@ class TestColMeshRead(unittest.TestCase):
     def test_can_read_colmesh(self):
         colmesh = modcolmesh.ColMesh()
         colmesh.load(self.path_colmesh)
+        
+if __name__ == '__main__':
+    unittest.main()

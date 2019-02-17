@@ -1,3 +1,5 @@
 *.pyc
-/generated/
 /tests/generated/
+.vscode
+__pycache__
+.venv

@@ -1,0 +1,13 @@
+GeometryTemplate.create StaticMesh evil_box_lods
+CollisionManager.createTemplate evil_box_lods
+
+ObjectTemplate.create SimpleObject evil_box_lods
+ObjectTemplate.saveInSeparateFile 1
+ObjectTemplate.creator DECENT-PC:Administrator
+ObjectTemplate.collisionMesh evil_box_lods
+ObjectTemplate.mapMaterial 0 evil_box_multimat 0
+ObjectTemplate.hasCollisionPhysics 1
+ObjectTemplate.physicsType 3
+ObjectTemplate.geometry evil_box_lods
+
+include evil_box_lods.tweak

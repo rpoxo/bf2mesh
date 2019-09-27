@@ -194,13 +194,16 @@ class VisibleMesh(BF2Mesh):
                 lod.load_materials(self.__meshfile, self.head.version, self.isSkinnedMesh)
         logging.debug('finished reading materials at %d' % (self.__meshfile.tell()))
     
-    def export(self, filename=None):
+    def export(self, filename=None, update_bounds=True):
         if not filename: filename = self.filename
         logging.debug('saving mesh as %s' % filename)
 
         dirname = os.path.dirname(filename)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
+        
+        # update lods&materials bounds first
+        if update_bounds: self.update_boundaries()
 
         with open(filename, 'wb') as vmesh:
             self.__export(vmesh)
@@ -268,7 +271,7 @@ class VisibleMesh(BF2Mesh):
         self.vertices = new_vertices
         self.index = new_index
     
-    def translate(self, offset, update_bounds=True):
+    def translate(self, offset):
         logging.debug('translating with offset of %s' % str(offset))
         new_vertices = []
 
@@ -304,10 +307,9 @@ class VisibleMesh(BF2Mesh):
         
         logging.debug('replacing old vertices array of %d size by new vertices array of %d size' % (len(self.vertices), len(new_vertices)))
         self.vertices = tuple(new_vertices)
-        if update_bounds: self.update_boundaries()
 
     # DELET THIS IF YOU FEEL CAN WRITE BETTER
-    def merge(self, other, update_bounds=True):
+    def merge(self, other):
         logging.debug('merging %s to %s' % (other.filename, self.filename))
         # support only "same" meshes for now
         if len(self.geoms) != len(other.geoms): raise NotImplementedError
@@ -406,7 +408,6 @@ class VisibleMesh(BF2Mesh):
         self.vertnum = vertnum
         logging.debug('self.indexnum: %d -> %d' % (self.indexnum, indexnum))
         self.indexnum = indexnum
-        if update_bounds: self.update_boundaries()
     
     def update_boundaries(self):
         logging.debug('updating %s boundaries' % self.filename)

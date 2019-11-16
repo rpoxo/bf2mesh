@@ -1,5 +1,6 @@
 import os
 import logging
+from math import sin, cos, radians
 
 from .mesh import BF2Mesh
 from .bf2types import D3DDECLTYPE, D3DDECLUSAGE, USED, UNUSED
@@ -307,23 +308,121 @@ class VisibleMesh(BF2Mesh):
         
         logging.debug('replacing old vertices array of %d size by new vertices array of %d size' % (len(self.vertices), len(new_vertices)))
         self.vertices = tuple(new_vertices)
+    
+    def rotate(self, rotation):
+        # sorry i suck at math so this much code
+        # rotate around forward(red) axis
+        # pitch
+        def Rpitch(position, angle):
+            x = position[0]
+            y = position[1]
+            z = position[2]
+
+            newX = x
+            newY = y * cos(angle) - z * sin(angle)
+            newZ = y * sin(angle) + z * cos(angle)
+
+            return (newX, newY, newZ)
+
+        # rotate around vertical(green) axis
+        # -angle due to DICE choosing left-handed axis system
+        # yaw
+        def Ryaw(position, angle):
+            x = position[0]
+            y = position[1]
+            z = position[2]
+
+            newX = x * cos(-angle) + z * sin(-angle)
+            newY = y
+            newZ = z * cos(-angle) - x * sin(-angle)
+
+            return (newX, newY, newZ)
+
+        # rotate around side(blue) axis
+        # roll
+        def Rroll(position, angle):
+            x = position[0]
+            y = position[1]
+            z = position[2]
+
+            newX = x * cos(angle) - y * sin(angle)
+            newY = x * sin(angle) + y * cos(angle)
+            newZ = z
+
+            return (newX, newY, newZ)
+
+        logging.debug('rotating by %s' % str(rotation))
+        yaw = radians(rotation[0])
+        pitch = radians(rotation[1])
+        roll = radians(rotation[2])
+
+        new_vertices = []
+
+        for geomId, geom in enumerate(self.geoms):
+            geom = self.geoms[geomId]
+            for lodId, lod in enumerate(geom.lods):
+                for materialId, material in enumerate(lod.materials):
+                    logging.debug('creating copy of geoms[%d].lods[%d].materials[%d] vertices array' % (geomId, lodId, materialId))
+
+                    vstart = material.vstart * self.vertex_size
+                    vend = vstart + material.vnum * self.vertex_size
+
+                    _material_vertices = list(self.vertices[vstart:vend])
+                    logging.debug('material vertices buffer [%d*%d:%d + %d*%d][%d]' % (material.vstart, self.vertex_size,
+                                                                                            vstart, material.vnum, self.vertex_size,
+                                                                                            len(_material_vertices)))
+                    for i in range(0, len(_material_vertices), self.vertex_size):
+                        vertex = _material_vertices[i:i + self.vertex_size]
+                        logging.debug('geoms[%d].lods[%d].materials[%d] vertex buffer[%d:%d][%d]: %s' % (geomId, lodId, materialId,
+                                                                                                        i, i + self.vertex_size, self.vertex_size, vertex))
+
+                        for attrib in self.vertex_attributes:
+                            if attrib.flag == UNUSED: continue
+                            if attrib.usage in [D3DDECLUSAGE.POSITION, D3DDECLUSAGE.NORMAL, D3DDECLUSAGE.TANGENT]:
+                                vertoffset = int(attrib.offset / self.vertformat)
+                                data = vertex[vertoffset:vertoffset+len(D3DDECLTYPE(attrib.vartype))]
+                                logging.debug('updating vertex.%s: %s' % (D3DDECLUSAGE(attrib.usage).name, data))
+                                new_data = Ryaw(Rpitch(Rroll(data, roll), pitch), yaw)
+                                vertex[vertoffset:vertoffset+len(D3DDECLTYPE(attrib.vartype))] = new_data
+                                logging.debug('updated vertex.%s: %s' % (D3DDECLUSAGE(attrib.usage).name, data))
+
+                        new_vertices.extend(vertex)
+                        logging.debug('extended vertices array to %d' % (len(new_vertices)))
+        
+        logging.debug('replacing old vertices array of %d size by new vertices array of %d size' % (len(self.vertices), len(new_vertices)))
+        self.vertices = tuple(new_vertices)
+    
+    def canMerge(self, other):
+        # support only "same" meshes for now
+        if len(self.geoms) != len(other.geoms): return False
+        for geomId, geom in enumerate(self.geoms):
+            if len(geom.lods) != len(other.geoms[geomId].lods): return False
+            for lodId, lod in enumerate(geom.lods):
+                if len(lod.materials) != len(other.geoms[geomId].lods[lodId].materials): return False
+                for matId, material in enumerate(lod.materials):
+                    other_material = other.geoms[geomId].lods[lodId].materials[matId]
+                    if material.alphamode != other_material.alphamode: return False
+                    if material.fxfile != other_material.fxfile: return False
+                    if material.technique != other_material.technique: return False
+                    if material.maps != other_material.maps: return False
+        if len(self.vertex_attributes) != len(other.vertex_attributes): return False
+        for attribId, attrib in enumerate(self.vertex_attributes):
+            if attrib != other.vertex_attributes[attribId]: return False
+        if self.vertex_size != other.vertex_size: return False
+
+        # TODO: check for arrays sizes
+        # NOTE: indices are unsigned short max
+
+        # passed checks, can merge
+        return True
 
     # DELET THIS IF YOU FEEL CAN WRITE BETTER
     def merge(self, other):
         logging.debug('merging %s to %s' % (other.filename, self.filename))
-        # support only "same" meshes for now
-        if len(self.geoms) != len(other.geoms): raise NotImplementedError
-        for geomId, geom in enumerate(self.geoms):
-            if len(geom.lods) != len(other.geoms[geomId].lods): raise NotImplementedError
-            for lodId, lod in enumerate(geom.lods):
-                if len(lod.materials) != len(other.geoms[geomId].lods[lodId].materials): raise NotImplementedError
-        if len(self.vertex_attributes) != len(other.vertex_attributes): raise NotImplementedError
-        for attribId, attrib in enumerate(self.vertex_attributes):
-            if attrib != other.vertex_attributes[attribId]: raise NotImplementedError
-        if self.vertex_size != other.vertex_size: raise NotImplementedError
         ####################################################
         # I'M VERY SORRY FUTURE ME IF YOU HAVE TO DEBUG THIS
         ####################################################
+        if not self.canMerge(other): return NotImplementedError
 
         new_vertices = []
         new_index = []
@@ -421,10 +520,11 @@ class VisibleMesh(BF2Mesh):
                 logging.debug('self.geoms[%d].lods[%d].min = %s' % (geomId, lodId, lod_min))
                 logging.debug('self.geoms[%d].lods[%d].max = %s' % (geomId, lodId, lod_max))
                 for materialId, material in enumerate(lod.materials):
-                    material_min = list(material.mmin)
-                    material_max = list(material.mmax)
-                    logging.debug('self.geoms[%d].lods[%d].materials[%d].mmin = %s' % (geomId, lodId, materialId, material_min))
-                    logging.debug('self.geoms[%d].lods[%d].materials[%d].mmax = %s' % (geomId, lodId, materialId, material_max))
+                    if not self.isSkinnedMesh and self.head.version == 11:
+                        material_min = list(material.mmin)
+                        material_max = list(material.mmax)
+                        logging.debug('self.geoms[%d].lods[%d].materials[%d].mmin = %s' % (geomId, lodId, materialId, material_min))
+                        logging.debug('self.geoms[%d].lods[%d].materials[%d].mmax = %s' % (geomId, lodId, materialId, material_max))
                     for vertId in range(material.vnum):
                         # create vertex
                         _start = (material.vstart + vertId) * self.vertex_size
@@ -439,22 +539,25 @@ class VisibleMesh(BF2Mesh):
                         # update material and lod bounds
                         # NOTE: I HAVE NO IDEA WHY ADDING MARGIN FIXES RENDER IN ENGINE(not bfmeshview)
                         # TODO: 
-                        for id_axis, axis in enumerate(material_min):
-                            if vertex.POSITION[id_axis] < material_min[id_axis]:
-                                logging.debug('geoms[%d].lods[%d].materials[%d].mmin(%d): %s > %s, updating' % (geomId, lodId, materialId, id_axis, material_min[id_axis], vertex.POSITION[id_axis]))
-                                material_min[id_axis] = vertex.POSITION[id_axis]
-                            if vertex.POSITION[id_axis] < lod_min[id_axis]:
-                                logging.debug('geoms[%d].lods[%d].min(%d): %s > %s, updating' % (geomId, lodId, id_axis, lod_min[id_axis], vertex.POSITION[id_axis]))
-                                lod_min[id_axis] = vertex.POSITION[id_axis]
-                        for id_axis, axis in enumerate(material_max):
-                            if vertex.POSITION[id_axis] > material_max[id_axis]:
-                                logging.debug('geoms[%d].lods[%d].materials[%d].mmin(%d): %s > %s, updating' % (geomId, lodId, materialId, id_axis, material_max[id_axis], vertex.POSITION[id_axis]))
-                                material_max[id_axis] = vertex.POSITION[id_axis]
-                            if vertex.POSITION[id_axis] > lod_max[id_axis]:
-                                logging.debug('geoms[%d].lods[%d].min(%d): %s > %s, updating' % (geomId, lodId, id_axis, lod_max[id_axis], vertex.POSITION[id_axis]))
-                                lod_max[id_axis] = vertex.POSITION[id_axis]
-                    material.mmin = tuple(material_min)
-                    material.mmax = tuple(material_max)
+                        if not self.isSkinnedMesh and self.head.version == 11:
+                            for id_axis, axis in enumerate(material_min):
+                                position = getattr(vertex, 'POSITION')
+                                if position[id_axis] < material_min[id_axis]:
+                                    logging.debug('geoms[%d].lods[%d].materials[%d].mmin(%d): %s > %s, updating' % (geomId, lodId, materialId, id_axis, material_min[id_axis], position[id_axis]))
+                                    material_min[id_axis] = position[id_axis]
+                                if position[id_axis] < lod_min[id_axis]:
+                                    logging.debug('geoms[%d].lods[%d].min(%d): %s > %s, updating' % (geomId, lodId, id_axis, lod_min[id_axis], position[id_axis]))
+                                    lod_min[id_axis] = position[id_axis]
+                            for id_axis, axis in enumerate(material_max):
+                                if position[id_axis] > material_max[id_axis]:
+                                    logging.debug('geoms[%d].lods[%d].materials[%d].mmin(%d): %s > %s, updating' % (geomId, lodId, materialId, id_axis, material_max[id_axis], position[id_axis]))
+                                    material_max[id_axis] = position[id_axis]
+                                if position[id_axis] > lod_max[id_axis]:
+                                    logging.debug('geoms[%d].lods[%d].min(%d): %s > %s, updating' % (geomId, lodId, id_axis, lod_max[id_axis], position[id_axis]))
+                                    lod_max[id_axis] = position[id_axis]
+                    if not self.isSkinnedMesh and self.head.version == 11:
+                        material.mmin = tuple(material_min)
+                        material.mmax = tuple(material_max)
                 lod.min = tuple(lod_min)
                 lod.max = tuple(lod_max)
 

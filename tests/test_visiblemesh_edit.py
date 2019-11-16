@@ -74,16 +74,25 @@ class test_visiblemesh_edit_staticmesh(unittest.TestCase):
 
     def setUp(self):
         self.meshes = {
-            'simple' : ('tests/samples/staticmesh/evil_box/meshes/evil_box.staticmesh',
+            'simple' : (
+                        'tests/samples/staticmesh/evil_box/meshes/evil_box.staticmesh',
                         'tests/generated/staticmesh/edit/translate/evil_box/meshes/evil_box.staticmesh',
-                        'tests/generated/staticmesh/edit/merge/evil_box/meshes/evil_box.staticmesh'),
-            'lods' : ('tests/samples/staticmesh/evil_box_lods/meshes/evil_box_lods.staticmesh',
+                        'tests/generated/staticmesh/edit/merge/evil_box/meshes/evil_box.staticmesh',
+                        'tests/generated/staticmesh/edit/rotate/evil_box/meshes/evil_box.staticmesh',
+                        ),
+            'lods' : (
+                        'tests/samples/staticmesh/evil_box_lods/meshes/evil_box_lods.staticmesh',
                         'tests/generated/staticmesh/edit/translate/evil_box_lods/meshes/evil_box_lods.staticmesh',
-                        'tests/generated/staticmesh/edit/merge/evil_box_lods/meshes/evil_box_lods.staticmesh'),
-            'dest' : ('tests/samples/staticmesh/evil_box_dest/meshes/evil_box_dest.staticmesh',
+                        'tests/generated/staticmesh/edit/merge/evil_box_lods/meshes/evil_box_lods.staticmesh',
+                        'tests/generated/staticmesh/edit/rotate/evil_box_lods/meshes/evil_box_lods.staticmesh',
+                        ),
+            'dest' : (
+                        'tests/samples/staticmesh/evil_box_dest/meshes/evil_box_dest.staticmesh',
                         'tests/generated/staticmesh/edit/translate/evil_box_dest/meshes/evil_box_dest.staticmesh',
-                        'tests/generated/staticmesh/edit/merge/evil_box_dest/meshes/evil_box_dest.staticmesh'),
-        }
+                        'tests/generated/staticmesh/edit/merge/evil_box_dest/meshes/evil_box_dest.staticmesh',
+                        'tests/generated/staticmesh/edit/rotate/evil_box_dest/meshes/evil_box_dest.staticmesh',
+                        ),
+            }
         with VisibleMesh(self.meshes['simple'][0]) as vmesh:
             if len(vmesh.geoms) != 1: self.skipTest('invalid input mesh, expected 1 geom')
         with VisibleMesh(self.meshes['lods'][0]) as vmesh:
@@ -143,5 +152,16 @@ class test_visiblemesh_edit_staticmesh(unittest.TestCase):
                         material_old = vmesh_old.geoms[geomId].lods[lodId].materials[materialId]
                         self.assertEqual(material.vnum, material2.vnum + material_old.vnum)
                         self.assertEqual(material.inum, material2.inum + material_old.inum)
+
+    
+    def test_can_rotate_staticmesh(self):
+        rotation = (45.0, 0.0, 0.0)
+        for staticmesh in self.meshes:
+            path_mesh, path_export = self.meshes[staticmesh][0], self.meshes[staticmesh][3]
+            with VisibleMesh(path_mesh) as vmesh:
+                vmesh.rotate(rotation)
+                vmesh.export(path_export)
+        self.skipTest('DUNNO how check beside visual yet, ported from v1')
+
 
                         

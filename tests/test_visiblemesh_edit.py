@@ -161,7 +161,7 @@ class test_visiblemesh_edit_staticmesh(unittest.TestCase):
             with VisibleMesh(path_mesh) as vmesh:
                 vmesh.rotate(rotation)
                 vmesh.export(path_export)
-        self.skipTest('DUNNO how check beside visual yet, ported from v1')
+        self.skipTest('rotate copypasted from v1, too lazy to test')
 
 
                         

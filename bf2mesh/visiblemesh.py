@@ -311,6 +311,7 @@ class VisibleMesh(BF2Mesh):
     
     def rotate(self, rotation):
         # sorry i suck at math so this much code
+
         # rotate around forward(red) axis
         # pitch
         def Rpitch(position, angle):
@@ -325,7 +326,6 @@ class VisibleMesh(BF2Mesh):
             return (newX, newY, newZ)
 
         # rotate around vertical(green) axis
-        # -angle due to DICE choosing left-handed axis system
         # yaw
         def Ryaw(position, angle):
             x = position[0]

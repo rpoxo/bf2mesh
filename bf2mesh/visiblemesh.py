@@ -332,9 +332,9 @@ class VisibleMesh(BF2Mesh):
             y = position[1]
             z = position[2]
 
-            newX = x * cos(-angle) + z * sin(-angle)
+            newX = x * cos(angle) + z * sin(angle)
             newY = y
-            newZ = z * cos(-angle) - x * sin(-angle)
+            newZ = z * cos(angle) - x * sin(angle)
 
             return (newX, newY, newZ)
 
@@ -352,9 +352,10 @@ class VisibleMesh(BF2Mesh):
             return (newX, newY, newZ)
 
         logging.debug('rotating by %s' % str(rotation))
-        yaw = radians(rotation[0])
-        pitch = radians(rotation[1])
-        roll = radians(rotation[2])
+        float3 = [axis for axis in rotation]
+        yaw = radians(float3[0])
+        pitch = radians(float3[1])
+        roll = radians(float3[2])
 
         new_vertices = []
 
@@ -394,21 +395,39 @@ class VisibleMesh(BF2Mesh):
     
     def canMerge(self, other):
         # support only "same" meshes for now
-        if len(self.geoms) != len(other.geoms): return False
+        if len(self.geoms) != len(other.geoms):
+            logging.debug('geoms %d != geoms %d %s: %s' % (len(self.geoms), len(other.geoms), self.filename, other.filename) )
+            return False
         for geomId, geom in enumerate(self.geoms):
-            if len(geom.lods) != len(other.geoms[geomId].lods): return False
+            if len(geom.lods) != len(other.geoms[geomId].lods):
+                logging.debug('geom[%d].lods %d != geom[%d].lods %d %s: %s' % (geomId, len(geom.lods), geomId, len(other.geoms[geomId].lods), self.filename, other.filename) )
+                return False
             for lodId, lod in enumerate(geom.lods):
-                if len(lod.materials) != len(other.geoms[geomId].lods[lodId].materials): return False
+                if len(lod.materials) != len(other.geoms[geomId].lods[lodId].materials):
+                    logging.debug('geom[%d].lod[%d].materials %d != geom[%d].lod[%d].materials %d %s: %s' % (geomId, lodId, len(lod.materials), geomId, lodId, len(other.geoms[geomId].lods[lodId].materials), self.filename, other.filename) )
+                    return False
                 for matId, material in enumerate(lod.materials):
                     other_material = other.geoms[geomId].lods[lodId].materials[matId]
-                    if material.alphamode != other_material.alphamode: return False
-                    if material.fxfile != other_material.fxfile: return False
-                    if material.technique != other_material.technique: return False
-                    if material.maps != other_material.maps: return False
-        if len(self.vertex_attributes) != len(other.vertex_attributes): return False
+                    if material.alphamode != other_material.alphamode:
+                        logging.debug('geom[%d].lod[%d].material[%d].alphamode %d != geom[%d].lod[%d].material[%d].alphamode %s %s: %s' % (geomId, lodId, matId, material.alphamode, geomId, lodId, matId, other_material.alphamode, self.filename, other.filename) )
+                        return False
+                    if material.fxfile != other_material.fxfile:
+                        logging.debug('geom[%d].lod[%d].material[%d].fxfile %s != geom[%d].lod[%d].material[%d].fxfile %s %s: %s' % (geomId, lodId, matId, material.fxfile, geomId, lodId, matId, other_material.fxfile, self.filename, other.filename) )
+                        return False
+                    if material.technique != other_material.technique:
+                        logging.debug('geom[%d].lod[%d].material[%d].technique %s != geom[%d].lod[%d].material[%d].technique %s %s: %s' % (geomId, lodId, matId, material.technique, geomId, lodId, matId, other_material.technique, self.filename, other.filename) )
+                        return False
+                    if material.maps != other_material.maps:
+                        logging.debug('geom[%d].lod[%d].material[%d] maps != geom[%d].lod[%d].material[%d] maps %s: %s' % (geomId, lodId, matId, geomId, lodId, matId, self.filename, other.filename) )
+                        return False
+        if len(self.vertex_attributes) != len(other.vertex_attributes):
+            logging.debug('vertex_attributes %d != vertex_attributes %d %s: %s' % (len(self.vertex_attributes), len(other.vertex_attributes), self.filename, other.filename) )
+            return False
         for attribId, attrib in enumerate(self.vertex_attributes):
-            if attrib != other.vertex_attributes[attribId]: return False
-        if self.vertex_size != other.vertex_size: return False
+            if attrib != other.vertex_attributes[attribId]:
+                logging.debug('vertex_attributes[%d] %s != vertex_attributes[%d] %s %s: %s' % (attribId, str(attrib), attribId, str(attrib), self.filename, other.filename) )
+                return False
+        #if self.vertex_size != other.vertex_size: return False
 
         # TODO: check for arrays sizes
         # NOTE: indices are unsigned short max
@@ -537,8 +556,6 @@ class VisibleMesh(BF2Mesh):
                             _end = _start + len(D3DDECLTYPE(attrib.vartype))
                             setattr(vertex, D3DDECLUSAGE(attrib.usage).name, vertexBuffer[_start:_end])
                         # update material and lod bounds
-                        # NOTE: I HAVE NO IDEA WHY ADDING MARGIN FIXES RENDER IN ENGINE(not bfmeshview)
-                        # TODO: 
                         if not self.isSkinnedMesh and self.head.version == 11:
                             for id_axis, axis in enumerate(material_min):
                                 position = getattr(vertex, 'POSITION')

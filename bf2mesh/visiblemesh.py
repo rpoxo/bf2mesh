@@ -21,6 +21,10 @@ from .io import write_string
 
 class VisibleMesh(BF2Mesh):
     
+    # internal container class for populating wtih D3DDECLUSAGE type attributes
+    class _vertex(object):
+        pass
+    
     def __init__(self,
             filename=None,
             isSkinnedMesh=False,
@@ -527,21 +531,32 @@ class VisibleMesh(BF2Mesh):
         logging.debug('self.indexnum: %d -> %d' % (self.indexnum, indexnum))
         self.indexnum = indexnum
     
+    def get_lod_center_offset(self, geomId, lodId, update_bounds=True):
+        logging.debug('computing geoms[%d].lods[%d]' % (geomId, lodId))
+        lod = self.geoms[geomId].lods[lodId]
+
+        # update bound boxes first
+        if update_bounds:
+            self.update_boundaries()
+
+        x, y, z = tuple((a+b)/2 for a, b in zip(lod.min, lod.max))
+
+        return (x, y, z)
+        
+    
     def update_boundaries(self):
         logging.debug('updating %s boundaries' % self.filename)
-        class _vertex(object):
-            pass
 
         for geomId, geom in enumerate(self.geoms):
             for lodId, lod in enumerate(geom.lods):
-                lod_min = list(lod.min)
-                lod_max = list(lod.max)
+                lod_min = [0.0, 0.0, 0.0]
+                lod_max = [0.0, 0.0, 0.0]
                 logging.debug('self.geoms[%d].lods[%d].min = %s' % (geomId, lodId, lod_min))
                 logging.debug('self.geoms[%d].lods[%d].max = %s' % (geomId, lodId, lod_max))
                 for materialId, material in enumerate(lod.materials):
                     if not self.isSkinnedMesh and self.head.version == 11:
-                        material_min = list(material.mmin)
-                        material_max = list(material.mmax)
+                        material_min = [0.0, 0.0, 0.0]
+                        material_max = [0.0, 0.0, 0.0]
                         logging.debug('self.geoms[%d].lods[%d].materials[%d].mmin = %s' % (geomId, lodId, materialId, material_min))
                         logging.debug('self.geoms[%d].lods[%d].materials[%d].mmax = %s' % (geomId, lodId, materialId, material_max))
                     for vertId in range(material.vnum):
@@ -549,7 +564,7 @@ class VisibleMesh(BF2Mesh):
                         _start = (material.vstart + vertId) * self.vertex_size
                         _end = _start + self.vertex_size
                         vertexBuffer = self.vertices[_start:_end]
-                        vertex = _vertex()
+                        vertex = self._vertex()
                         for attrib in self.vertex_attributes:
                             if attrib.flag is UNUSED: continue
                             _start = int(attrib.offset / self.vertformat)

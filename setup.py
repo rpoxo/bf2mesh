@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="Nikita Gotsko",
     author_email="irpoxotaujio@gmail.com",
-    description="Library for reading and writing Battlefiedl 2 mesh files",
+    description="Library for reading and writing Battlefield 2 mesh files",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/rPoXoTauJIo/bf2mesh",

@@ -11,7 +11,7 @@ setuptools.setup(
     description="Library for reading and writing Battlefield 2 mesh files",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/rPoXoTauJIo/bf2mesh",
+    url="https://github.com/rpoxo/bf2mesh",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
